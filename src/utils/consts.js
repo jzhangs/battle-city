@@ -44,3 +44,10 @@ export const STEEL_WALL_COLOR_SCHEMES = {
   b: '#636363',
   c: '#ADADAD'
 };
+
+export const DIRECTION_MAP = {
+  [UP]: ['y', 'dec'],
+  [DOWN]: ['y', 'inc'],
+  [LEFT]: ['x', 'dec'],
+  [RIGHT]: ['x', 'inc'],
+};

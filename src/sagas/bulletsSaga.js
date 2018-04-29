@@ -1,34 +1,29 @@
+import * as R from 'ramda';
 import { takeEvery, put, select } from 'redux-saga/effects';
-import { UP, DOWN, LEFT, RIGHT, BULLET_SIZE, FIELD_BSIZE, BLOCK_SIZE } from 'utils/consts';
+
+import { BULLET_SIZE, FIELD_BSIZE, BLOCK_SIZE, DIRECTION_MAP } from 'utils/consts';
 import * as A from 'utils/actions';
 import * as selectors from 'utils/selectors';
 
 function* update({ delta }) {
   const bullets = yield select(selectors.bullets);
-  const newBullets = bullets.map((b) => {
-    const { direction, speed, x, y } = b;
-    if (direction === UP) {
-      return b.set('y', y - speed * delta);
-    } else if (direction === DOWN) {
-      return b.set('y', y + speed * delta);
-    } else if (direction === LEFT) {
-      return b.set('x', x - speed * delta);
-    } else if (direction === RIGHT) {
-      return b.set('x', x + speed * delta);
-    }
-    throw new Error(`Invalid direction ${direction}`);
+  const updatedBullets = bullets.map((bullet) => {
+    const { direction, speed } = bullet;
+    const distance = speed * delta;
+    const [xy, incdec] = DIRECTION_MAP[direction];
+    return bullet.update(xy, incdec === 'inc' ? R.add(distance) : R.subtract(R.__, distance));
   });
-  yield put({ type: A.SET_BULLETS, bullets: newBullets });
+  yield put({ type: A.UPDATE_BULLETS, updatedBullets });
 }
 
 function* afterUpdate() {
   // TODO check conlisions
 
-  let bullets = yield select(selectors.bullets);
+  const bullets = yield select(selectors.bullets);
 
   // Check if meet border
-  bullets = bullets.filter(isInField);
-  yield put({ type: A.SET_BULLETS, bullets });
+  const outBullets = bullets.filterNot(isInField);
+  yield put({ type: A.DESTROY_BULLETS, bullets: outBullets });
 
   function isInField(bullet) {
     const x = Math.round(bullet.x);
