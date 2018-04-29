@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import Screen from 'components/screen';
+import Screen from 'components/Screen';
 import { BLOCK_SIZE } from 'utils/consts';
 
 function mapStateToProps(state) {

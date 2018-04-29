@@ -1,6 +1,6 @@
 import React from 'react';
 import * as _ from 'lodash';
-import { Pixel, Bitmap } from 'components/elements';
+import { Pixel, Bitmap } from 'components/Elements';
 import { TANK_COLOR_SCHEMES, UP, DOWN, LEFT, BLOCK_SIZE } from 'utils/consts';
 
 class Tank extends React.Component {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { UP, DOWN, LEFT } from 'utils/consts';
-import { Pixel } from 'components/elements';
+import { Pixel } from 'components/Elements';
 
 const fill = '#ADADAD';
 
