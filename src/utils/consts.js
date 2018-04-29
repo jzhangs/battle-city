@@ -28,3 +28,15 @@ export const UP = 'UP';
 export const DOWN = 'DOWN';
 export const RIGHT = 'RIGHT';
 export const LEFT = 'LEFT';
+
+export const BRICK_WALL_COLOR_SCHEMES = {
+  a: '#6B0800',
+  b: '#9C4A00',
+  c: '#636363'
+};
+
+export const STEEL_WALL_COLOR_SCHEMES = {
+  a: '#FFFFFF',
+  b: '#636363',
+  c: '#ADADAD'
+};
