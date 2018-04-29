@@ -1,6 +1,5 @@
 import Mousetrap from 'mousetrap';
-import { delay } from 'redux-saga';
-import { fork, take, put, select } from 'redux-saga/effects';
+import { take, put, select } from 'redux-saga/effects';
 
 import { BLOCK_SIZE } from 'utils/consts';
 import { getBulletStartPosition } from 'utils/common';
@@ -40,14 +39,6 @@ export default function* fireController() {
         },
         getBulletStartPosition(x, y, direction)
       ));
-      // todo for-test
-      yield fork(function* destroyBullet() {
-        yield delay(1000);
-        yield put({
-          type: A.DESTROY_BULLET,
-          owner: 'player'
-        });
-      });
     }
     pressed = false;
   }

@@ -6,6 +6,7 @@ module.exports = {
     'comma-dangle': 0,
     'no-mixed-operators': 0,
     'no-use-before-define': 0,
+    'no-underscore-dangle': 0,
     'object-curly-newline': 0,
     'react/jsx-filename-extension': 0,
     'react/prop-types': 0,

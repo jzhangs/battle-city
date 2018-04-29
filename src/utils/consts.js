@@ -1,6 +1,10 @@
 // 16px for a block
 export const BLOCK_SIZE = 16;
 
+// field size - (13block * 13block)
+export const FIELD_BSIZE = 13;
+export const BULLET_SIZE = 3;
+
 export const TANK_COLOR_SCHEMES = {
   yellow: {
     a: '#E7E794',
