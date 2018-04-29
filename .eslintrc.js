@@ -5,6 +5,7 @@ module.exports = {
   rules: {
     'comma-dangle': 0,
     'no-mixed-operators': 0,
+    'no-use-before-define': 0,
     'object-curly-newline': 0,
     'react/jsx-filename-extension': 0,
     'react/prop-types': 0,
@@ -14,7 +15,10 @@ module.exports = {
     // 'jsx-a11y/click-events-have-key-events': 0,
   },
   globals: {
-    document: true
+    document: true,
+    performance: true,
+    requestAnimationFrame: true,
+    cancelAnimationFrame: true
   },
   settings: {
     'import/resolver': {

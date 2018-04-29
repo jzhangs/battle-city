@@ -38,12 +38,12 @@ class Tank extends React.Component {
       dy = y;
       rotate = 0;
     } else if (direction === DOWN) {
-      dx = x + BLOCK_SIZE;
+      dx = x + BLOCK_SIZE - 1;
       dy = y + BLOCK_SIZE;
       rotate = 180;
     } else if (direction === LEFT) {
       dx = x;
-      dy = y + BLOCK_SIZE;
+      dy = y + BLOCK_SIZE - 1;
       rotate = -90;
     } else {
       // RIGHT
@@ -62,7 +62,7 @@ class Tank extends React.Component {
         />
       );
     }
-    // todo complete level 1~7
+    // TODO complete level 1~7
     return null;
   }
 }
