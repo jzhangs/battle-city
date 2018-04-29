@@ -1,10 +1,41 @@
 import { Map } from 'immutable';
+import { combineReducers } from 'redux-immutable';
 
-const initialState = Map();
+import { UP, DOWN, LEFT, RIGHT } from 'utils/consts';
+import * as A from 'utils/actions';
+import { inc, dec } from 'utils/common';
 
-export default function reducer(state = initialState, action) {
-  if (action.type === 'foo') {
-    return state;
+const playerInitialState = Map({
+  x: 0,
+  y: 0,
+  direction: UP,
+  moving: false
+});
+
+function player(state = playerInitialState, action) {
+  if (action.type === A.MOVE) {
+    const { direction } = action;
+    if (direction !== state.get('direction')) {
+      return state.set('direction', direction);
+    } else if (direction === UP) {
+      return state.update('y', dec);
+    } else if (direction === DOWN) {
+      return state.update('y', inc);
+    } else if (direction === LEFT) {
+      return state.update('x', dec);
+    } else if (direction === RIGHT) {
+      return state.update('x', inc);
+    }
+    throw new Error(`Invalid direction ${direction}`);
+  } else if (action.type === A.START_MOVE) {
+    return state.set('moving', true);
+  } else if (action.type === A.STOP_MOVE) {
+    return state.set('moving', false);
   }
+
   return state;
 }
+
+export default combineReducers({
+  player
+});

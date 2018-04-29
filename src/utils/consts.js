@@ -1,6 +1,5 @@
 // 16px for a block
 export const BLOCK_SIZE = 16;
-export const HALF_SIZE = BLOCK_SIZE / 2;
 
 export const TANK_COLOR_SCHEMES = {
   yellow: {
