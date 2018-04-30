@@ -1,4 +1,7 @@
-import { UP, DOWN, LEFT, BLOCK_SIZE, FIELD_SIZE } from 'utils/consts';
+import { UP, DOWN, LEFT, BLOCK_SIZE, FIELD_SIZE, BULLET_SIZE, TANK_SIZE } from 'utils/consts';
+
+import BulletRecord from 'types/BulletRecord';
+import TankRecord from 'types/TankRecord';
 
 // Calculte bullet start postion according to postion and
 // direction of tank.
@@ -56,4 +59,23 @@ export function getNextId(tag = '') {
   }
   nextIdMap.set(tag, 2);
   return 1;
+}
+
+export function asBox(item) {
+  if (item instanceof BulletRecord) {
+    return {
+      x: item.x,
+      y: item.y,
+      width: BULLET_SIZE,
+      height: BULLET_SIZE
+    };
+  } else if (item instanceof TankRecord) {
+    return {
+      x: item.x,
+      y: item.y,
+      width: TANK_SIZE,
+      height: TANK_SIZE
+    };
+  }
+  throw new Error('Cannot convert to type Box');
 }

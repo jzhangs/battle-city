@@ -1,5 +1,5 @@
-import { isInField, testCollide, iterRowsAndCols } from 'utils/common';
-import { BLOCK_SIZE, TANK_SIZE, ITEM_SIZE_MAP, N_MAP } from 'utils/consts';
+import { asBox, isInField, testCollide, iterRowsAndCols } from 'utils/common';
+import { BLOCK_SIZE, ITEM_SIZE_MAP, N_MAP } from 'utils/consts';
 import * as selectors from 'utils/selectors';
 
 function isTankCollidedWithEagle(eagle, tankTarget, threshhold) {
@@ -74,12 +74,7 @@ function isTankCollidedWithOtherTanks(tanks, tank, tankTarget, threshhold) {
     if (tank.tankId === otherTank.tankId) {
       continue;
     }
-    const subject = {
-      x: otherTank.x,
-      y: otherTank.y,
-      width: TANK_SIZE,
-      height: TANK_SIZE
-    };
+    const subject = asBox(otherTank);
     if (testCollide(subject, tankTarget, threshhold)) {
       return true;
     }
@@ -88,12 +83,7 @@ function isTankCollidedWithOtherTanks(tanks, tank, tankTarget, threshhold) {
 }
 
 export default function canTankMove(state, tank, threshhold = -0.01) {
-  const tankTarget = {
-    x: tank.x,
-    y: tank.y,
-    width: TANK_SIZE,
-    height: TANK_SIZE
-  };
+  const tankTarget = asBox(tank);
 
   if (!isInField(tankTarget)) {
     return false;
