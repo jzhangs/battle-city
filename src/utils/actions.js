@@ -1,3 +1,5 @@
+export const TURN = 'TURN';
+
 // { type: MOVE, direction: UP|DOWN|LEFT|RIGHT, distance }
 export const MOVE = 'MOVE';
 
@@ -21,3 +23,6 @@ export const DESTROY_BULLETS = 'DESTROY_BULLETS';
 
 // { type: UPDATE_BULLETS, updatedBullets: <updated-bullets-map> }
 export const UPDATE_BULLETS = 'UPDATE_BULLETS';
+
+// { type: LOAD_MAP }
+export const LOAD_MAP = 'LOAD_MAP';

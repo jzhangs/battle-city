@@ -1,9 +1,11 @@
 import Mousetrap from 'mousetrap';
-import { take, put } from 'redux-saga/effects';
+import { take, put, select } from 'redux-saga/effects';
 import * as _ from 'lodash';
+import * as R from 'ramda';
 
-import { UP, DOWN, LEFT, RIGHT } from 'utils/consts';
+import { UP, DOWN, LEFT, RIGHT, DIRECTION_MAP } from 'utils/consts';
 import * as A from 'utils/actions';
+import * as selectors from 'utils/selectors';
 
 export default function* directionController() {
   const pressed = [];
@@ -18,15 +20,25 @@ export default function* directionController() {
     const { delta } = yield take(A.TICK);
     const speed = 48; // 16px per second
     if (pressed.length > 0) {
-      if (!moving) {
-        yield put({ type: A.START_MOVE });
+      const player = yield select(selectors.player);
+      const direction = _.last(pressed);
+      if (direction !== player.get('direction')) {
+        yield put({ type: A.TURN, direction });
+      } else {
+        const distance = delta * speed;
+        const [xy, incdec] = DIRECTION_MAP[direction];
+        const movedPlayer = player.update(
+          xy,
+          incdec === 'inc' ? R.add(distance) : R.subtract(R.__, distance)
+        );
+        if (yield select(selectors.canMove, movedPlayer)) {
+          yield put({ type: A.MOVE, player: movedPlayer });
+          if (!moving) {
+            yield put({ type: A.START_MOVE });
+            moving = true;
+          }
+        }
       }
-      yield put({
-        type: A.MOVE,
-        direction: _.last(pressed),
-        distance: delta * speed
-      });
-      moving = true;
     } else if (moving) {
       yield put({ type: A.STOP_MOVE });
       moving = false;

@@ -1,7 +1,9 @@
 import * as R from 'ramda';
 import { takeEvery, put, select } from 'redux-saga/effects';
 
-import { BULLET_SIZE, FIELD_BSIZE, BLOCK_SIZE, DIRECTION_MAP } from 'utils/consts';
+import { BULLET_SIZE, FIELD_BSIZE, BLOCK_SIZE, DIRECTION_MAP, ITEM_SIZE_MAP } from 'utils/consts';
+import { testCollide } from 'utils/common';
+
 import * as A from 'utils/actions';
 import * as selectors from 'utils/selectors';
 
@@ -20,6 +22,39 @@ function* afterUpdate() {
   // TODO check conlisions
 
   const bullets = yield select(selectors.bullets);
+
+  // check if meet wall
+  const bricks = yield select(selectors.map.bricks);
+  const out1 = bullets.filter(bullet =>
+    testCollide(
+      {
+        x: bullet.x,
+        y: bullet.y,
+        width: BULLET_SIZE,
+        height: BULLET_SIZE
+      },
+      ITEM_SIZE_MAP.BRICK,
+      bricks
+    ));
+  if (!out1.isEmpty()) {
+    yield put({ type: A.DESTROY_BULLETS, bullets: out1 });
+  }
+
+  const steels = yield select(selectors.map.steels);
+  const out2 = bullets.filter(bullet =>
+    testCollide(
+      {
+        x: bullet.x,
+        y: bullet.y,
+        width: BULLET_SIZE,
+        height: BULLET_SIZE
+      },
+      ITEM_SIZE_MAP.STEEL,
+      steels
+    ));
+  if (!out2.isEmpty()) {
+    yield put({ type: A.DESTROY_BULLETS, bullets: out2 });
+  }
 
   // Check if meet border
   const outBullets = bullets.filterNot(isInField);

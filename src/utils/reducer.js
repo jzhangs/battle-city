@@ -1,10 +1,29 @@
-import { Map } from 'immutable';
+import { Map, List } from 'immutable';
 import { combineReducers } from 'redux-immutable';
 import * as R from 'ramda';
 
-import { LEFT, BLOCK_SIZE, FIELD_BSIZE, DIRECTION_MAP } from 'utils/consts';
+import { LEFT, BLOCK_SIZE, FIELD_BSIZE, ITEM_SIZE_MAP } from 'utils/consts';
 import * as A from 'utils/actions';
 import BulletRecord from 'types/BulletRecord';
+
+const bricks = [];
+const steels = [];
+for (let i = 0; i < (BLOCK_SIZE / ITEM_SIZE_MAP.BRICK * FIELD_BSIZE) ** 2; i += 1) {
+  bricks.push(Math.random() < 0.03);
+  steels.push(Math.random() < 0.01);
+}
+
+const mapInitialState = Map({
+  bricks: List(bricks),
+  steels: List(steels)
+});
+
+function map(state = mapInitialState, action) {
+  if (action.type === A.LOAD_MAP) {
+    return state;
+  }
+  return state;
+}
 
 const playerInitialState = Map({
   x: 0,
@@ -13,19 +32,11 @@ const playerInitialState = Map({
   moving: false
 });
 
-const clamp = R.clamp(0, BLOCK_SIZE * (FIELD_BSIZE - 1));
-
 function player(state = playerInitialState, action) {
-  if (action.type === A.MOVE) {
-    const { direction, distance } = action;
-    if (direction !== state.get('direction')) {
-      return state.set('direction', direction);
-    }
-    const [xy, incdec] = DIRECTION_MAP[direction];
-    return state.update(
-      xy,
-      incdec === 'inc' ? R.pipe(R.add(distance), clamp) : R.pipe(R.subtract(R.__, distance), clamp)
-    );
+  if (action.type === A.TURN) {
+    return state.set('direction', action.direction);
+  } else if (action.type === A.MOVE) {
+    return action.player;
   } else if (action.type === A.START_MOVE) {
     return state.set('moving', true);
   } else if (action.type === A.STOP_MOVE) {
@@ -50,5 +61,6 @@ function bullets(state = Map(), action) {
 
 export default combineReducers({
   player,
-  bullets
+  bullets,
+  map
 });
