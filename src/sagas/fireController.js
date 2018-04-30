@@ -1,10 +1,12 @@
 import Mousetrap from 'mousetrap';
 import { take, put, select } from 'redux-saga/effects';
 
-import { BLOCK_SIZE } from 'utils/consts';
 import { getBulletStartPosition } from 'utils/common';
 import * as A from 'utils/actions';
 import * as selectors from 'utils/selectors';
+
+const bulletSpeed = 80 / 1000;
+const interval = 200;
 
 export default function* fireController() {
   let pressing = false;
@@ -25,9 +27,12 @@ export default function* fireController() {
     'keyup'
   );
 
+  let countDown = interval;
   while (true) {
-    yield take(A.TICK);
-    if ((pressing || pressed) && (yield select(selectors.canFire, 'player'))) {
+    const { delta } = yield take(A.TICK);
+    if (countDown > 0) {
+      countDown -= delta;
+    } else if ((pressing || pressed) && (yield select(selectors.canFire, 'player'))) {
       const player = yield select(selectors.player);
       const { x, y, direction } = player.toObject();
       yield put(Object.assign(
@@ -35,10 +40,11 @@ export default function* fireController() {
           type: A.ADD_BULLET,
           direction,
           owner: 'player',
-          speed: 5 * BLOCK_SIZE
+          speed: bulletSpeed
         },
         getBulletStartPosition(x, y, direction)
       ));
+      countDown = interval;
     }
     pressed = false;
   }

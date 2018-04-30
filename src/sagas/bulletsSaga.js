@@ -17,9 +17,12 @@ import * as A from 'utils/actions';
 import * as selectors from 'utils/selectors';
 
 function isInField(bullet) {
-  const x = Math.round(bullet.x);
-  const y = Math.round(bullet.y);
-  return x >= 0 && x + BULLET_SIZE < FIELD_SIZE && y >= 0 && y + BULLET_SIZE < FIELD_SIZE;
+  return (
+    bullet.x >= 0 &&
+    bullet.x + BULLET_SIZE < FIELD_SIZE &&
+    bullet.y >= 0 &&
+    bullet.y + BULLET_SIZE < FIELD_SIZE
+  );
 }
 
 function* update({ delta }) {
@@ -54,8 +57,8 @@ function* handleCollisionsBetweenBulletsAndBricks(bullets) {
   if (collisions.length > 0) {
     const collidedBullets = Set(collisions.map(R.head));
     yield put({
-      type: A.DESTROY_BULLETS_BY_ONWER,
-      owners: collidedBullets.map(R.prop('owner'))
+      type: A.DESTROY_BULLETS,
+      bullets: collidedBullets,
     });
 
     const spread = 4;
@@ -112,14 +115,28 @@ function* afterUpdate() {
   yield* handleCollisionsBetweenBulletsAndBricks(bullets);
   yield* handleCollisionsBetweenBulletsAndSteels(bullets);
 
-  // Check if meet border
   yield put({
     type: A.DESTROY_BULLETS,
     bullets: bullets.filterNot(isInField)
   });
 }
 
+let nextExplosionId = 1
+
 export default function* bulletsSaga() {
   yield takeEvery(A.TICK, update);
   yield takeEvery(A.AFTER_TICK, afterUpdate);
+
+  yield takeEvery(A.DESTROY_BULLETS, function* spawnExplosion({ bullets }) {
+    yield* bullets
+      .map(b =>
+        put({
+          type: A.SPAWN_EXPLOSION,
+          x: b.x - 6,
+          y: b.y - 6,
+          explosionType: 'bullet',
+          explosionId: nextExplosionId++
+        }))
+      .toArray();
+  });
 }

@@ -18,7 +18,7 @@ export default function* directionController() {
 
   while (true) {
     const { delta } = yield take(A.TICK);
-    const speed = 48; // 16px per second
+    const speed = 48 / 1000;
     if (pressed.length > 0) {
       const player = yield select(selectors.player);
       const direction = _.last(pressed);

@@ -12,8 +12,8 @@ const tickChannel = eventChannel((emit) => {
 
   function emitTick() {
     const now = Date.now();
-    emit({ type: A.TICK, delta: (now - lastTime) / 1000 });
-    emit({ type: A.AFTER_TICK, delta: (now - lastTime) / 1000 });
+    emit({ type: A.TICK, delta: now - lastTime });
+    emit({ type: A.AFTER_TICK, delta: now - lastTime });
     lastTime = now;
     requestId = requestAnimationFrame(emitTick);
   }

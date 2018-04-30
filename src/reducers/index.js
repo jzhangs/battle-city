@@ -2,8 +2,9 @@ import { Map } from 'immutable';
 import { combineReducers } from 'redux-immutable';
 import { UP, DIRECTION_MAP, BLOCK_SIZE } from 'utils/consts';
 import BulletRecord from 'types/BulletRecord';
-import map from 'reducers/map';
 import * as A from 'utils/actions';
+import map from 'reducers/map';
+import explosions from 'reducers/explosions';
 
 const playerInitialState = Map({
   x: 4 * BLOCK_SIZE,
@@ -33,8 +34,6 @@ function bullets(state = Map(), action) {
   if (action.type === A.ADD_BULLET) {
     const { direction, speed, x, y, owner } = action;
     return state.set(owner, BulletRecord({ owner, direction, speed, x, y }));
-  } else if (action.type === A.DESTROY_BULLETS_BY_ONWER) {
-    return state.filterNot((bullet, owner) => action.owners.has(owner));
   } else if (action.type === A.DESTROY_BULLETS) {
     const set = action.bullets.toSet();
     return state.filterNot(bullet => set.has(bullet));
@@ -44,8 +43,17 @@ function bullets(state = Map(), action) {
   return state;
 }
 
+function time(state = 0, action) {
+  if (action.type === A.TICK) {
+    return state + action.delta;
+  }
+  return state;
+}
+
 export default combineReducers({
   player,
   bullets,
-  map
+  map,
+  time,
+  explosions
 });

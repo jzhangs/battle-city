@@ -9,22 +9,25 @@ import RiverLayer from 'components/RiverLayer';
 import SnowLayer from 'components/SnowLayer';
 import ForestLayer from 'components/ForestLayer';
 import Eagle from 'components/Eagle';
+import Explosion from 'components/Explosion';
 
 import { BLOCK_SIZE } from 'utils/consts';
 import * as selectors from 'utils/selectors';
+import * as A from 'utils/actions';
 
 function mapStateToProps(state) {
   return {
     player: selectors.player(state),
     bullets: selectors.bullets(state),
-    map: selectors.map(state)
+    map: selectors.map(state),
+    explosions: selectors.explosions(state)
   };
 }
 
 @connect(mapStateToProps)
 export default class Screen extends React.Component {
   render() {
-    const { player, bullets, map } = this.props;
+    const { player, bullets, map, explosions } = this.props;
     const { bricks, steels, rivers, snows, forests } = map.toObject();
     const { direction, x, y, moving } = player.toObject();
     return (
@@ -43,6 +46,21 @@ export default class Screen extends React.Component {
           <Tank direction={direction} x={x} y={y} level={0} color="yellow" moving={moving} />
           <ForestLayer forests={forests} />
           <Eagle x={6 * BLOCK_SIZE} y={12 * BLOCK_SIZE} />
+          <g data-role="explosion-layer">
+            {explosions
+              .map(exp => (
+                <Explosion
+                  key={exp.explosionId}
+                  x={exp.x}
+                  y={exp.y}
+                  delayedAction={{
+                    type: A.REMOVE_EXPLOSION,
+                    explosionId: exp.explosionId
+                  }}
+                />
+              ))
+              .toArray()}
+          </g>
         </g>
       </g>
     );
