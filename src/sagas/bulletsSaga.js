@@ -1,7 +1,7 @@
 import * as R from 'ramda';
 import { takeEvery, put, select } from 'redux-saga/effects';
 
-import { BULLET_SIZE, FIELD_BSIZE, BLOCK_SIZE, DIRECTION_MAP, ITEM_SIZE_MAP } from 'utils/consts';
+import { BULLET_SIZE, DIRECTION_MAP, ITEM_SIZE_MAP, FIELD_SIZE } from 'utils/consts';
 import { testCollide } from 'utils/common';
 
 import * as A from 'utils/actions';
@@ -63,12 +63,7 @@ function* afterUpdate() {
   function isInField(bullet) {
     const x = Math.round(bullet.x);
     const y = Math.round(bullet.y);
-    return (
-      x >= 0 &&
-      x + BULLET_SIZE < FIELD_BSIZE * BLOCK_SIZE &&
-      y >= 0 &&
-      y + BULLET_SIZE < FIELD_BSIZE * BLOCK_SIZE
-    );
+    return x >= 0 && x + BULLET_SIZE < FIELD_SIZE && y >= 0 && y + BULLET_SIZE < FIELD_SIZE;
   }
 }
 

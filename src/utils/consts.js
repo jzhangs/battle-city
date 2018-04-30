@@ -2,7 +2,10 @@
 export const BLOCK_SIZE = 16;
 
 // field size - (13block * 13block)
-export const FIELD_BSIZE = 13;
+export const FIELD_BLOCK_SIZE = 13;
+
+export const FIELD_SIZE = BLOCK_SIZE * FIELD_BLOCK_SIZE;
+
 export const BULLET_SIZE = 3;
 
 export const TANK_COLOR_SCHEMES = {
@@ -46,4 +49,12 @@ export const ITEM_SIZE_MAP = {
   RIVER: BLOCK_SIZE,
   SNOW: BLOCK_SIZE,
   FOREST: BLOCK_SIZE
+};
+
+export const N_MAP = {
+  BRICK: FIELD_SIZE / ITEM_SIZE_MAP.BRICK,
+  STEEL: FIELD_SIZE / ITEM_SIZE_MAP.STEEL,
+  RIVER: FIELD_SIZE / ITEM_SIZE_MAP.RIVER,
+  SNOW: FIELD_SIZE / ITEM_SIZE_MAP.SNOW,
+  FOREST: FIELD_SIZE / ITEM_SIZE_MAP.FOREST
 };

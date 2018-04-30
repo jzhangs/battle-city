@@ -4,6 +4,7 @@ module.exports = {
   plugins: ['react', 'jsx-a11y', 'import'],
   rules: {
     'comma-dangle': 0,
+    'no-bitwise': 0,
     'no-mixed-operators': 0,
     'no-use-before-define': 0,
     'no-underscore-dangle': 0,

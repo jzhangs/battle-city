@@ -1,41 +1,9 @@
-import { Map, List } from 'immutable';
+import { Map } from 'immutable';
 import { combineReducers } from 'redux-immutable';
-import * as R from 'ramda';
-
-import { LEFT, BLOCK_SIZE, FIELD_BSIZE, ITEM_SIZE_MAP } from 'utils/consts';
-import * as A from 'utils/actions';
+import { LEFT, DIRECTION_MAP } from 'utils/consts';
 import BulletRecord from 'types/BulletRecord';
-
-const bricks = [];
-const steels = [];
-const rivers = [];
-const snows = [];
-const forests = [];
-for (let i = 0; i < (BLOCK_SIZE / ITEM_SIZE_MAP.BRICK * FIELD_BSIZE) ** 2; i += 1) {
-  bricks.push(Math.random() < 0.03);
-  steels.push(Math.random() < 0.01);
-}
-
-for (let i = 0; i < (BLOCK_SIZE / ITEM_SIZE_MAP.RIVER * FIELD_BSIZE) ** 2; i += 1) {
-  rivers.push(Math.random() < 0.015);
-  snows.push(Math.random() < 0.015);
-  forests.push(Math.random() < 0.015);
-}
-
-const mapInitialState = Map({
-  bricks: List(bricks),
-  steels: List(steels),
-  rivers: List(rivers),
-  snows: List(snows),
-  forests: List(forests)
-});
-
-function map(state = mapInitialState, action) {
-  if (action.type === A.LOAD_MAP) {
-    return state;
-  }
-  return state;
-}
+import map from 'reducers/map';
+import * as A from 'utils/actions';
 
 const playerInitialState = Map({
   x: 0,
@@ -46,7 +14,11 @@ const playerInitialState = Map({
 
 function player(state = playerInitialState, action) {
   if (action.type === A.TURN) {
-    return state.set('direction', action.direction);
+    const { direction } = action;
+    const [xy] = DIRECTION_MAP[direction];
+    return state
+      .set('direction', direction)
+      .update(xy === 'x' ? 'y' : 'x', t => Math.round(t / 4) * 4);
   } else if (action.type === A.MOVE) {
     return action.player;
   } else if (action.type === A.START_MOVE) {
@@ -54,7 +26,6 @@ function player(state = playerInitialState, action) {
   } else if (action.type === A.STOP_MOVE) {
     return state.set('moving', false);
   }
-
   return state;
 }
 

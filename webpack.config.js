@@ -17,13 +17,9 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.jsx?/,
+        test: /\.jsx?$/,
         exclude: /node_modules/,
         use: ['babel-loader']
-      }, {
-        test: /\.s?css/,
-        exclude: /node_modules/,
-        use: ['style-loader', 'css-loader', 'sass-loader']
       }
     ]
   },
@@ -33,7 +29,6 @@ module.exports = {
     })
   ],
   devServer: {
-    contentBase: path.join(__dirname, 'examples'),
     port: 8088
   },
   mode: 'development'

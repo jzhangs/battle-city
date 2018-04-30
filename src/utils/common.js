@@ -1,4 +1,4 @@
-import { UP, DOWN, LEFT, BLOCK_SIZE, FIELD_BSIZE } from 'utils/consts';
+import { FIELD_SIZE, UP, DOWN, LEFT, BLOCK_SIZE } from 'utils/consts';
 
 // Calculte bullet start postion according to postion and
 // direction of tank.
@@ -30,7 +30,7 @@ export function filterCollide(target, itemSize, itemList, threshhold = 0) {
   const right = (x + width) / itemSize;
   const top = y / itemSize - 1;
   const bottom = (y + height) / itemSize;
-  const N = BLOCK_SIZE / itemSize * FIELD_BSIZE;
+  const N = FIELD_SIZE / itemSize;
   return itemList.toMap().filter((set, t) => {
     if (set) {
       const [row, col] = getRowCol(t, N);
