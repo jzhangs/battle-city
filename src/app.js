@@ -12,7 +12,7 @@ function mapStateToProps(state) {
 export default class App extends React.Component {
   render() {
     return (
-      <svg width={16 * BLOCK_SIZE} height={15 * BLOCK_SIZE} style={{ background: 'black' }}>
+      <svg width={15 * BLOCK_SIZE} height={15 * BLOCK_SIZE} style={{ background: 'grey' }}>
         <Screen />
       </svg>
     );
