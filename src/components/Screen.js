@@ -23,44 +23,47 @@ function mapStateToProps(state) {
     bullets: selectors.bullets(state),
     map: selectors.map(state),
     explosions: selectors.explosions(state),
-    flickers: selectors.flickers(state)
+    flickers: selectors.flickers(state),
+    tanks: selectors.tanks(state)
   };
 }
 
 @connect(mapStateToProps)
 export default class Screen extends React.Component {
-  renderPlayerTank() {
-    const { active, direction, x, y, moving } = this.props.player.toObject();
-    if (active) {
-      return <Tank direction={direction} x={x} y={y} level={0} color="yellow" moving={moving} />;
-    }
-    return null;
-  }
-
   render() {
-    const { bullets, map, explosions, flickers } = this.props;
+    const { bullets, map, explosions, flickers, tanks } = this.props;
     const { bricks, steels, rivers, snows, forests, eagle } = map.toObject();
     return (
       <g data-role="screen">
         <g data-role="board" transform={`translate(${BLOCK_SIZE},${BLOCK_SIZE})`}>
           <rect width={13 * BLOCK_SIZE} height={13 * BLOCK_SIZE} fill="#000" />
           <Items x={0} y={0} name="shovel" />
-          <g data0role="bullets">
-            {bullets
-              .map((b, i) => <Bullet key={i} direction={b.direction} x={b.x} y={b.y} />)
-              .toArray()}
-          </g>
           <SteelLayer steels={steels} />
           <BrickLayer bricks={bricks} />
           <RiverLayer rivers={rivers} />
           <SnowLayer snows={snows} />
-          {this.renderPlayerTank()}
+          <g data-role="bullet-layer">
+            {bullets
+              .map((b, i) => <Bullet key={i} direction={b.direction} x={b.x} y={b.y} />)
+              .toArray()}
+          </g>
+          <g data-role="tank-layer">
+            {tanks
+              .map(tank => (
+                <Tank
+                  key={tank.tankId}
+                  x={tank.x}
+                  y={tank.y}
+                  direction={tank.direction}
+                  level={0}
+                  color={tank.color}
+                  moving={tank.moving}
+                />
+              ))
+              .toArray()}
+          </g>
           <ForestLayer forests={forests} />
-          <Eagle
-            x={eagle.get('x')}
-            y={eagle.get('y')}
-            broken={eagle.get('broken')}
-          />
+          <Eagle x={eagle.get('x')} y={eagle.get('y')} broken={eagle.get('broken')} />
           <g data-role="explosion-layer">
             {explosions
               .map(exp => (

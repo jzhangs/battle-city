@@ -33,8 +33,11 @@ export default function* fireController() {
     if (countDown > 0) {
       countDown -= delta;
     } else if ((pressing || pressed) && (yield select(selectors.canFire, 'player'))) {
-      const player = yield select(selectors.player);
-      const { x, y, direction } = player.toObject();
+      const tank = yield select(selectors.playerTank);
+      if (tank == null) {
+        continue;
+      }
+      const { x, y, direction } = tank.toObject();
       yield put(Object.assign(
         {
           type: A.ADD_BULLET,

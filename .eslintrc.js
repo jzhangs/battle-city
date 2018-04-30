@@ -6,6 +6,7 @@ module.exports = {
     'comma-dangle': 0,
     'func-names': 0,
     'no-bitwise': 0,
+    'no-continue': 0,
     'no-mixed-operators': 0,
     'no-plusplus': 0,
     'no-use-before-define': 0,

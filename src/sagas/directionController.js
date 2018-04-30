@@ -19,43 +19,55 @@ export default function* directionController() {
   while (true) {
     const { delta } = yield take(A.TICK);
     const speed = 48 / 1000;
+    const tank = yield select(selectors.playerTank);
+    if (tank == null) {
+      continue;
+    }
     if (pressed.length > 0) {
-      const player = yield select(selectors.player);
       const direction = _.last(pressed);
-      if (direction !== player.get('direction')) {
-        const turned = player.set('direction', direction);
+      if (direction !== tank.get('direction')) {
+        const turned = tank.set('direction', direction);
         const xy = DIRECTION_MAP[direction][0] === 'x' ? 'y' : 'x';
-        const n = player.get(xy) / 8;
+        const n = tank.get(xy) / 8;
         const useFloor = turned.set(xy, Math.floor(n) * 8);
         const useCeil = turned.set(xy, Math.ceil(n) * 8);
         const canMoveWhenUseFloor = yield select(selectors.canMove, useFloor);
         const canMoveWhenUseCeil = yield select(selectors.canMove, useCeil);
+        let movedTank;
         if (!canMoveWhenUseFloor) {
-          yield put({ type: A.MOVE, player: useCeil });
+          movedTank = useCeil;
         } else if (!canMoveWhenUseCeil) {
-          yield put({ type: A.MOVE, player: useFloor });
+          movedTank = useFloor;
         } else {
           // use-round
-          const useRound = turned.set(xy, Math.round(n) * 8);
-          yield put({ type: A.MOVE, player: useRound });
+          movedTank = turned.set(xy, Math.round(n) * 8);
         }
+        yield put({
+          type: A.MOVE,
+          tankId: tank.tankId,
+          tank: movedTank
+        });
       } else {
         const distance = delta * speed;
         const [xy, incdec] = DIRECTION_MAP[direction];
-        const movedPlayer = player.update(
+        const movedTank = tank.update(
           xy,
           incdec === 'inc' ? R.add(distance) : R.subtract(R.__, distance)
         );
-        if (yield select(selectors.canMove, movedPlayer)) {
-          yield put({ type: A.MOVE, player: movedPlayer });
+        if (yield select(selectors.canMove, movedTank)) {
+          yield put({
+            type: A.MOVE,
+            tankId: tank.tankId,
+            tank: movedTank
+          });
           if (!moving) {
-            yield put({ type: A.START_MOVE });
+            yield put({ type: A.START_MOVE, tankId: tank.tankId });
             moving = true;
           }
         }
       }
     } else if (moving) {
-      yield put({ type: A.STOP_MOVE });
+        yield put({ type: A.STOP_MOVE, tankId: tank.tankId })
       moving = false;
     }
   }

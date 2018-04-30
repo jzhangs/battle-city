@@ -10,6 +10,11 @@ export const BULLET_SIZE = 3;
 
 export const TANK_SPAWN_DELAY = 1500;
 
+export const PLAYER_TANK_SPAWN_POSITION = {
+  x: 4 * BLOCK_SIZE,
+  y: 12 * BLOCK_SIZE
+};
+
 export const TANK_COLOR_SCHEMES = {
   yellow: {
     a: '#E7E794',
