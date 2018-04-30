@@ -2,7 +2,9 @@ import React from 'react';
 import * as _ from 'lodash';
 import { Pixel, Bitmap } from 'components/Elements';
 import { TANK_COLOR_SCHEMES, UP, DOWN, LEFT, BLOCK_SIZE } from 'utils/consts';
+import registerTick from 'hocs/registerTick';
 
+@registerTick(80, 80)
 class Tank extends React.Component {
   static defaultProps = {
     moving: false
@@ -10,28 +12,15 @@ class Tank extends React.Component {
 
   constructor(props) {
     super(props);
-    this.handle = null;
     this.state = {
-      shape: 0
+      lastShape: 0
     };
   }
 
-  componentDidMount() {
-    if (this.props.moving) {
-      this.startMoving();
+  componentWillReceiveProps(nextProps) {
+    if (this.props.moving && !nextProps.moving) {
+      this.setState({ lastShape: this.props.tickIndex });
     }
-  }
-
-  componentWillUpdate(nextProps) {
-    if (!this.props.moving && nextProps.moving) {
-      this.startMoving();
-    } else if (this.props.moving && !nextProps.moving) {
-      this.stopMoving();
-    }
-  }
-
-  componentWillUnmount() {
-    this.stopMoving();
   }
 
   startMoving() {
@@ -45,7 +34,8 @@ class Tank extends React.Component {
   }
 
   render() {
-    const { x, y, color, level, direction } = this.props;
+    const { x, y, color, level, direction, tickIndex, moving } = this.props;
+    const { lastShape } = this.state;
     let rotate;
     let dx;
     let dy;
@@ -67,6 +57,8 @@ class Tank extends React.Component {
       dy = y;
       rotate = 90;
     }
+
+    const shape = moving ? tickIndex : lastShape;
     if (level === 0) {
       return (
         <TankLevel0
@@ -74,7 +66,7 @@ class Tank extends React.Component {
           y={y}
           transform={`translate(${dx}, ${dy})rotate(${rotate})`}
           color={color}
-          shape={this.state.shape % 2}
+          shape={shape}
         />
       );
     }
@@ -85,7 +77,7 @@ class Tank extends React.Component {
         y={y}
         transform={`translate(${dx}, ${dy})rotate(${rotate})`}
         color={color}
-        shape={this.state.shape % 2}
+        shape={shape}
       />
     );
   }
