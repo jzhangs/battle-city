@@ -11,6 +11,7 @@ import ForestLayer from 'components/ForestLayer';
 import Eagle from 'components/Eagle';
 import Explosion from 'components/Explosion';
 import Flicker from 'components/Flicker';
+import Items from 'components/Items';
 
 import { BLOCK_SIZE } from 'utils/consts';
 import * as selectors from 'utils/selectors';
@@ -43,6 +44,7 @@ export default class Screen extends React.Component {
       <g data-role="screen">
         <g data-role="board" transform={`translate(${BLOCK_SIZE},${BLOCK_SIZE})`}>
           <rect width={13 * BLOCK_SIZE} height={13 * BLOCK_SIZE} fill="#000" />
+          <Items x={0} y={0} name="shovel" />
           <g data0role="bullets">
             {bullets
               .map((b, i) => <Bullet key={i} direction={b.direction} x={b.x} y={b.y} />)
