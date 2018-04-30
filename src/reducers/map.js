@@ -11,6 +11,9 @@ export default function mapReducer(state = mapInitialState, action) {
   } else if (action.type === A.DESTROY_BRICKS) {
     return state.update('bricks', bricks =>
       bricks.map((set, t) => (action.ts.has(t) ? false : set)));
+  } else if (action.type === A.DESTROY_STEELS) {
+    return state.update('steels', steels =>
+      steels.map((set, t) => (action.ts.has(t) ? false : set)));
   }
   return state;
 }

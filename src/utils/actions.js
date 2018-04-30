@@ -24,6 +24,8 @@ export const DESTROY_BULLETS = 'DESTROY_BULLETS';
 // { type: DESTROY_BRICKS, ts: <set-of-t> }
 export const DESTROY_BRICKS = 'DESTROY_BRICKS';
 
+export const DESTROY_STEELS = 'DESTROY_STEELS';
+
 // { type: UPDATE_BULLETS, updatedBullets: <updated-bullets-map> }
 export const UPDATE_BULLETS = 'UPDATE_BULLETS';
 
