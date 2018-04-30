@@ -23,7 +23,22 @@ export default function* directionController() {
       const player = yield select(selectors.player);
       const direction = _.last(pressed);
       if (direction !== player.get('direction')) {
-        yield put({ type: A.TURN, direction });
+        const turned = player.set('direction', direction);
+        const xy = DIRECTION_MAP[direction][0] === 'x' ? 'y' : 'x';
+        const n = player.get(xy) / 8;
+        const useFloor = turned.set(xy, Math.floor(n) * 8);
+        const useCeil = turned.set(xy, Math.ceil(n) * 8);
+        const canMoveWhenUseFloor = yield select(selectors.canMove, useFloor);
+        const canMoveWhenUseCeil = yield select(selectors.canMove, useCeil);
+        if (!canMoveWhenUseFloor) {
+          yield put({ type: A.MOVE, player: useCeil });
+        } else if (!canMoveWhenUseCeil) {
+          yield put({ type: A.MOVE, player: useFloor });
+        } else {
+          // use-round
+          const useRound = turned.set(xy, Math.round(n) * 8);
+          yield put({ type: A.MOVE, player: useRound });
+        }
       } else {
         const distance = delta * speed;
         const [xy, incdec] = DIRECTION_MAP[direction];

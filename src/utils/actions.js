@@ -1,5 +1,3 @@
-export const TURN = 'TURN';
-
 // { type: MOVE, direction: UP|DOWN|LEFT|RIGHT, distance }
 export const MOVE = 'MOVE';
 
