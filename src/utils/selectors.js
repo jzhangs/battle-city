@@ -20,7 +20,7 @@ export const canMove = (state, movedPlayer) => {
     return false;
   }
 
-  const { bricks, steels } = map(state).toObject();
+  const { bricks, steels, rivers } = map(state).toObject();
   const target = {
     x,
     y,
@@ -31,6 +31,9 @@ export const canMove = (state, movedPlayer) => {
     return false;
   }
   if (testCollide(target, ITEM_SIZE_MAP.STEEL, steels, -0.05)) {
+    return false;
+  }
+  if (testCollide(target, ITEM_SIZE_MAP.RIVER, rivers, -0.05)) {
     return false;
   }
 
