@@ -4,6 +4,7 @@ import { takeEvery } from 'redux-saga';
 import { put, select } from 'redux-saga/effects';
 import {
   BULLET_SIZE,
+  BLOCK_SIZE,
   DIRECTION_MAP,
   ITEM_SIZE_MAP,
   FIELD_SIZE,
@@ -11,6 +12,7 @@ import {
   UP,
   DOWN
 } from 'utils/consts';
+import { testCollide2 } from 'utils/common';
 
 import * as A from 'utils/actions';
 import * as selectors from 'utils/selectors';
@@ -81,6 +83,23 @@ function* filterBulletsCollidedWithSteels(bullets) {
       return false;
     })
     .toSet();
+}
+
+function* filterBulletsCollidedWithEagle(bullets) {
+  const eagle = yield select(selectors.map.eagle);
+  const eagleBox = {
+    x: eagle.get('x'),
+    y: eagle.get('y'),
+    width: BLOCK_SIZE,
+    height: BLOCK_SIZE
+  };
+  return bullets.filter(bullet =>
+    testCollide2(eagleBox, {
+      x: bullet.x,
+      y: bullet.y,
+      width: BULLET_SIZE,
+      height: BULLET_SIZE
+    }));
 }
 
 const BULLET_EXPLOSION_SPREAD = 4;
@@ -163,6 +182,12 @@ function* destroyBricks(collidedBullets) {
 function* afterUpdate() {
   // TODO check conlisions
   const bullets = yield select(selectors.bullets);
+
+  const set0 = yield* filterBulletsCollidedWithEagle(bullets);
+  if (!set0.isEmpty()) {
+    yield put({ type: A.DESTROY_BULLETS, bullets: set0 });
+    yield put({ type: A.DESTROY_EAGLE });
+  }
 
   // check if meet wall
   const set1 = yield* filterBulletsCollidedWithBricks(bullets);

@@ -39,3 +39,5 @@ export const SPAWN_FLICKER = 'SPAWN_FLICKER';
 export const REMOVE_FLICKER = 'REMOVE_FLICKER';
 
 export const SPAWN_PLAYER = 'SPAWN_PLAYER';
+
+export const DESTROY_EAGLE = 'DESTROY_EAGLE';
