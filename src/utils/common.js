@@ -43,3 +43,10 @@ export function filterCollide(target, itemSize, itemList, threshhold = 0) {
 export function testCollide(target, itemSize, itemList, threshhold) {
   return filterCollide(target, itemSize, itemList, threshhold).count() > 0;
 }
+
+export function testCollide2(subject, object, threshhold = 0) {
+  return (
+    between(subject.x - object.width, object.x, subject.x + subject.width, threshhold) &&
+    between(subject.y - object.height, object.y, subject.y + subject.height, threshhold)
+  );
+}

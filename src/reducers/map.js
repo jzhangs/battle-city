@@ -8,6 +8,9 @@ const mapInitialState = parseStageConfig(testStage);
 export default function mapReducer(state = mapInitialState, action) {
   if (action.type === A.LOAD_STAGE) {
     return state; // todo
+  } else if (action.type === A.DESTROY_BRICKS) {
+    return state.update('bricks', bricks =>
+      bricks.map((set, t) => (action.ts.has(t) ? false : set)));
   }
   return state;
 }
