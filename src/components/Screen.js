@@ -8,6 +8,7 @@ import SteelLayer from 'components/SteelLayer';
 import RiverLayer from 'components/RiverLayer';
 import SnowLayer from 'components/SnowLayer';
 import ForestLayer from 'components/ForestLayer';
+import Eagle from 'components/Eagle';
 
 import { BLOCK_SIZE } from 'utils/consts';
 import * as selectors from 'utils/selectors';
@@ -35,12 +36,13 @@ export default class Screen extends React.Component {
               .map((b, i) => <Bullet key={i} direction={b.direction} x={b.x} y={b.y} />)
               .toArray()}
           </g>
-          <Tank direction={direction} x={x} y={y} level={0} color="yellow" moving={moving} />
           <SteelLayer steels={steels} />
           <BrickLayer bricks={bricks} />
           <RiverLayer rivers={rivers} />
           <SnowLayer snows={snows} />
           <ForestLayer forests={forests} />
+          <Tank direction={direction} x={x} y={y} level={0} color="yellow" moving={moving} />
+          <Eagle x={6 * BLOCK_SIZE} y={12 * BLOCK_SIZE} />
         </g>
       </g>
     );
