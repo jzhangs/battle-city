@@ -5,6 +5,9 @@ import Tank from 'components/Tank';
 import Bullet from 'components/Bullet';
 import BrickLayer from 'components/BrickLayer';
 import SteelLayer from 'components/SteelLayer';
+import RiverLayer from 'components/RiverLayer';
+import SnowLayer from 'components/SnowLayer';
+import ForestLayer from 'components/ForestLayer';
 
 import { BLOCK_SIZE } from 'utils/consts';
 import * as selectors from 'utils/selectors';
@@ -21,7 +24,7 @@ function mapStateToProps(state) {
 export default class Screen extends React.Component {
   render() {
     const { player, bullets, map } = this.props;
-    const { bricks, steels } = map.toObject();
+    const { bricks, steels, rivers, snows, forests } = map.toObject();
     const { direction, x, y, moving } = player.toObject();
     return (
       <g data-role="screen">
@@ -35,6 +38,9 @@ export default class Screen extends React.Component {
           <Tank direction={direction} x={x} y={y} level={0} color="yellow" moving={moving} />
           <SteelLayer steels={steels} />
           <BrickLayer bricks={bricks} />
+          <RiverLayer rivers={rivers} />
+          <SnowLayer snows={snows} />
+          <ForestLayer forests={forests} />
         </g>
       </g>
     );

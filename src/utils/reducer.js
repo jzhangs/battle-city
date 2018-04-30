@@ -8,14 +8,26 @@ import BulletRecord from 'types/BulletRecord';
 
 const bricks = [];
 const steels = [];
+const rivers = [];
+const snows = [];
+const forests = [];
 for (let i = 0; i < (BLOCK_SIZE / ITEM_SIZE_MAP.BRICK * FIELD_BSIZE) ** 2; i += 1) {
   bricks.push(Math.random() < 0.03);
   steels.push(Math.random() < 0.01);
 }
 
+for (let i = 0; i < (BLOCK_SIZE / ITEM_SIZE_MAP.RIVER * FIELD_BSIZE) ** 2; i += 1) {
+  rivers.push(Math.random() < 0.015);
+  snows.push(Math.random() < 0.015);
+  forests.push(Math.random() < 0.015);
+}
+
 const mapInitialState = Map({
   bricks: List(bricks),
-  steels: List(steels)
+  steels: List(steels),
+  rivers: List(rivers),
+  snows: List(snows),
+  forests: List(forests)
 });
 
 function map(state = mapInitialState, action) {
