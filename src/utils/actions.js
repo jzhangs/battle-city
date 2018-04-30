@@ -33,3 +33,9 @@ export const LOAD_STAGE = 'LOAD_STAGE';
 export const SPAWN_EXPLOSION = 'SPAWN_EXPLOSION';
 
 export const REMOVE_EXPLOSION = 'REMOVE_EXPLOSION';
+
+export const SPAWN_FLICKER = 'SPAWN_FLICKER';
+
+export const REMOVE_FLICKER = 'REMOVE_FLICKER';
+
+export const SPAWN_PLAYER = 'SPAWN_PLAYER';

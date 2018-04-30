@@ -10,8 +10,12 @@ export default function delayedDispatch(delay, propKey = 'delayedAction') {
 
       constructor(props) {
         super(props);
-        this.startTime = props.time;
+        this.startTime = 0;
         this.dispatched = false;
+      }
+
+      componentDidMount() {
+        this.startTime = this.props.time;
       }
 
       componentDidUpdate() {

@@ -8,6 +8,8 @@ export const FIELD_SIZE = BLOCK_SIZE * FIELD_BLOCK_SIZE;
 
 export const BULLET_SIZE = 3;
 
+export const TANK_SPAWN_DELAY = 1500;
+
 export const TANK_COLOR_SCHEMES = {
   yellow: {
     a: '#E7E794',

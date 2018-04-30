@@ -4,6 +4,7 @@ import { fork, take, put } from 'redux-saga/effects';
 import fireController from 'sagas/fireController';
 import directionController from 'sagas/directionController';
 import bulletsSaga from 'sagas/bulletsSaga';
+import gameManager from 'sagas/gameManager';
 import * as A from 'utils/actions';
 
 const tickChannel = eventChannel((emit) => {
@@ -23,15 +24,20 @@ const tickChannel = eventChannel((emit) => {
   };
 });
 
+function* handleTick() {
+  while (true) {
+    yield put(yield take(tickChannel));
+  }
+}
+
 export default function* rootSaga() {
   console.info('root saga started');
   yield fork(bulletsSaga);
+
   yield fork(directionController);
   yield fork(fireController);
 
-  yield fork(function* handleTick() {
-    while (true) {
-      yield put(yield take(tickChannel));
-    }
-  });
+  yield fork(handleTick);
+
+  yield fork(gameManager);
 }

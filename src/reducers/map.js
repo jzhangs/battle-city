@@ -3,11 +3,24 @@ import { FIELD_BLOCK_SIZE, N_MAP } from 'utils/consts';
 import * as A from 'utils/actions';
 import testStage from 'stages/stage-test.json';
 
-const mapInitialState = parseStageConfig(testStage);
+const configs = Map({
+  test: testStage
+});
+
+const emptyMap = Map({
+  bricks: Repeat(false, N_MAP.BRICK ** 2).toList(),
+  steels: Repeat(false, N_MAP.STEEL ** 2).toList(),
+  rivers: Repeat(false, N_MAP.RIVER ** 2).toList(),
+  snows: Repeat(false, N_MAP.SNOW ** 2).toList(),
+  forests: Repeat(false, N_MAP.FOREST ** 2).toList()
+});
+
+const mapInitialState = emptyMap;
 
 export default function mapReducer(state = mapInitialState, action) {
   if (action.type === A.LOAD_STAGE) {
-    return state; // todo
+    const { name } = action;
+    return parseStageConfig(configs.get(name));
   } else if (action.type === A.DESTROY_BRICKS) {
     return state.update('bricks', bricks =>
       bricks.map((set, t) => (action.ts.has(t) ? false : set)));

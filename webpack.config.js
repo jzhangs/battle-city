@@ -32,5 +32,5 @@ module.exports = {
     port: 8088
   },
   mode: 'development',
-  // devtool: 'inline-source-map'
+  devtool: 'inline-source-map'
 };

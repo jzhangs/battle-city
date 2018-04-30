@@ -10,6 +10,7 @@ import SnowLayer from 'components/SnowLayer';
 import ForestLayer from 'components/ForestLayer';
 import Eagle from 'components/Eagle';
 import Explosion from 'components/Explosion';
+import Flicker from 'components/Flicker';
 
 import { BLOCK_SIZE } from 'utils/consts';
 import * as selectors from 'utils/selectors';
@@ -20,16 +21,24 @@ function mapStateToProps(state) {
     player: selectors.player(state),
     bullets: selectors.bullets(state),
     map: selectors.map(state),
-    explosions: selectors.explosions(state)
+    explosions: selectors.explosions(state),
+    flickers: selectors.flickers(state)
   };
 }
 
 @connect(mapStateToProps)
 export default class Screen extends React.Component {
+  renderPlayerTank() {
+    const { active, direction, x, y, moving } = this.props.player.toObject();
+    if (active) {
+      return <Tank direction={direction} x={x} y={y} level={0} color="yellow" moving={moving} />;
+    }
+    return null;
+  }
+
   render() {
-    const { player, bullets, map, explosions } = this.props;
+    const { bullets, map, explosions, flickers } = this.props;
     const { bricks, steels, rivers, snows, forests } = map.toObject();
-    const { direction, x, y, moving } = player.toObject();
     return (
       <g data-role="screen">
         <g data-role="board" transform={`translate(${BLOCK_SIZE},${BLOCK_SIZE})`}>
@@ -43,7 +52,7 @@ export default class Screen extends React.Component {
           <BrickLayer bricks={bricks} />
           <RiverLayer rivers={rivers} />
           <SnowLayer snows={snows} />
-          <Tank direction={direction} x={x} y={y} level={0} color="yellow" moving={moving} />
+          {this.renderPlayerTank()}
           <ForestLayer forests={forests} />
           <Eagle x={6 * BLOCK_SIZE} y={12 * BLOCK_SIZE} />
           <g data-role="explosion-layer">
@@ -56,6 +65,21 @@ export default class Screen extends React.Component {
                   delayedAction={{
                     type: A.REMOVE_EXPLOSION,
                     explosionId: exp.explosionId
+                  }}
+                />
+              ))
+              .toArray()}
+          </g>
+          <g data-role="flicker-layer">
+            {flickers
+              .map(flicker => (
+                <Flicker
+                  key={flicker.flickerId}
+                  x={flicker.x}
+                  y={flicker.y}
+                  delayedAction={{
+                    type: A.REMOVE_FLICKER,
+                    flickerId: flicker.flickerId
                   }}
                 />
               ))
