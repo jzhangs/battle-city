@@ -3,9 +3,9 @@ import { FIELD_BLOCK_SIZE, N_MAP, BLOCK_SIZE } from 'utils/consts';
 import * as A from 'utils/actions';
 import testStage from 'stages/stage-test.json';
 
-const configs = Map({
+const configs = {
   test: testStage
-});
+};
 
 const emptyMap = Map({
   eagle: Map({
@@ -25,7 +25,7 @@ const mapInitialState = emptyMap;
 export default function mapReducer(state = mapInitialState, action) {
   if (action.type === A.LOAD_STAGE) {
     const { name } = action;
-    return parseStageConfig(configs.get(name));
+    return parseStageConfig(configs[name]);
   } else if (action.type === A.DESTROY_EAGLE) {
     return state.setIn(['eagle', 'broken'], true);
   } else if (action.type === A.DESTROY_BRICKS) {

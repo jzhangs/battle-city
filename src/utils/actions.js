@@ -13,7 +13,7 @@ export const AFTER_TICK = 'AFTER_TICK';
 // { type: ADD_BULLET, direction, speed, x, y, owner }
 export const ADD_BULLET = 'ADD_BULLET';
 
-// { type: DESTROY_BULLETS, owner }
+// { type: DESTROY_BULLETS, owner, spawnExplosion: true|false }
 export const DESTROY_BULLETS = 'DESTROY_BULLETS';
 
 // { type: UPDATE_BULLETS, updatedBullets: <updated-bullets-map> }
@@ -38,3 +38,5 @@ export const SPAWN_TANK = 'SPAWN_TANK';
 export const REMOVE_TANK = 'REMOVE_TANK';
 
 export const ACTIVATE_PLAYER = 'ACTIVATE_PLAYER';
+export const CREATE_PLAYER = 'CREATE_PLAYER';
+export const REMOVE_PLAYER = 'REMOVE_PLAYER';

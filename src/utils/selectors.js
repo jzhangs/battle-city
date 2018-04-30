@@ -1,75 +1,25 @@
-import { between, testCollide, testCollide2 } from 'utils/common';
-import { BLOCK_SIZE, FIELD_BLOCK_SIZE, ITEM_SIZE_MAP } from 'utils/consts';
-
-export const playerTank = (state) => {
-  const { tankId, active } = player(state).toObject();
-  if (active) {
-    return tanks(state).get(tankId);
+export const playerTank = (state, playerName) => {
+  const { active, tankId } = state.players.get(playerName);
+  if (!active) {
+    return null;
   }
-  return null;
+  return tanks(state).get(tankId);
 };
 
-export const tanks = state => state.get('tanks');
+export const tanks = state => state.tanks;
 
-export const time = state => state.get('time');
+export const time = state => state.time;
 
-export const player = state => state.get('player');
+export const bullets = state => state.bullets;
 
-export const bullets = state => state.get('bullets');
+/** @deprecated refactor need to test bullets count exceeds tank's limit */
+export const canFire = (state, playerName) => !bullets(state).has(playerName);
 
-export const canFire = (state, targetOwner) => {
-  if (targetOwner === 'player') {
-    if (!player(state).get('active')) {
-      return false;
-    }
-  }
-  return !bullets(state).has(targetOwner);
-};
-
-export const map = state => state.get('map');
+export const map = state => state.map;
 map.bricks = state => map(state).get('bricks');
 map.steels = state => map(state).get('steels');
 map.eagle = state => map(state).get('eagle');
 
-export const canMove = (state, movedPlayer, threshhold = -0.01) => {
-  const { x, y } = movedPlayer.toObject();
-  if (
-    !between(0, x, BLOCK_SIZE * (FIELD_BLOCK_SIZE - 1)) ||
-    !between(0, y, BLOCK_SIZE * (FIELD_BLOCK_SIZE - 1))
-  ) {
-    return false;
-  }
+export const explosions = state => state.explosions;
 
-  const { bricks, steels, rivers, eagle } = map(state).toObject();
-  const target = {
-    x,
-    y,
-    width: BLOCK_SIZE,
-    height: BLOCK_SIZE
-  };
-
-  const eagleBox = {
-    x: eagle.get('x'),
-    y: eagle.get('y'),
-    width: BLOCK_SIZE,
-    height: BLOCK_SIZE
-  };
-  if (testCollide2(eagleBox, target, -0.01)) {
-    return false;
-  }
-  if (testCollide(target, ITEM_SIZE_MAP.BRICK, bricks, threshhold)) {
-    return false;
-  }
-  if (testCollide(target, ITEM_SIZE_MAP.STEEL, steels, threshhold)) {
-    return false;
-  }
-  if (testCollide(target, ITEM_SIZE_MAP.RIVER, rivers, threshhold)) {
-    return false;
-  }
-
-  return true;
-};
-
-export const explosions = state => state.get('explosions');
-
-export const flickers = state => state.get('flickers');
+export const flickers = state => state.flickers;

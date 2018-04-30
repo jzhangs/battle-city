@@ -11,15 +11,12 @@ import ForestLayer from 'components/ForestLayer';
 import Eagle from 'components/Eagle';
 import Explosion from 'components/Explosion';
 import Flicker from 'components/Flicker';
-import Items from 'components/Items';
 
 import { BLOCK_SIZE } from 'utils/consts';
 import * as selectors from 'utils/selectors';
-import * as A from 'utils/actions';
 
 function mapStateToProps(state) {
   return {
-    player: selectors.player(state),
     bullets: selectors.bullets(state),
     map: selectors.map(state),
     explosions: selectors.explosions(state),
@@ -37,7 +34,7 @@ export default class Screen extends React.Component {
       <g data-role="screen">
         <g data-role="board" transform={`translate(${BLOCK_SIZE},${BLOCK_SIZE})`}>
           <rect width={13 * BLOCK_SIZE} height={13 * BLOCK_SIZE} fill="#000" />
-          <Items x={0} y={0} name="shovel" />
+          {/* <Items x={0} y={0} name="shovel" /> */}
           <SteelLayer steels={steels} />
           <BrickLayer bricks={bricks} />
           <RiverLayer rivers={rivers} />
@@ -71,10 +68,6 @@ export default class Screen extends React.Component {
                   key={exp.explosionId}
                   x={exp.x}
                   y={exp.y}
-                  delayedAction={{
-                    type: A.REMOVE_EXPLOSION,
-                    explosionId: exp.explosionId
-                  }}
                 />
               ))
               .toArray()}
@@ -86,10 +79,6 @@ export default class Screen extends React.Component {
                   key={flicker.flickerId}
                   x={flicker.x}
                   y={flicker.y}
-                  delayedAction={{
-                    type: A.REMOVE_FLICKER,
-                    flickerId: flicker.flickerId
-                  }}
                 />
               ))
               .toArray()}

@@ -1,18 +1,17 @@
-import { eventChannel } from 'redux-saga';
+import { takeEvery, delay, eventChannel } from 'redux-saga';
 import { fork, take, put } from 'redux-saga/effects';
-
-import fireController from 'sagas/fireController';
-import directionController from 'sagas/directionController';
+import playerController from 'sagas/playerController';
 import bulletsSaga from 'sagas/bulletsSaga';
 import gameManager from 'sagas/gameManager';
+import { CONTROL_CONFIG, TANK_SPAWN_DELAY } from 'utils/consts';
 import * as A from 'utils/actions';
 
 const tickChannel = eventChannel((emit) => {
-  let lastTime = Date.now();
+  let lastTime = performance.now();
   let requestId = requestAnimationFrame(emitTick);
 
   function emitTick() {
-    const now = Date.now();
+    const now = performance.now();
     emit({ type: A.TICK, delta: now - lastTime });
     emit({ type: A.AFTER_TICK, delta: now - lastTime });
     lastTime = now;
@@ -24,20 +23,30 @@ const tickChannel = eventChannel((emit) => {
   };
 });
 
-function* handleTick() {
-  while (true) {
-    yield put(yield take(tickChannel));
-  }
+function* autoRemoveEffects() {
+  yield takeEvery(A.SPAWN_EXPLOSION, function* removeExplosion({ explosionId }) {
+    yield delay(200);
+    yield put({ type: A.REMOVE_EXPLOSION, explosionId });
+  });
+  yield takeEvery(A.SPAWN_FLICKER, function* removeFlicker({ flickerId }) {
+    yield delay(TANK_SPAWN_DELAY);
+    yield put({ type: A.REMOVE_FLICKER, flickerId });
+  });
 }
 
 export default function* rootSaga() {
-  console.info('root saga started');
+  console.debug('root saga started');
+  yield fork(function* handleTick() {
+    while (true) {
+      yield put(yield take(tickChannel));
+    }
+  });
+
   yield fork(bulletsSaga);
+  yield fork(autoRemoveEffects);
 
-  yield fork(directionController);
-  yield fork(fireController);
-
-  yield fork(handleTick);
+  yield fork(playerController, 'player-1', CONTROL_CONFIG.player1);
+  yield fork(playerController, 'player-2', CONTROL_CONFIG.player2);
 
   yield fork(gameManager);
 }

@@ -1,4 +1,4 @@
-import { FIELD_SIZE, UP, DOWN, LEFT, BLOCK_SIZE } from 'utils/consts';
+import { UP, DOWN, LEFT, BLOCK_SIZE, FIELD_SIZE } from 'utils/consts';
 
 // Calculte bullet start postion according to postion and
 // direction of tank.
@@ -24,29 +24,25 @@ export function getRowCol(t, N) {
   return [Math.floor(t / N), t % N];
 }
 
-export function filterCollide(target, itemSize, itemList, threshhold) {
-  const { x, y, width, height } = target;
-  const left = x / itemSize - 1;
-  const right = (x + width) / itemSize;
-  const top = y / itemSize - 1;
-  const bottom = (y + height) / itemSize;
-  const N = FIELD_SIZE / itemSize;
-  return itemList.toMap().filter((set, t) => {
-    if (set) {
-      const [row, col] = getRowCol(t, N);
-      return between(left, col, right, threshhold) && between(top, row, bottom, threshhold);
-    }
-    return false;
-  });
-}
-
-export function testCollide(target, itemSize, itemList, threshhold) {
-  return filterCollide(target, itemSize, itemList, threshhold).count() > 0;
-}
-
-export function testCollide2(subject, object, threshhold = 0) {
+export function testCollide(subject, object, threshhold = 0) {
   return (
     between(subject.x - object.width, object.x, subject.x + subject.width, threshhold) &&
     between(subject.y - object.height, object.y, subject.y + subject.height, threshhold)
   );
+}
+
+export function* iterRowsAndCols(itemSize, box) {
+  const col1 = Math.floor(box.x / itemSize);
+  const col2 = Math.floor((box.x + box.width) / itemSize);
+  const row1 = Math.floor(box.y / itemSize);
+  const row2 = Math.floor((box.y + box.height) / itemSize);
+  for (let row = row1; row <= row2; row += 1) {
+    for (let col = col1; col <= col2; col += 1) {
+      yield [row, col];
+    }
+  }
+}
+
+export function isInField(box) {
+  return between(0, box.x, FIELD_SIZE - box.width) && between(0, box.y, FIELD_SIZE - box.height);
 }
