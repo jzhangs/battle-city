@@ -2,7 +2,7 @@ import { UP, DOWN, LEFT, BLOCK_SIZE, FIELD_SIZE } from 'utils/consts';
 
 // Calculte bullet start postion according to postion and
 // direction of tank.
-export function getBulletStartPosition(x, y, direction) {
+export function getBulletStartPosition({ x, y, direction }) {
   switch (direction) {
     case UP:
       return { x: x + 6, y: y - 3 };
@@ -45,4 +45,15 @@ export function* iterRowsAndCols(itemSize, box) {
 
 export function isInField(box) {
   return between(0, box.x, FIELD_SIZE - box.width) && between(0, box.y, FIELD_SIZE - box.height);
+}
+
+const nextIdMap = new Map();
+export function getNextId(tag = '') {
+  if (nextIdMap.has(tag)) {
+    const nextId = nextIdMap.get(tag);
+    nextIdMap.set(tag, nextId + 1);
+    return nextId;
+  }
+  nextIdMap.set(tag, 2);
+  return 1;
 }

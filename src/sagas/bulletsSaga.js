@@ -9,9 +9,10 @@ import {
   N_MAP,
   UP,
   DOWN,
-  SIDE
+  SIDE,
+  STEEL_POWER
 } from 'utils/consts';
-import { testCollide, isInField } from 'utils/common';
+import { testCollide, isInField, getNextId } from 'utils/common';
 
 import * as A from 'utils/actions';
 import * as selectors from 'utils/selectors';
@@ -31,7 +32,7 @@ function makeExplosionFromBullet(bullet) {
     x: bullet.x - 6,
     y: bullet.y - 6,
     explosionType: 'bullet',
-    explosionId: nextExplosionId++
+    explosionId: getNextId('explosion')
   });
 }
 
@@ -68,7 +69,7 @@ function* handleBulletsCollidedWithBricks(context) {
       for (let col = col1; col <= col2; col += 1) {
         const t = row * N + col;
         if (bricks.get(t)) {
-          context.expBulletOwners.add(bullet.owner);
+          context.expBulletIdSet.add(bullet.bulletId);
           continue bulletLoop;
         }
       }
@@ -92,7 +93,7 @@ function* handleBulletsCollidedWithSteels(context) {
       for (let col = col1; col <= col2; col += 1) {
         const t = row * N + col;
         if (steels.get(t)) {
-          context.expBulletOwners.add(bullet.owner);
+          context.expBulletIdSet.add(bullet.bulletId);
           continue bulletLoop;
         }
       }
@@ -138,18 +139,19 @@ function* destroySteels(collidedBullets) {
   const N = N_MAP.STEEL;
 
   collidedBullets.forEach((bullet) => {
-    // TODO, if (bullet.power >= 3)
-    const { x, y, width, height } = spreadBullet(bullet);
+    if (bullet.power >= STEEL_POWER) {
+      const { x, y, width, height } = spreadBullet(bullet);
 
-    const col1 = Math.floor(x / itemSize);
-    const col2 = Math.floor((x + width) / itemSize);
-    const row1 = Math.floor(y / itemSize);
-    const row2 = Math.floor((y + height) / itemSize);
-    for (let row = row1; row <= row2; row += 1) {
-      for (let col = col1; col <= col2; col += 1) {
-        const t = row * N + col;
-        if (steels.get(t)) {
-          steelsNeedToDestroy.push(t);
+      const col1 = Math.floor(x / itemSize);
+      const col2 = Math.floor((x + width) / itemSize);
+      const row1 = Math.floor(y / itemSize);
+      const row2 = Math.floor((y + height) / itemSize);
+      for (let row = row1; row <= row2; row += 1) {
+        for (let col = col1; col <= col2; col += 1) {
+          const t = row * N + col;
+          if (steels.get(t)) {
+            steelsNeedToDestroy.push(t);
+          }
         }
       }
     }
@@ -206,6 +208,9 @@ function* handleBulletsCollidedWithTanks(context) {
       height: BULLET_SIZE
     };
     for (const tank of tanks.values()) {
+      if (tank.tankId === bullet.tankId) {
+        continue;
+      }
       const subject = {
         x: tank.x,
         y: tank.y,
@@ -213,16 +218,18 @@ function* handleBulletsCollidedWithTanks(context) {
         height: BLOCK_SIZE
       };
       if (testCollide(subject, object, -0.02)) {
-        if (bullet.side === SIDE.PLAYER && tank.side === SIDE.PLAYER) {
-          context.expBulletOwners.add(bullet.owner);
-        } else if (bullet.side === SIDE.PLAYER && tank.side === SIDE.AI) {
+        const bulletSide = yield select(selectors.sideOfBullet, bullet.bulletId);
+        const tankSide = tank.side;
+        if (bulletSide === SIDE.PLAYER && tankSide === SIDE.PLAYER) {
+          context.expBulletIdSet.add(bullet.bulletId);
+        } else if (bulletSide === SIDE.PLAYER && tankSide === SIDE.AI) {
           context.hurtedTankIds.add(tank.tankId);
-          context.expBulletOwners.add(bullet.owner);
-        } else if (bullet.side === SIDE.AI && tank.side === SIDE.PLAYER) {
+          context.expBulletIdSet.add(bullet.bulletId);
+        } else if (bulletSide === SIDE.AI && tankSide === SIDE.PLAYER) {
           context.hurtedTankIds.add(tank.tankId);
-          context.expBulletOwners.add(bullet.owner);
-        } else if (bullet.side === SIDE.AI && tank.side === SIDE.AI) {
-          context.noExpBulletOwners.add(bullet.owner);
+          context.expBulletIdSet.add(bullet.bulletId);
+        } else if (bulletSide === SIDE.AI && tankSide === SIDE.AI) {
+          context.noExpBulletIdSet.add(bullet.bulletId);
         } else {
           throw new Error('Error side status');
         }
@@ -251,7 +258,7 @@ function* handleBulletsCollidedWithBullets(context) {
         height: BULLET_SIZE
       };
       if (testCollide(subject, object)) {
-        context.noExpBulletOwners.add(bullet.owner);
+        context.noExpBulletIdSet.add(bullet.bulletId);
       }
     }
   }
@@ -274,8 +281,8 @@ function* handleAfterTick() {
     }
 
     const context = {
-      expBulletOwners: new Set(),
-      noExpBulletOwners: new Set(),
+      expBulletIdSet: new Set(),
+      noExpBulletIdSet: new Set(),
       hurtedTankIds: new Set()
     };
 
@@ -284,7 +291,7 @@ function* handleAfterTick() {
     yield* handleBulletsCollidedWithBricks(context);
     yield* handleBulletsCollidedWithSteels(context);
 
-    const expBullets = bullets.filter(bullet => context.expBulletOwners.has(bullet.owner));
+    const expBullets = bullets.filter(bullet => context.expBulletIdSet.has(bullet.bulletId));
     if (!expBullets.isEmpty()) {
       yield put({
         type: A.DESTROY_BULLETS,
@@ -296,8 +303,8 @@ function* handleAfterTick() {
       yield* destroySteels(expBullets);
     }
 
-    const noExpBullets = bullets.filter(bullet => context.noExpBulletOwners.has(bullet.owner));
-    if (context.noExpBulletOwners.size > 0) {
+    const noExpBullets = bullets.filter(bullet => context.noExpBulletIdSet.has(bullet.bulletId));
+    if (context.noExpBulletIdSet.size > 0) {
       yield put({
         type: A.DESTROY_BULLETS,
         bullets: noExpBullets,
@@ -315,8 +322,6 @@ function* handleAfterTick() {
     }
   }
 }
-
-let nextExplosionId = 1;
 
 export default function* bulletsSaga() {
   yield fork(handleTick);

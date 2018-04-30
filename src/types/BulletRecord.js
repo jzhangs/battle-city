@@ -1,13 +1,13 @@
 import { Record } from 'immutable';
-import { SIDE } from 'utils/consts';
 
 const BulletRecord = Record({
+  bulletId: 0,
   direction: null,
-  side: SIDE.PLAYER,
   speed: 0,
   x: 0,
   y: 0,
-  owner: null
+  power: 1,
+  tankId: -1
 });
 
 export default BulletRecord;
