@@ -1,7 +1,10 @@
 import { combineReducers } from 'redux';
 import explosions from 'reducers/explosions';
 import flickers from 'reducers/flickers';
+import game from 'reducers/game';
 import players from 'reducers/players';
+import texts from 'reducers/texts';
+
 import map from 'reducers/map';
 import bullets from 'reducers/bullets';
 import tanks from 'reducers/tanks';
@@ -21,5 +24,7 @@ export default combineReducers({
   time,
   explosions,
   flickers,
-  tanks
+  tanks,
+  game,
+  texts
 });

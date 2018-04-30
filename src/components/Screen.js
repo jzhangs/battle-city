@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import _ from 'lodash';
 
 import Tank from 'components/Tank';
 import Bullet from 'components/Bullet';
@@ -11,34 +12,28 @@ import ForestLayer from 'components/ForestLayer';
 import Eagle from 'components/Eagle';
 import Explosion from 'components/Explosion';
 import Flicker from 'components/Flicker';
+import EnemyCountIndicator from 'components/EnemyCountIndicator';
+import TextLayer from 'components/TextLayer';
+import GameoverOverlay from 'components/GameoverOverlay';
 
 import { BLOCK_SIZE } from 'utils/consts';
-import * as selectors from 'utils/selectors';
 
-function mapStateToProps(state) {
-  return {
-    bullets: selectors.bullets(state),
-    map: selectors.map(state),
-    explosions: selectors.explosions(state),
-    flickers: selectors.flickers(state),
-    tanks: selectors.tanks(state)
-  };
-}
-
-@connect(mapStateToProps)
+@connect(_.identity)
 export default class Screen extends React.Component {
   render() {
-    const { bullets, map, explosions, flickers, tanks } = this.props;
+    const { bullets, map, explosions, flickers, tanks, game, texts } = this.props;
+    const { remainingEnemyCount, overlay } = game.toObject();
     const { bricks, steels, rivers, snows, forests, eagle } = map.toObject();
     return (
       <g data-role="screen">
-        <g data-role="board" transform={`translate(${BLOCK_SIZE},${BLOCK_SIZE})`}>
+        <EnemyCountIndicator count={remainingEnemyCount} />
+        <g data-role="battle-field" transform={`translate(${BLOCK_SIZE},${BLOCK_SIZE})`}>
           <rect width={13 * BLOCK_SIZE} height={13 * BLOCK_SIZE} fill="#000" />
-          {/* <Items x={0} y={0} name="shovel" /> */}
           <SteelLayer steels={steels} />
           <BrickLayer bricks={bricks} />
           <RiverLayer rivers={rivers} />
           <SnowLayer snows={snows} />
+          <Eagle x={eagle.get('x')} y={eagle.get('y')} broken={eagle.get('broken')} />
           <g data-role="bullet-layer">
             {bullets
               .map((b, i) => <Bullet key={i} direction={b.direction} x={b.x} y={b.y} />)
@@ -60,30 +55,19 @@ export default class Screen extends React.Component {
               .toArray()}
           </g>
           <ForestLayer forests={forests} />
-          <Eagle x={eagle.get('x')} y={eagle.get('y')} broken={eagle.get('broken')} />
           <g data-role="explosion-layer">
             {explosions
-              .map(exp => (
-                <Explosion
-                  key={exp.explosionId}
-                  x={exp.x}
-                  y={exp.y}
-                />
-              ))
+              .map(exp => <Explosion key={exp.explosionId} x={exp.x} y={exp.y} />)
               .toArray()}
           </g>
           <g data-role="flicker-layer">
             {flickers
-              .map(flicker => (
-                <Flicker
-                  key={flicker.flickerId}
-                  x={flicker.x}
-                  y={flicker.y}
-                />
-              ))
+              .map(flicker => <Flicker key={flicker.flickerId} x={flicker.x} y={flicker.y} />)
               .toArray()}
           </g>
         </g>
+        {overlay === 'gameover' ? <GameoverOverlay /> : null}
+        <TextLayer texts={texts} />
       </g>
     );
   }

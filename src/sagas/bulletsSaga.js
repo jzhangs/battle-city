@@ -1,5 +1,5 @@
 import * as R from 'ramda';
-import { Set as ISet } from 'immutable';
+import { Set as ISet, Map } from 'immutable';
 import { put, select, fork, take } from 'redux-saga/effects';
 import {
   BLOCK_SIZE,
@@ -137,6 +137,9 @@ function* destroyBricks(collidedBullets) {
 
 function* filterBulletsCollidedWithEagle(bullets) {
   const eagle = yield select(selectors.map.eagle);
+  if (eagle.get('broken')) {
+    return Map();
+  }
   const eagleBox = {
     x: eagle.get('x'),
     y: eagle.get('y'),
@@ -211,7 +214,6 @@ function* handleAfterTick() {
         spawnExplosion: true
       });
       yield put({ type: A.DESTROY_EAGLE });
-      return;
     }
 
     const context = {

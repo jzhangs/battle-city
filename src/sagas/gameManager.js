@@ -24,14 +24,69 @@ function* spawnTank({ x, y }) {
   return tankId;
 }
 
-function* watchEagle() {
+function* animateTexts(textIds, { direction, distance: totalDistance, duration }) {
+  const speed = totalDistance / duration;
+  let animatedDistance = 0;
+  while (true) {
+    const { delta } = yield take(A.TICK);
+    const len = delta * speed;
+    const distance =
+      len + animatedDistance < totalDistance ? len : totalDistance - animatedDistance;
+    yield put({
+      type: A.UPDATE_TEXT_POSITION,
+      textIds,
+      direction,
+      distance
+    });
+    animatedDistance += distance;
+    if (animatedDistance >= totalDistance) {
+      return;
+    }
+  }
+}
+
+function* animateGameover() {
+  const textId1 = getNextId('text');
+  const textId2 = getNextId('text');
+  yield put({
+    type: A.SET_TEXT,
+    textId: textId1,
+    content: 'game',
+    fill: 'red',
+    x: BLOCK_SIZE * 6.5,
+    y: BLOCK_SIZE * 13
+  });
+  yield put({
+    type: A.SET_TEXT,
+    textId: textId2,
+    content: 'over',
+    fill: 'red',
+    x: BLOCK_SIZE * 6.5,
+    y: BLOCK_SIZE * 13.5
+  });
+  yield* animateTexts([textId1, textId2], {
+    direction: UP,
+    distance: BLOCK_SIZE * 6,
+    duration: 1000
+  });
+  yield delay(500);
+  yield put({ type: A.REMOVE_TEXT, textId: textId1 });
+  yield put({ type: A.REMOVE_TEXT, textId: textId2 });
+  yield put({ type: A.SHOW_OVERLAY, overlay: 'gameover' });
+  console.debug('GAMEOVER');
+}
+
+function* watchGameover() {
   while (true) {
     yield take([A.DESTROY_EAGLE]);
-    console.debug('eagle-destroyed');
+    yield put({ type: A.DEACTIVATE_ALL_PLAYERS });
+    yield* animateGameover();
   }
 }
 
 export default function* gameManager() {
+  yield fork(watchGameover);
+
   yield put({ type: A.LOAD_STAGE, name: 'test' });
 
   yield put({
@@ -39,27 +94,11 @@ export default function* gameManager() {
     playerName: 'player-1',
     lives: 3
   });
-  yield put({
-    type: A.CREATE_PLAYER,
-    playerName: 'player-2',
-    lives: 3
-  });
 
-  const [tankId1, tankId2] = yield [
-    call(spawnTank, { x: 4 * BLOCK_SIZE, y: 12 * BLOCK_SIZE }),
-    call(spawnTank, { x: 8 * BLOCK_SIZE, y: 12 * BLOCK_SIZE })
-  ];
-
+  const [tankId1] = yield [call(spawnTank, { x: 4 * BLOCK_SIZE, y: 12 * BLOCK_SIZE })];
   yield put({
     type: A.ACTIVATE_PLAYER,
     playerName: 'player-1',
     tankId: tankId1
   });
-  yield put({
-    type: A.ACTIVATE_PLAYER,
-    playerName: 'player-2',
-    tankId: tankId2
-  });
-  // todo
-  yield fork(watchEagle);
 }
