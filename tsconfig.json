@@ -9,15 +9,10 @@
     "target": "es6",
     "jsx": "react",
     "allowJs": true,
-    "baseUrl": ".", // This must be specified if "paths" is.
+    "baseUrl": ".",
     "paths": {
-      "*": [
-        "*",
-        "src/*"
-      ]
+      "*": ["*", "src/*"]
     }
   },
-  "include": [
-    "./src/**/*"
-  ]
+  "include": ["./src/**/*"]
 }
