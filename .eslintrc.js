@@ -23,7 +23,9 @@ module.exports = {
   },
   globals: {
     document: true,
+    window: true,
     performance: true,
+    self: true,
     requestAnimationFrame: true,
     cancelAnimationFrame: true
   },

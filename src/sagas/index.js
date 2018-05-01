@@ -1,8 +1,9 @@
 import { takeEvery, delay, eventChannel } from 'redux-saga';
 import { fork, take, put } from 'redux-saga/effects';
-import playerController from 'sagas/playerController';
+import userController from 'sagas/userController';
 import bulletsSaga from 'sagas/bulletsSaga';
 import gameManager from 'sagas/gameManager';
+import workerSaga from 'sagas/workerSaga';
 import { CONTROL_CONFIG, TANK_SPAWN_DELAY } from 'utils/consts';
 import * as A from 'utils/actions';
 
@@ -45,8 +46,10 @@ export default function* rootSaga() {
   yield fork(bulletsSaga);
   yield fork(autoRemoveEffects);
 
-  yield fork(playerController, 'player-1', CONTROL_CONFIG.player1);
-  yield fork(playerController, 'player-2', CONTROL_CONFIG.player2);
+  yield fork(userController, 'player-1', CONTROL_CONFIG.player1);
+  yield fork(userController, 'player-2', CONTROL_CONFIG.player2);
+
+  yield fork(workerSaga);
 
   yield fork(gameManager);
 }

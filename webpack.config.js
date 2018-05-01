@@ -8,14 +8,15 @@ module.exports = {
     filename: 'bundle.js'
   },
   resolve: {
-    modules: [
-      path.resolve(__dirname, 'src'),
-      'node_modules',
-    ],
-    extensions: ['.js', '.jsx'],
+    modules: [path.resolve(__dirname, 'src'), 'node_modules'],
+    extensions: ['.js', '.jsx']
   },
   module: {
     rules: [
+      {
+        test: /worker\.js$/,
+        use: ['worker-loader']
+      },
       {
         test: /\.jsx?$/,
         exclude: /node_modules/,
