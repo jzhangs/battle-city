@@ -25,8 +25,8 @@ const tickChannel = eventChannel((emit) => {
 });
 
 function* autoRemoveEffects() {
-  yield takeEvery(A.SPAWN_EXPLOSION, function* removeExplosion({ explosionId }) {
-    yield delay(200);
+  yield takeEvery(A.SPAWN_EXPLOSION, function* removeExplosion({ explosionId, explosionType }) {
+    yield delay(explosionType === 'tank' ? 500 : 200);
     yield put({ type: A.REMOVE_EXPLOSION, explosionId });
   });
   yield takeEvery(A.SPAWN_FLICKER, function* removeFlicker({ flickerId }) {
@@ -36,7 +36,6 @@ function* autoRemoveEffects() {
 }
 
 export default function* rootSaga() {
-  console.debug('root saga started');
   yield fork(function* handleTick() {
     while (true) {
       yield put(yield take(tickChannel));

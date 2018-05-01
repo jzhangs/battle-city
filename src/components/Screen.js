@@ -57,7 +57,7 @@ export default class Screen extends React.Component {
           <ForestLayer forests={forests} />
           <g data-role="explosion-layer">
             {explosions
-              .map(exp => <Explosion key={exp.explosionId} x={exp.x} y={exp.y} />)
+              .map(exp => <Explosion key={exp.explosionId} x={exp.x} y={exp.y} explosionType={exp.explosionType} />)
               .toArray()}
           </g>
           <g data-role="flicker-layer">

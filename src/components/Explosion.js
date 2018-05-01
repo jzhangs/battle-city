@@ -4,12 +4,12 @@ import registerTick from 'hocs/registerTick';
 
 const schema = {
   ' ': 'none',
-  W: '#FFFFFF',
-  P: '#590D79',
-  R: '#B53121'
+  W: '#fffffe',
+  P: '#590d79',
+  R: '#b53121'
 };
 
-const dataArray = [
+const bulletExplosiondataArray = [
   [
     '                ',
     '                ',
@@ -65,9 +65,101 @@ const dataArray = [
 ];
 
 @registerTick(66, 66, 9999)
-export default class Explosion extends React.PureComponent {
+class BulletExplosion extends React.PureComponent {
   render() {
     const { x, y, tickIndex } = this.props;
-    return <Bitmap x={x} y={y} d={dataArray[tickIndex]} scheme={schema} />;
+    return <Bitmap x={x} y={y} d={bulletExplosiondataArray[tickIndex]} scheme={schema} />;
+  }
+}
+
+const tankExplosionDataArray = [
+  [
+    '                                ',
+    '                     W       W  ',
+    '  W       W          W       W  ',
+    '   W  W  W   PPP WWP  W     W   ',
+    '    P  W   WWWPPPWWPP W W  P    ',
+    '     W P  WPWWW W  WPPW W WW    ',
+    '      W   WWPW WPPP WWWW W      ',
+    '    WW   WWWWWWWWWPWWWWWW W     ',
+    '       PPPW  WWWPWWPWW PW    PW ',
+    '      WPPPWWWWWPWW WW WWPW   W  ',
+    'P    WW WPWWWRWWRWWWPWWWPWWW    ',
+    ' WP PW WWWRRWWWWRPWWWPWPW WPW   ',
+    '  W WW WWWWRRWRWRWWRRPWW WPPW   ',
+    ' W   WW WPWRWRRRRRRWRWWWW WW    ',
+    '  W WPWWPPWWRWRWWRWRPWWWWW WW   ',
+    '    PP PWPWWRRWP WRWWWW W WPP   ',
+    '      WWPWRRRW WPW RW PWWW PP   ',
+    '     WWWWWWWRRWRPRRRWPPPWWWP  W ',
+    '     WW WWWWRWRRPRWWRWW WWPP   W',
+    '    PW WWPWRWWWRWRPWWWWWPPPP    ',
+    '    PPWPPPWWWWPRRWWWWPWWW P W   ',
+    '  W  PPPPWWWWPPWRWWWWWPWW WW    ',
+    '   W    PW WPPWWWW WW PW WP     ',
+    '        WW WWW WWWW  PPWWPP     ',
+    '      WP WW W PPWWWWPPWW P      ',
+    '     P W WWWWWPP  PPP W W WW    ',
+    '    W      PPPP         W  P    ',
+    '   W     W        W  W     WP   ',
+    '  P        W       PWP      WP  ',
+    '  W                W W       W  ',
+    '                                ',
+    '                                '
+  ],
+  [
+    'W                               ',
+    'PW   W             PPWW       W ',
+    ' PW   P     WPPP PWWWWPP    WP  ',
+    '  PP    WW WWWP PWWW  WPP  WP   ',
+    '   PP  WPWWWRWWW WW WP WPP  P   ',
+    '   P  WWPPRPWWWWWWWWWWP WP      ',
+    '      WPWWWWPWWWWWWPPWW WP WW   ',
+    '    PPWWWWWWWWWPPWWWWPWWWPPWWP  ',
+    '    PWWWW WPPWWWWPWWWWWWPPWWPPP ',
+    '     WW  WWWWWRWWWWRWWWWPWW WPP ',
+    '   WWW WWWRWWWRRWWRRWRWPWWWW WP ',
+    '  PWWWWWWWRRRWRWRRRWRWWWWPWW WPW',
+    '  WPWW WWWR RRWPRRWRWWWWWPW WPPP',
+    '   PW PWWWWRWWR RWRWWWRWPW WPPW ',
+    '   PP PWWWWRRRRWPRRRWRWWWWWWP   ',
+    ' W WWW PWRRRRRWWW WRWWWWWWPPWW  ',
+    ' WWWWWWWWWWRRP WWRRRRWWWWPWWWPP ',
+    'WWWRPWWWWRWRWWRPWWR WRRRWWWWWWP ',
+    'WWWWPWWWRWWRRRR RRWRWWWWWWW WWPW',
+    'PWWPWRWWWWRRWRRWRRRRWWWWWPWW WWP',
+    'PPPPWWPPWRRPPWRRRWWRRWWPPWWWW W ',
+    ' PP WWWWWWWWWWRWWWWWWRWWWPWW WPW',
+    '     WWWWWWWPWWWWWWPWWWWWWWWW WP',
+    '    WW WW WWWWWWW PP WWWWWWWPWPW',
+    '    WWW  PPWWWPWWW  WWWP WW  PWW',
+    '    WWWWWWPPWWW WWWWPWWPP  WPPW ',
+    '    PWWWWP WWWW WWWPPPWWPPPPPW  ',
+    '  W  PWPP  PPPWW PPP WRWWPPW    ',
+    '   W  PP      WWW   WWWPP    W  ',
+    '  P P     WP   WWWWWWWPPW  P P  ',
+    ' W  P       W   WWPPWPPP    P W ',
+    'W          W     PPP P         P'
+  ]
+];
+
+@registerTick(200, 9999)
+class TankExplosion extends React.PureComponent {
+  render() {
+    const { x, y, tickIndex } = this.props;
+    return <Bitmap x={x} y={y} d={tankExplosionDataArray[tickIndex]} scheme={schema} />;
+  }
+}
+
+export default class Explosion extends React.PureComponent {
+  render() {
+    const { explosionType } = this.props;
+    console.info('------ explosion:' + explosionType);
+    if (explosionType === 'bullet') {
+      return <BulletExplosion {...this.props} />;
+    } else if (explosionType === 'tank') {
+      return <TankExplosion {...this.props} />;
+    }
+    return null;
   }
 }
