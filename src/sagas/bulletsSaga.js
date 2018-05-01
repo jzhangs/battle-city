@@ -1,4 +1,4 @@
-import { Map, Set as ISet } from 'immutable';
+import { Map as IMap, Set as ISet } from 'immutable';
 import { fork, put, select, take } from 'redux-saga/effects';
 import { BLOCK_SIZE, DOWN, ITEM_SIZE_MAP, N_MAP, SIDE, STEEL_POWER, UP } from 'utils/consts';
 import {
@@ -23,6 +23,16 @@ function makeExplosionFromBullet(bullet) {
     x: bullet.x - 6,
     y: bullet.y - 6,
     explosionType: 'bullet',
+    explosionId: getNextId('explosion')
+  });
+}
+
+function makeExplosionFromTank(tank) {
+  return put({
+    type: A.SPAWN_EXPLOSION,
+    x: tank.x - 6,
+    y: tank.y - 6,
+    explosionType: 'tank',
     explosionId: getNextId('explosion')
   });
 }
@@ -132,10 +142,20 @@ function* destroyBricks(collidedBullets) {
   }
 }
 
+function* destroyTanks(tankIdSet) {
+  const tanks = yield select(selectors.tanks);
+  yield* tankIdSet.map(tankId =>
+    put({
+      type: A.REMOVE_TANK,
+      tankId
+    }));
+  yield* tankIdSet.map(tankId => tanks.get(tankId)).map(makeExplosionFromTank);
+}
+
 function* filterBulletsCollidedWithEagle(bullets) {
   const eagle = yield select(selectors.map.eagle);
   if (eagle.get('broken')) {
-    return Map();
+    return IMap();
   }
   const eagleBox = {
     x: eagle.get('x'),
@@ -167,10 +187,12 @@ function* handleBulletsCollidedWithTanks(context) {
         if (bulletSide === SIDE.PLAYER && tankSide === SIDE.PLAYER) {
           context.expBulletIdSet.add(bullet.bulletId);
         } else if (bulletSide === SIDE.PLAYER && tankSide === SIDE.AI) {
-          context.hurtedTankIds.add(tank.tankId);
+          const oldHurt = context.tankHurtMap.get(tank.tankId) || 0;
+          context.tankHurtMap.set(tank.tankId, oldHurt + 1);
           context.expBulletIdSet.add(bullet.bulletId);
         } else if (bulletSide === SIDE.AI && tankSide === SIDE.PLAYER) {
-          context.hurtedTankIds.add(tank.tankId);
+          const oldHurt = context.tankHurtMap.get(tank.tankId) || 0;
+          context.tankHurtMap.set(tank.tankId, oldHurt + 1);
           context.expBulletIdSet.add(bullet.bulletId);
         } else if (bulletSide === SIDE.AI && tankSide === SIDE.AI) {
           context.noExpBulletIdSet.add(bullet.bulletId);
@@ -216,7 +238,7 @@ function* handleAfterTick() {
     const context = {
       expBulletIdSet: new Set(),
       noExpBulletIdSet: new Set(),
-      hurtedTankIds: new Set()
+      tankHurtMap: new Map()
     };
 
     yield* handleBulletsCollidedWithTanks(context);
@@ -234,6 +256,11 @@ function* handleAfterTick() {
 
       yield* destroyBricks(expBullets);
       yield* destroySteels(expBullets);
+    }
+
+    if (context.tankHurtMap.size !== 0) {
+      const tankIdSet = ISet(context.tankHurtMap.keys());
+      yield destroyTanks(tankIdSet);
     }
 
     const noExpBullets = bullets.filter(bullet => context.noExpBulletIdSet.has(bullet.bulletId));

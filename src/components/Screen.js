@@ -12,9 +12,9 @@ import ForestLayer from 'components/ForestLayer';
 import Eagle from 'components/Eagle';
 import Explosion from 'components/Explosion';
 import Flicker from 'components/Flicker';
-import EnemyCountIndicator from 'components/EnemyCountIndicator';
 import TextLayer from 'components/TextLayer';
 import GameoverOverlay from 'components/GameoverOverlay';
+import HUD from 'components/HUD';
 
 import { BLOCK_SIZE } from 'utils/consts';
 
@@ -22,11 +22,11 @@ import { BLOCK_SIZE } from 'utils/consts';
 export default class Screen extends React.Component {
   render() {
     const { bullets, map, explosions, flickers, tanks, game, texts } = this.props;
-    const { remainingEnemyCount, overlay } = game.toObject();
+    const { overlay } = game.toObject();
     const { bricks, steels, rivers, snows, forests, eagle } = map.toObject();
     return (
       <g data-role="screen">
-        <EnemyCountIndicator count={remainingEnemyCount} />
+        <HUD />
         <g data-role="battle-field" transform={`translate(${BLOCK_SIZE},${BLOCK_SIZE})`}>
           <rect width={13 * BLOCK_SIZE} height={13 * BLOCK_SIZE} fill="#000" />
           <SteelLayer steels={steels} />

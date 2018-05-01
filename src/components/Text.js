@@ -79,12 +79,46 @@ const chars = {
       <rect x={3} y={4} width={3} height={1} />
     </g>
   ),
+  b: ({ fill }) => (
+    <g data-role="character-b" fill={fill}>
+      <rect x={1} y={0} width={2} height={7} />
+      <rect x={3} y={0} width={4} height={1} />
+      <rect x={3} y={3} width={4} height={1} />
+      <rect x={3} y={6} width={4} height={1} />
+      <rect x={6} y={1} width={2} height={2} />
+      <rect x={6} y={4} width={2} height={2} />
+    </g>
+  ),
+  c: ({ fill }) => (
+    <path
+      data-role="character-c"
+      fill={fill}
+      d="M3,0 h4 v1 h1 v1 h-2 v-1 h-2 v1 h-1 v3 h1 v1 h2 v-1 h2 v1 h-1 v1 h-4 v-1 h-1 v-1 h-1 v-3 h1 v-1 h1 v-1"
+    />
+  ),
+  d: ({ fill }) => (
+    <g data-role="character-d" fill={fill}>
+      <rect x={1} y={0} width={2} height={7} />
+      <rect x={3} y={0} width={3} height={1} />
+      <rect x={5} y={1} width={2} height={1} />
+      <rect x={6} y={2} width={2} height={3} />
+      <rect x={5} y={5} width={2} height={1} />
+      <rect x={3} y={6} width={3} height={1} />
+    </g>
+  ),
   e: ({ fill }) => (
     <g data-role="character-e" fill={fill}>
-      <rect x={2} y={0} width={2} height={7} />
-      <rect x={4} y={0} width={4} height={1} />
-      <rect x={4} y={3} width={3} height={1} />
-      <rect x={4} y={6} width={4} height={1} />
+      <rect x={1} y={0} width={2} height={7} />
+      <rect x={3} y={0} width={5} height={1} />
+      <rect x={3} y={3} width={4} height={1} />
+      <rect x={3} y={6} width={5} height={1} />
+    </g>
+  ),
+  f: ({ fill }) => (
+    <g data-role="character-f" fill={fill}>
+      <rect x={1} y={0} width={2} height={7} />
+      <rect x={3} y={0} width={5} height={1} />
+      <rect x={3} y={3} width={4} height={1} />
     </g>
   ),
   g: ({ fill }) => (
@@ -94,6 +128,40 @@ const chars = {
       d="M3,0 h5 v1 h-4 v1 h-1 v3 h1 v1 h2 v-2 h-1 v-1 h3 v4 h-5 v-1 h-1 v-1 h-1 v-3 h1 v-1 h1 v-1"
     />
   ),
+  h: ({ fill }) => (
+    <g data-role="character-h" fill={fill}>
+      <rect x={1} y={0} width={2} height={7} />
+      <rect x={3} y={3} width={3} height={1} />
+      <rect x={6} y={0} width={2} height={7} />
+    </g>
+  ),
+  i: ({ fill }) => (
+    <g data-role="character-i" fill={fill}>
+      <rect x={2} y={0} width={6} height={1} />
+      <rect x={4} y={1} width={2} height={5} />
+      <rect x={2} y={6} width={6} height={1} />
+    </g>
+  ),
+  j: ({ fill }) => (
+    <g data-role="character-j" fill={fill}>
+      <rect x={6} y={0} width={2} height={6} />
+      <rect x={1} y={5} width={2} height={1} />
+      <rect x={2} y={6} width={5} height={1} />
+    </g>
+  ),
+  k: ({ fill }) => (
+    <path
+      data-role="character-k"
+      fill={fill}
+      d="M1,0 h2 v3 h1 v-1 h1 v-1 h1 v-1 h2 v1 h-1 v1 h-1 v1 h-1 v1 h1 v1 h1 v1 h1 v1 h-3 v-1 h-1 v-1 h-1 v2 h-2 v-7"
+    />
+  ),
+  l: ({ fill }) => (
+    <g data-role="character-l" fill={fill}>
+      <rect x={2} y={0} width={2} height={6} />
+      <rect x={2} y={6} width={6} height={1} />
+    </g>
+  ),
   m: ({ fill }) => (
     <path
       data-role="character-m"
@@ -101,8 +169,17 @@ const chars = {
       d="M1,0 h2 v1 h1 v1 h1 v-1 h1 v-1 h2 v7 h-2 v-3 h-1 v1 h-1 v-1 h-1 v3 h-2 v-7"
     />
   ),
+  n: ({ fill }) => (
+    <g data-role="character-n" fill={fill}>
+      <rect x={1} y={0} width={2} height={7} />
+      <rect x={6} y={0} width={2} height={7} />
+      <rect x={3} y={1} width={1} height={2} />
+      <rect x={4} y={2} width={1} height={2} />
+      <rect x={5} y={3} width={1} height={2} />
+    </g>
+  ),
   o: ({ fill }) => (
-    <g data-role="character-p" fill={fill}>
+    <g data-role="character-o" fill={fill}>
       <rect x={2} y={0} width={5} height={1} />
       <rect x={2} y={6} width={5} height={1} />
       <rect x={1} y={1} width={2} height={5} />
@@ -113,9 +190,16 @@ const chars = {
     <g data-role="character-p" fill={fill}>
       <rect x={1} y={0} width={2} height={7} />
       <rect x={3} y={0} width={4} height={1} />
-      <rect x={3} y={4} width={3} height={1} />
+      <rect x={3} y={4} width={4} height={1} />
       <rect x={6} y={1} width={2} height={3} />
     </g>
+  ),
+  q: ({ fill }) => (
+    <path
+      data-role="character-q"
+      fill={fill}
+      d="M2,0 h5 v1 h1 v4 h-1 v1 h1 v1 h-1 v-1 h-2 v-1 h-1 v-1 h2 v-3 h-3 v5 h3 v1 h-4 v-1 h-1 v-5 h1 v-1"
+    />
   ),
   r: ({ fill }) => (
     <path
@@ -151,6 +235,49 @@ const chars = {
       fill={fill}
       d="M1,0 h2 v3 h1 v1 h1 v-1 h1 v-3 h2 v4 h-1 v1 h-1 v1 h-1 v1 h-1 v-1 h-1 v-1 h-1 v-1 h-1 v-4"
     />
+  ),
+  w: ({ fill }) => (
+    <path
+      data-role="character-w"
+      fill={fill}
+      d="M1,0 h2 v3 h1 v-1 h1 v1 h1 v-3 h2 v7 h-2 v-1 h-1 v-1 h-1 v1 h-1 v1 h-2 v-7"
+    />
+  ),
+  x: ({ fill }) => (
+    <path
+      data-role="character-x"
+      fill={fill}
+      d="M1,0 h2 v1 h1 v1 h1 v-1 h1 v-1 h2 v2 h-1 v1 h-1 v1 h1 v1 h1 v2 h-2 v-1 h-1 v-1 h-1 v1 h-1 v1 h-2 v-2 h1 v-1 h1 v-1 h-1 v-1 h-1 v-2"
+    />
+  ),
+  y: ({ fill }) => (
+    <path
+      data-role="character-y"
+      fill={fill}
+      d="M2,0 h2 v3 h2 v-3 h2 v3 h-1 v1 h-1 v3 h-2 v-3 h-1 v-1 h-1 v-3"
+    />
+  ),
+  z: ({ fill }) => (
+    <path
+      data-role="character-z"
+      fill={fill}
+      d="M1,0 h7 v2 h-1 v1 h-1 v1 h-1 v1 h-1 v1 h4 v1 h-7 v-2 h1 v-1 h1 v-1 h1 v-1 h1 v-1 h-4 v-1"
+    />
+  ),
+  ⅰ: ({ fill }) => (
+    <path
+      data-role="character-roman-numeral-one"
+      fill={fill}
+      d="M2,0 h4 v1 h-1 v5 h1 v1 h-4 v-1 h1 v-5 h-1 v-1"
+    />
+  ),
+  ⅱ: ({ fill }) => (
+    <g data-role="character-roman-numeral-two" fill={fill}>
+      <rect x={2} y={0} width={5} height={1} />
+      <rect x={3} y={1} width={1} height={5} />
+      <rect x={5} y={1} width={1} height={5} />
+      <rect x={2} y={6} width={5} height={1} />
+    </g>
   )
 };
 

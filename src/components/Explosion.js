@@ -154,7 +154,6 @@ class TankExplosion extends React.PureComponent {
 export default class Explosion extends React.PureComponent {
   render() {
     const { explosionType } = this.props;
-    console.info('------ explosion:' + explosionType);
     if (explosionType === 'bullet') {
       return <BulletExplosion {...this.props} />;
     } else if (explosionType === 'tank') {
