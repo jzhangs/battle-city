@@ -6,7 +6,7 @@ import BrickWall from 'components/BrickWall';
 
 type P = {
   bricks: List<boolean>,
-}
+};
 
 export default class BrickLayer extends React.PureComponent<P, {}> {
   render() {

@@ -7,7 +7,7 @@ import workerSaga from 'sagas/workerSaga';
 import { CONTROL_CONFIG, TANK_SPAWN_DELAY } from 'utils/consts';
 import * as A from 'utils/actions';
 
-const tickChannel = eventChannel<Action>((emit) => {
+const tickChannel = eventChannel<Action>(emit => {
   let lastTime = performance.now();
   let requestId = requestAnimationFrame(emitTick);
 
@@ -25,14 +25,17 @@ const tickChannel = eventChannel<Action>((emit) => {
 });
 
 function* autoRemoveEffects() {
-  yield takeEvery('SPAWN_EXPLOSION', function* removeExplosion({ explosionId, explosionType }: Action.SpawnExplosionAction) {
+  yield takeEvery('SPAWN_EXPLOSION', function* removeExplosion({
+    explosionId,
+    explosionType
+  }: Action.SpawnExplosionAction) {
     yield delay(explosionType === 'tank' ? 500 : 200);
-    yield put({ type: 'REMOVE_EXPLOSION', explosionId })
-  })
+    yield put({ type: 'REMOVE_EXPLOSION', explosionId });
+  });
   yield takeEvery('SPAWN_FLICKER', function* removeFlicker({ flickerId }: Action.SpawnFlickerAction) {
-    yield delay(TANK_SPAWN_DELAY)
-    yield put({ type: 'REMOVE_FLICKER', flickerId })
-  })
+    yield delay(TANK_SPAWN_DELAY);
+    yield put({ type: 'REMOVE_FLICKER', flickerId });
+  });
 }
 
 export default function* rootSaga() {

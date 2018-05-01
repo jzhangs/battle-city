@@ -6,7 +6,7 @@ import Snow from 'components/Snow';
 
 type P = {
   snows: List<boolean>,
-}
+};
 
 export default class SnowLayer extends React.PureComponent<P, {}> {
   render() {

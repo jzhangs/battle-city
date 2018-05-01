@@ -1,7 +1,7 @@
 import { delay } from 'redux-saga';
 import { put } from 'redux-saga/effects';
 import { BLOCK_SIZE, BULLET_SIZE, FIELD_SIZE, TANK_SIZE, TANK_SPAWN_DELAY } from 'utils/consts';
-import { BulletRecord, TankRecord } from 'types/index';
+import { BulletRecord, TankRecord } from 'types';
 
 // Calculte bullet start postion according to postion and
 // direction of tank.
@@ -35,14 +35,14 @@ export function testCollide(subject: Box, object: Box, threshhold = 0) {
 }
 
 export function* iterRowsAndCols(itemSize: number, box: Box) {
-  const N = FIELD_SIZE / itemSize // todo should not use N
-  const col1 = Math.max(0, Math.floor(box.x / itemSize))
-  const col2 = Math.min(N - 1, Math.floor((box.x + box.width) / itemSize))
-  const row1 = Math.max(0, Math.floor(box.y / itemSize))
-  const row2 = Math.min(N - 1, Math.floor((box.y + box.height) / itemSize))
+  const N = FIELD_SIZE / itemSize; // todo should not use N
+  const col1 = Math.max(0, Math.floor(box.x / itemSize));
+  const col2 = Math.min(N - 1, Math.floor((box.x + box.width) / itemSize));
+  const row1 = Math.max(0, Math.floor(box.y / itemSize));
+  const row2 = Math.min(N - 1, Math.floor((box.y + box.height) / itemSize));
   for (let row = row1; row <= row2; row += 1) {
     for (let col = col1; col <= col2; col += 1) {
-      yield [row, col]
+      yield [row, col];
     }
   }
 }

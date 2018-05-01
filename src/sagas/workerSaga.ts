@@ -7,7 +7,7 @@ import * as selectors from 'utils/selectors';
 // import Worker from 'ai/worker';
 import inlineAI from './inlineAI';
 
-const Worker = require('worker-loader!ai/worker')
+const Worker = require('worker-loader!ai/worker');
 
 function* handleReceiveMessages(channel: Channel<AICommand>, notifyAI: Function) {
   let fire = false;

@@ -8,12 +8,12 @@ export { default as TankRecord } from 'types/TankRecord';
 export { default as FlickerRecord } from 'types/FlickerRecord';
 export { default as TextRecord } from 'types/TextRecord';
 export { default as BulletRecord } from 'types/BulletRecord';
-export { EagleRecord } from "reducers/map";
+export { EagleRecord } from 'reducers/map';
 export { State } from 'reducers';
-export { PlayersMap } from 'reducers/players'
+export { PlayersMap } from 'reducers/players';
 export { BulletsMap } from 'reducers/bullets';
-export { TextsMap } from 'reducers/texts'
-export { TanksMap } from 'reducers/tanks'
+export { TextsMap } from 'reducers/texts';
+export { TanksMap } from 'reducers/tanks';
 
 export interface UserControllerConfig {
   fire: string;

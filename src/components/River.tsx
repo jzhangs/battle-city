@@ -17,7 +17,7 @@ type P = {
   x: number,
   y: number,
   shape: number,
-}
+};
 export default class River extends React.PureComponent<P, {}> {
   render() {
     const { x, y, shape } = this.props;

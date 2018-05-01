@@ -7,8 +7,8 @@ export default function players(state = Map() as PlayersMap, action: Action) {
   if (action.type === 'ACTIVATE_PLAYER') {
     const { playerName, tankId } = action;
     return state.mergeIn([playerName], {
+      tankId,
       active: true,
-      tankId
     });
   } else if (action.type === 'CREATE_PLAYER') {
     return state.set(action.playerName, PlayerRecord(action));

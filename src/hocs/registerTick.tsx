@@ -1,6 +1,6 @@
-import * as React from 'react'
-import { connect } from 'react-redux'
-import * as _ from 'lodash'
+import * as React from 'react';
+import { connect } from 'react-redux';
+import * as _ from 'lodash';
 import { wrapDisplayName } from 'recompose';
 
 import { State } from 'types';
@@ -8,7 +8,7 @@ import { State } from 'types';
 export default function registerTick(...intervals: number[]) {
   const sum = _.sum(intervals);
 
-  return function(BaseComponent: React.ComponentClass<any>) {
+  return function (BaseComponent: React.ComponentClass<any>) {
     type Props = { time: number };
     class Component extends React.Component<{}, {}> {
       static displayName = wrapDisplayName(BaseComponent, 'registerTick');

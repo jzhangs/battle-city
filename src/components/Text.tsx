@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-type Chars = { [char: string]: (props: { fill: string }) => JSX.Element }
+type Chars = { [char: string]: (props: { fill: string }) => JSX.Element };
 
 const chars: Chars = {
   ' ': () => <g data-role="character-blank" />,
@@ -249,7 +249,8 @@ const chars: Chars = {
     <path
       data-role="character-x"
       fill={fill}
-      d="M1,0 h2 v1 h1 v1 h1 v-1 h1 v-1 h2 v2 h-1 v1 h-1 v1 h1 v1 h1 v2 h-2 v-1 h-1 v-1 h-1 v1 h-1 v1 h-2 v-2 h1 v-1 h1 v-1 h-1 v-1 h-1 v-2"
+      d="M1,0 h2 v1 h1 v1 h1 v-1 h1 v-1 h2 v2 h-1 v1 h-1 v1 h1 v1 h1 v2
+        h-2 v-1 h-1 v-1 h-1 v1 h-1 v1 h-2 v-2 h1 v-1 h1 v-1 h-1 v-1 h-1 v-2"
     />
   ),
   y: ({ fill }) => (
@@ -288,7 +289,7 @@ type Props = {
   x: number,
   y: number,
   fill: string,
-}
+};
 
 export default class Text extends React.PureComponent<Props, {}> {
   render() {

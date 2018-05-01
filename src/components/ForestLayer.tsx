@@ -6,7 +6,7 @@ import Forest from 'components/Forest';
 
 type P = {
   forests: List<boolean>,
-}
+};
 
 export default class ForestLayer extends React.PureComponent<P, {}> {
   render() {
@@ -18,7 +18,7 @@ export default class ForestLayer extends React.PureComponent<P, {}> {
             const [row, col] = getRowCol(t, N_MAP.FOREST);
             return <Forest key={t} x={col * ITEM_SIZE_MAP.FOREST} y={row * ITEM_SIZE_MAP.FOREST} />;
           }
-            return null;
+          return null;
         })}
       </g>
     );

@@ -1,5 +1,5 @@
 import { Map as IMap, Set as ISet } from 'immutable';
-import { fork, put, select, take, PutEffect } from 'redux-saga/effects'
+import { fork, put, select, take, PutEffect } from 'redux-saga/effects';
 import { BLOCK_SIZE, ITEM_SIZE_MAP, N_MAP, STEEL_POWER } from 'utils/consts';
 import { asBox, getDirectionInfo, getNextId, isInField, iterRowsAndCols, testCollide } from 'utils/common';
 
@@ -43,7 +43,7 @@ function* handleTick() {
     if (bullets.isEmpty()) {
       continue;
     }
-    const updatedBullets = bullets.map(bullet => {
+    const updatedBullets = bullets.map((bullet) => {
       const { direction, speed } = bullet;
       const distance = speed * delta;
       const { xy, updater } = getDirectionInfo(direction);
@@ -59,7 +59,7 @@ function* handleBulletsCollidedWithBricks(context: Context) {
     map: { bricks }
   }: State = yield select();
 
-  bullets.forEach((bullet) => {
+  bullets.forEach(bullet => {
     for (const [row, col] of iterRowsAndCols(ITEM_SIZE_MAP.BRICK, asBox(bullet))) {
       const t = row * N_MAP.BRICK + col;
       if (bricks.get(t)) {
@@ -76,7 +76,7 @@ function* handleBulletsCollidedWithSteels(context: Context) {
     map: { steels }
   }: State = yield select();
 
-  bullets.forEach((bullet) => {
+  bullets.forEach(bullet => {
     for (const [row, col] of iterRowsAndCols(ITEM_SIZE_MAP.STEEL, asBox(bullet))) {
       const t = row * N_MAP.STEEL + col;
       if (steels.get(t)) {
@@ -107,7 +107,7 @@ function* destroySteels(collidedBullets: BulletsMap) {
   }: State = yield select();
   const steelsNeedToDestroy: SteelIndex[] = [];
 
-  collidedBullets.forEach((bullet) => {
+  collidedBullets.forEach(bullet => {
     if (bullet.power >= STEEL_POWER) {
       for (const [row, col] of iterRowsAndCols(ITEM_SIZE_MAP.STEEL, spreadBullet(bullet))) {
         const t = row * N_MAP.STEEL + col;
@@ -236,7 +236,7 @@ function* handleBulletsCollidedWithBullets(context: Context) {
 function* handleAfterTick() {
   while (true) {
     yield take('AFTER_TICK');
-    const { bullets }: State = yield select()
+    const { bullets }: State = yield select();
 
     const bulletsCollidedWithEagle = yield* filterBulletsCollidedWithEagle(bullets);
     if (!bulletsCollidedWithEagle.isEmpty()) {

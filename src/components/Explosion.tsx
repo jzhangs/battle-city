@@ -65,10 +65,10 @@ const bulletExplosiondataArray = [
 ];
 
 type P = {
-  x: number,
-  y: number,
-  tickIndex?: number,
-}
+  x: number;
+  y: number;
+  tickIndex?: number;
+};
 
 class _BulletExplosion extends React.PureComponent<P, {}> {
   render() {
@@ -158,7 +158,6 @@ class _TankExplosion extends React.PureComponent<P, {}> {
 }
 
 const TankExplosion = registerTick(200, 9999)(_TankExplosion);
-
 
 export default class Explosion extends React.PureComponent<{ explosionType: ExplosionType } & P, {}> {
   render() {

@@ -8,7 +8,7 @@ type P = {
   x: number,
   y: number,
   tickIndex?: number,
-}
+};
 
 class Flicker extends React.PureComponent<P, {}> {
   render() {

@@ -124,7 +124,7 @@ const TankLevel0: TankLevelX = ({ transform, color, shape }) => {
   );
 };
 
-const TankLevel1 : TankLevelX= ({ transform, color, shape }) => {
+const TankLevel1 : TankLevelX = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color];
   const { a, b, c } = scheme;
   return (
@@ -333,7 +333,7 @@ const TankLevel4: TankLevelX = ({ transform, color, shape }) => {
   );
 };
 
-const TankLevel5 : TankLevelX= ({ transform, color, shape }) => {
+const TankLevel5 : TankLevelX = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color];
   const { a, b, c } = scheme;
   return (

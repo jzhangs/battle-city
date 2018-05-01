@@ -7,7 +7,7 @@ type P = {
   x: number,
   y: number,
   broken: boolean,
-}
+};
 
 export default class Eagle extends React.PureComponent<P, {}> {
   static defaultProps = {

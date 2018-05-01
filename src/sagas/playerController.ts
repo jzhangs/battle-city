@@ -71,7 +71,7 @@ export default function* playerController(playerName: string, config: UserContro
   bindKeyWithDirection(config.right, 'right');
 
   function* getUserPlayerInput() {
-    const tank: TankRecord = yield select(selectors.playerTank, playerName)
+    const tank: TankRecord = yield select(selectors.playerTank, playerName);
     if (tank != null) {
       const { direction } = getDirectionControlInfo();
       if (direction != null) {
@@ -85,7 +85,7 @@ export default function* playerController(playerName: string, config: UserContro
   }
 
   while (true) {
-    const action: Action.ActivatePlayerAction = yield take('ACTIVATE_PLAYER')
+    const action: Action.ActivatePlayerAction = yield take('ACTIVATE_PLAYER');
     if (action.playerName === playerName) {
       yield [
         directionController(playerName, getUserPlayerInput),

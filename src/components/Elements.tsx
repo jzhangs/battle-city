@@ -5,7 +5,8 @@ type PixelProps = {
   y: number;
   fill: string;
 };
-export const Pixel = ({ x, y, fill }: PixelProps) => <rect x={x} y={y} width={1} height={1} fill={fill} />;
+
+export const Pixel = (props: PixelProps) => <rect {...props} width={1} height={1} />;
 
 type BitMapProps = {
   x: number;
@@ -13,6 +14,7 @@ type BitMapProps = {
   d: string[];
   scheme: { [key: string]: string };
 };
+
 export const Bitmap = ({ x, y, d, scheme }: BitMapProps) => {
   const cols = d[0].length;
   return (

@@ -6,7 +6,7 @@ import Text from 'components/Text';
 import { BLOCK_SIZE } from 'utils/consts';
 import * as selectors from 'utils/selectors';
 
-import { State, PlayersMap } from 'types/index';
+import { State, PlayersMap } from 'types';
 
 function mapStateToProps(state: State) {
   return {
@@ -18,7 +18,7 @@ function mapStateToProps(state: State) {
 type P = {
   remainingEnemyCount: number,
   players: PlayersMap,
-}
+};
 
 class HUD extends React.PureComponent<P> {
   renderPlayer1Info() {

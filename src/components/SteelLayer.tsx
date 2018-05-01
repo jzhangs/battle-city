@@ -6,7 +6,7 @@ import SteelWall from 'components/SteelWall';
 
 type P = {
   steels: List<boolean>,
-}
+};
 
 export default class SteelLayer extends React.PureComponent<P, {}> {
   render() {
@@ -20,7 +20,7 @@ export default class SteelLayer extends React.PureComponent<P, {}> {
               <SteelWall key={t} x={col * ITEM_SIZE_MAP.STEEL} y={row * ITEM_SIZE_MAP.STEEL} />
             );
           }
-            return null;
+          return null;
         })}
       </g>
     );
