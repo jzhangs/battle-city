@@ -39,7 +39,8 @@ declare global {
       | RemoveTextAction
       | RemoveFlickerAction
       | SpawnFlickerAction
-      | KillAction;
+      | KillAction
+      | IncKillCout;
 
     export type ActionType = Action['type'];
 
@@ -49,6 +50,12 @@ declare global {
       sourceTank: TankRecord;
       targetPlayer: PlayerRecord;
       sourcePlayer: PlayerRecord;
+    };
+
+    export type IncKillCout = {
+      type: 'INC_KILL_COUNT';
+      playerName: PlayerName;
+      level: TankLevel;
     };
 
     export type MoveAction = {
@@ -157,8 +164,7 @@ declare global {
 
     export type CreatePlayerAction = {
       type: 'CREATE_PLAYER';
-      playerName: PlayerName;
-      lives: number;
+      player: PlayerRecord;
     };
 
     export type RemovePlayerAction = {

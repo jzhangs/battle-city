@@ -1,8 +1,8 @@
 import { delay } from 'redux-saga';
-import { fork, put, select, take } from 'redux-saga/effects';
+import { put, take } from 'redux-saga/effects';
 import { BLOCK_SIZE } from 'utils/consts';
-import { getNextId, spawnTank } from 'utils/common';
-import { State, TankRecord } from 'types';
+import { getNextId } from 'utils/common';
+import stageSaga from 'sagas/stageSaga';
 
 type Animation = {
   direction: Direction;
@@ -60,61 +60,20 @@ function* animateGameover() {
   yield put({ type: 'SHOW_OVERLAY', overlay: 'gameover' });
 }
 
-function* watchGameover() {
-  while (true) {
-    yield take(['DESTROY_EAGLE', 'ALL_PLAYERS_DEAD']);
-    yield put({ type: 'DEACTIVATE_ALL_PLAYERS' });
-    yield* animateGameover();
-  }
-}
-
-function* playerSaga(playerName: string) {
-  yield put({
-    type: 'CREATE_PLAYER',
-    playerName,
-    lives: 3
-  });
-
-  while (true) {
-    yield take(
-      (action: Action) =>
-        action.type === 'LOAD_STAGE' || (action.type === 'KILL' && action.targetPlayer.playerName === 'player-1')
-    );
-    const { players }: State = yield select();
-    const player = players.get(playerName);
-    if (player.lives > 0) {
-      yield put({ type: 'DECREMENT_PLAYER_LIVE', playerName });
-      const tankId = yield* spawnTank(
-        TankRecord({
-          x: 4 * BLOCK_SIZE,
-          y: 12 * BLOCK_SIZE,
-          side: 'player',
-          level: 'basic'
-        })
-      );
-      yield put({
-        type: 'ACTIVATE_PLAYER',
-        playerName: 'player-1',
-        tankId
-      });
-    } else {
-      yield put({ type: 'ALL_HUMAN_DEAD' });
-    }
-  }
-}
-
-function* stageStatistics() {
-  yield put({ type: 'SHOW_OVERLAY', overlay: 'statistics' });
-  yield delay(5000);
-  yield put({ type: 'REMOVE_OVERLAY', overlay: 'statistics' });
+interface StageResult {
+  status: 'clear' | 'fail';
+  reason?: string;
 }
 
 export default function* gameManager() {
-  yield fork(watchGameover);
-  yield fork(playerSaga, 'player-1');
-
-  yield put({ type: 'LOAD_STAGE', name: 'test' });
-  yield take('CLEAR_STAGE');
-  yield* stageStatistics();
-  yield put({ type: 'LOAD_STAGE', name: 'test' });
+  const stages = ['1', '2', '3'];
+  for (const stageName of stages) {
+    const stageResult: StageResult = yield* stageSaga(stageName);
+    if (stageResult.status === 'clear') {
+      // continue to next stage
+    } else {
+      console.log(`gameover, reason: ${stageResult.reason}`);
+      yield* animateGameover();
+    }
+  }
 }

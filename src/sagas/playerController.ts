@@ -1,4 +1,4 @@
-import { take, fork, select } from 'redux-saga/effects';
+import { all, take, fork, select } from 'redux-saga/effects';
 import * as selectors from 'utils/selectors';
 import * as _ from 'lodash';
 import directionController from 'sagas/directionController';
@@ -87,10 +87,10 @@ export default function* playerController(playerName: string, config: PlayerCont
   while (true) {
     const action: Action.ActivatePlayerAction = yield take('ACTIVATE_PLAYER');
     if (action.playerName === playerName) {
-      yield [
+      yield all([
         directionController(playerName, getPlayerInput),
         fireController(playerName, shouldFire)
-      ];
+      ]);
     }
   }
 }

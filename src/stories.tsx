@@ -81,7 +81,7 @@ const levels = ['basic', 'fast', 'power', 'armor'];
 const powerUpNames = ['tank', 'star', 'grenade', 'timer', 'helmet', 'shovel'];
 
 function Stories() {
-  const { bricks, steels, rivers, snows, forests, eagle } = parseStageMap(stageConfigs['test'].map).toObject();
+  const { bricks, steels, rivers, snows, forests, eagle } = parseStageMap(stageConfigs['1'].map).toObject();
 
   return (
     <div style={{ fontFamily: 'monospace', margin: 8 }}>
@@ -104,7 +104,7 @@ function Stories() {
       </details>
       <details open>
         <summary>
-          <FontLevel1>Test Stage</FontLevel1>
+          <FontLevel1>Stages</FontLevel1>
         </summary>
         <svg className="svg" width={3 * 13 * BLOCK_SIZE} height={3 * 13 * BLOCK_SIZE}>
           <g transform="scale(3)">

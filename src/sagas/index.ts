@@ -1,9 +1,10 @@
-import { takeEvery, delay } from 'redux-saga';
-import { fork, put } from 'redux-saga/effects';
+import { delay } from 'redux-saga';
+import { fork, put, takeEvery } from 'redux-saga/effects';
 import playerController from 'sagas/playerController';
 import bulletsSaga from 'sagas/bulletsSaga';
 import gameManager from 'sagas/gameManager';
 import AIMasterSaga from 'sagas/AISaga';
+import playerSage from 'sagas/playerSaga';
 import tickEmitter from 'sagas/tickEmitter';
 import { CONTROL_CONFIG, TANK_SPAWN_DELAY } from 'utils/consts';
 
@@ -31,6 +32,7 @@ export default function* rootSaga() {
   yield fork(playerController, 'player-2', CONTROL_CONFIG.player2);
 
   yield fork(AIMasterSaga);
+  yield fork(playerSage, 'player-1');
 
   yield fork(gameManager);
 }

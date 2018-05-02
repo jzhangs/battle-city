@@ -7,7 +7,7 @@ import inlineAI from 'sagas/inlineAI';
 import * as selectors from 'utils/selectors';
 import { getDirectionInfo, spawnTank } from 'utils/common';
 import { State } from 'reducers';
-import { TankRecord } from 'types';
+import { TankRecord, PlayerRecord } from 'types';
 
 const EmptyWorker = require('worker-loader!ai/emptyWorker');
 
@@ -142,10 +142,13 @@ export default function* AIMasterSaga() {
     }: State = yield select();
     if (remainingEnemyCount > 0) {
       const playerName = `AI-${nextAIPlayerIndex++}`;
-      yield put({
+      yield put<Action>({
         type: 'CREATE_PLAYER',
-        playerName,
-        lives: Infinity
+        player: PlayerRecord({
+          playerName,
+          lives: Infinity,
+          side: 'ai'
+        })
       });
 
       const { x, y } = yield select(selectors.avaliableSpawnPosition);
@@ -157,8 +160,6 @@ export default function* AIMasterSaga() {
         playerName,
         tankId
       });
-    } else {
-      yield put({ type: 'CLEAR_STAGE' });
     }
   }
 

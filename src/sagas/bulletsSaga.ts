@@ -19,14 +19,6 @@ function isBulletInField(bullet: BulletRecord) {
   return isInField(asBox(bullet));
 }
 
-function sum(iterable: Iterable<number>) {
-  let result = 0;
-  for (const item of iterable) {
-    result += item;
-  }
-  return result;
-}
-
 function getOrDefault<K, V>(map: Map<K, V>, key: K, getValue: () => V) {
   if (!map.has(key)) {
     map.set(key, getValue());
@@ -291,19 +283,24 @@ function* handleAfterTick() {
       yield* destroySteels(expBullets);
     }
 
+    const kills: PutEffect<Action.KillAction>[] = [];
     for (const [targetTankId, hurtMap] of context.tankHurtMap.entries()) {
       const sourceTankId = hurtMap.values().next().value;
-      yield put<Action>({
-        type: 'KILL',
-        targetTank: tanks.get(targetTankId),
-        sourceTank: tanks.get(sourceTankId),
-        targetPlayer: players.find(ply => ply.tankId === targetTankId),
-        sourcePlayer: players.find(ply => ply.tankId === sourceTankId)
-      });
+      kills.push(
+        put<Action.KillAction>({
+          type: 'KILL',
+          targetTank: tanks.get(targetTankId),
+          sourceTank: tanks.get(sourceTankId),
+          targetPlayer: players.find(ply => ply.tankId === targetTankId),
+          sourcePlayer: players.find(ply => ply.tankId === sourceTankId)
+        })
+      );
     }
     if (context.tankHurtMap.size > 0) {
       yield destroyTanks(ISet(context.tankHurtMap.keys()));
     }
+
+    yield* kills;
 
     const noExpBullets = bullets.filter(bullet => context.noExpBulletIdSet.has(bullet.bulletId));
     if (context.noExpBulletIdSet.size > 0) {
