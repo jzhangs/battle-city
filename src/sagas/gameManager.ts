@@ -2,7 +2,6 @@ import { delay } from 'redux-saga';
 import { fork, put, select, take } from 'redux-saga/effects';
 import { BLOCK_SIZE } from 'utils/consts';
 import { getNextId, spawnTank } from 'utils/common';
-import * as selectors from 'utils/selectors';
 import { State, TankRecord } from 'types';
 
 type Animation = {
@@ -77,26 +76,29 @@ function* playerSaga(playerName: string) {
   });
 
   while (true) {
-    yield take(['REMOVE_TANK', 'LOAD_STAGE']);
-    const tank: TankRecord = yield select(selectors.playerTank, playerName);
-    if (tank == null) {
-      const { players }: State = yield select();
-      const player = players.get(playerName);
-      if (player.lives > 0) {
-        yield put({ type: 'DECREMENT_PLAYER_LIVE', playerName });
-        const tankId = yield* spawnTank({
+    yield take(
+      (action: Action) =>
+        action.type === 'LOAD_STAGE' || (action.type === 'KILL' && action.targetPlayer.playerName === 'player-1')
+    );
+    const { players }: State = yield select();
+    const player = players.get(playerName);
+    if (player.lives > 0) {
+      yield put({ type: 'DECREMENT_PLAYER_LIVE', playerName });
+      const tankId = yield* spawnTank(
+        TankRecord({
           x: 4 * BLOCK_SIZE,
           y: 12 * BLOCK_SIZE,
-          side: 'player'
-        });
-        yield put({
-          type: 'ACTIVATE_PLAYER',
-          playerName: 'player-1',
-          tankId
-        });
-      } else {
-        yield put({ type: 'ALL_PLAYERS_DEAD' });
-      }
+          side: 'player',
+          level: 'basic'
+        })
+      );
+      yield put({
+        type: 'ACTIVATE_PLAYER',
+        playerName: 'player-1',
+        tankId
+      });
+    } else {
+      yield put({ type: 'ALL_HUMAN_DEAD' });
     }
   }
 }

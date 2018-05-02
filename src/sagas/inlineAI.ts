@@ -348,11 +348,11 @@ export default function* inlineAI(
   noteChannel: Channel<any>
 ) {
   while (true) {
-    console.groupCollapsed(`AI ${playerName}`);
     const raceResult = yield race({
       timeout: call(delay, 2000),
       event: take(noteChannel)
     });
+    console.groupCollapsed(`AI ${playerName}`);
     console.log(raceResult);
     let tank: TankRecord = yield select(selectors.playerTank, playerName);
     if (tank == null) {

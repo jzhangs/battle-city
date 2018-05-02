@@ -4,7 +4,7 @@ import { StageConfig } from 'types';
 // import testStage from 'stages/stage-test';
 
 const testStage: StageConfig = require('stages/stage-test.json');
-const configs: { [name: string]: StageConfig } = {
+const stageConfigs: { [name: string]: StageConfig } = {
   test: testStage
 };
 
@@ -41,7 +41,7 @@ export const MapRecord = Record({
 export default function mapReducer(state = MapRecord(), action: Action) {
   if (action.type === 'LOAD_STAGE') {
     const { name } = action;
-    return parseStageConfig(configs[name]);
+    return parseStageMap(stageConfigs[name]);
   } else if (action.type === 'DESTROY_EAGLE') {
     return state.setIn(['eagle', 'broken'], true);
   } else if (action.type === 'DESTROY_BRICKS') {
@@ -60,7 +60,7 @@ export default function mapReducer(state = MapRecord(), action: Action) {
 // forest F
 // steel  T<n>
 // eagle  E
-function parseStageConfig({ map }: StageConfig) {
+function parseStageMap({ map }: StageConfig) {
   const bricks = new Set();
   const steels = new Set();
   const rivers = new Set();

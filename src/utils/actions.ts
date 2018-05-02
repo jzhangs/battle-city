@@ -1,8 +1,6 @@
 import { Map, Set } from 'immutable';
-import TankRecord from 'types/TankRecord';
-import BulletRecord from 'types/BulletRecord';
-
-// const { Map } = require('immutable');
+import { TankRecord, BulletRecord } from 'types';
+import PlayerRecord from 'types/PlayerRecord';
 
 declare global {
   type Action = Action.Action;
@@ -22,7 +20,7 @@ declare global {
       | Simple<'GAMEOVER'>
       | ShowOverlayAction
       | RemoveOverlayAction
-      | Simple<'DECREMENT_ENEMY_COUNT'>
+      | Simple<'DECREMENT_REMAINING_ENEMY_COUNT'>
       | DecrementPlayerLiveAction
       | ActivatePlayerAction
       | CreatePlayerAction
@@ -40,9 +38,18 @@ declare global {
       | StopMoveAction
       | RemoveTextAction
       | RemoveFlickerAction
-      | SpawnFlickerAction;
+      | SpawnFlickerAction
+      | KillAction;
 
     export type ActionType = Action['type'];
+
+    export type KillAction = {
+      type: 'KILL';
+      targetTank: TankRecord;
+      sourceTank: TankRecord;
+      targetPlayer: PlayerRecord;
+      sourcePlayer: PlayerRecord;
+    };
 
     export type MoveAction = {
       type: 'MOVE';
@@ -134,11 +141,7 @@ declare global {
 
     export type SpawnTankAction = {
       type: 'SPAWN_TANK';
-      side: Side;
-      tankId: TankId;
-      x: number;
-      y: number;
-      direction: Direction;
+      tank: TankRecord;
     };
 
     export type RemoveTankAction = {

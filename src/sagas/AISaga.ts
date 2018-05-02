@@ -7,6 +7,7 @@ import inlineAI from 'sagas/inlineAI';
 import * as selectors from 'utils/selectors';
 import { getDirectionInfo, spawnTank } from 'utils/common';
 import { State } from 'reducers';
+import { TankRecord } from 'types';
 
 const EmptyWorker = require('worker-loader!ai/emptyWorker');
 
@@ -148,8 +149,8 @@ export default function* AIMasterSaga() {
       });
 
       const { x, y } = yield select(selectors.avaliableSpawnPosition);
-      yield put({ type: 'DECREMENT_ENEMY_COUNT' });
-      const tankId = yield* spawnTank({ x, y, side: 'ai' });
+      yield put({ type: 'DECREMENT_REMAINING_ENEMY_COUNT' });
+      const tankId = yield* spawnTank(TankRecord({ x, y, side: 'ai' }));
       taskMap[playerName] = yield spawn(AIWorkerSaga, playerName, EmptyWorker);
       yield put<Action.ActivatePlayerAction>({
         type: 'ACTIVATE_PLAYER',
@@ -162,54 +163,18 @@ export default function* AIMasterSaga() {
   }
 
   while (true) {
-    const action: Action = yield take(['REMOVE_TANK', 'LOAD_STAGE']);
+    const action: Action = yield take(['KILL', 'LOAD_STAGE']);
     if (action.type === 'LOAD_STAGE') {
-      yield all([addAI(), addAI()]);
-    } else if (action.type === 'REMOVE_TANK') {
-      for (const [playerName, task] of Object.entries(taskMap)) {
-        const AITank = yield select(selectors.playerTank, playerName);
-        if (AITank === null) {
-          task.cancel();
-          delete taskMap[playerName];
-          yield* addAI();
-        }
+      yield* addAI();
+      yield* addAI();
+    } else if (action.type === 'KILL') {
+      const { targetTank, targetPlayer } = action;
+      if (targetTank.side === 'ai') {
+        const task = taskMap[targetPlayer.playerName];
+        task.cancel();
+        delete taskMap[targetPlayer.playerName];
+        yield* addAI();
       }
     }
   }
-}
-
-declare global {
-  interface Window {
-    go: any;
-    fire: any;
-    idle: any;
-    $$postMessage: any;
-  }
-}
-
-function injectDebugUtils(emitter: any) {
-  window.go = (x: number, y: number) => emitter({ type: 'move', x, y });
-  window.fire = () => emitter({ type: 'fire' });
-  window.idle = () => emitter({ type: 'idle' });
-  setTimeout(() => {
-    const arena = document.querySelector('[role=battle-field]');
-    arena.addEventListener('click', (event: MouseEvent) => {
-      const rect = arena.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-      const flr = (xxx: number) => Math.floor(xxx / 8) * 8;
-      window.go(flr(x - 4), flr(y - 4));
-    });
-    let firing = false;
-    arena.addEventListener('contextmenu', event => {
-      event.preventDefault();
-      if (firing) {
-        window.idle();
-        firing = true;
-      } else {
-        window.fire();
-        firing = false;
-      }
-    });
-  }, 100);
 }

@@ -4,74 +4,11 @@ import { Bitmap, Pixel } from 'components/Elements';
 import registerTick from 'hocs/registerTick';
 import { BLOCK_SIZE, TANK_COLOR_SCHEMES } from 'utils/consts';
 
-type P = {
-  x: number;
-  y: number;
-  color: string;
-  level: number;
-  direction: Direction;
-  tickIndex?: number;
-  moving: boolean;
-};
-
-type S = { lastShape: number };
-
-type TankLevelX = (props: { transform: string; color: string; shape: number }) => JSX.Element;
-
-class Tank extends React.Component<P, S> {
-  static defaultProps = {
-    moving: false
-  };
-
-  constructor(props: P) {
-    super(props);
-    this.state = {
-      lastShape: 0
-    };
-  }
-
-  componentWillReceiveProps(nextProps: P) {
-    if (this.props.moving && !nextProps.moving) {
-      this.setState({ lastShape: this.props.tickIndex });
-    }
-  }
-
-  render() {
-    const { x, y, color, level, direction, tickIndex, moving } = this.props;
-    const { lastShape } = this.state;
-    let rotate;
-    let dx;
-    let dy;
-    if (direction === 'up') {
-      dx = x;
-      dy = y;
-      rotate = 0;
-    } else if (direction === 'down') {
-      dx = x + BLOCK_SIZE - 1;
-      dy = y + BLOCK_SIZE;
-      rotate = 180;
-    } else if (direction === 'left') {
-      dx = x;
-      dy = y + BLOCK_SIZE - 1;
-      rotate = -90;
-    } else {
-      // right
-      dx = x + BLOCK_SIZE;
-      dy = y;
-      rotate = 90;
-    }
-
-    const shape = moving ? tickIndex : lastShape;
-
-    return React.createElement(tankLevels[level], {
-      transform: `translate(${dx}, ${dy}) rotate(${rotate})`,
-      color,
-      shape
-    });
-  }
+interface TankComponent {
+  (props: { transform: string; color: string; shape: number }): JSX.Element;
 }
 
-const TankLevel0: TankLevelX = ({ transform, color, shape }) => {
+const TankHumanBasic: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color];
   const { a, b, c } = scheme;
   return (
@@ -125,7 +62,7 @@ const TankLevel0: TankLevelX = ({ transform, color, shape }) => {
   );
 };
 
-const TankLevel1: TankLevelX = ({ transform, color, shape }) => {
+const TankHumanFast: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color];
   const { a, b, c } = scheme;
   return (
@@ -178,7 +115,7 @@ const TankLevel1: TankLevelX = ({ transform, color, shape }) => {
   );
 };
 
-const TankLevel2: TankLevelX = ({ transform, color, shape }) => {
+const TankHumanPower: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color];
   const { a, b, c } = scheme;
   return (
@@ -233,7 +170,7 @@ const TankLevel2: TankLevelX = ({ transform, color, shape }) => {
   );
 };
 
-const TankLevel3: TankLevelX = ({ transform, color, shape }) => {
+const TankHumanArmor: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color];
   const { a, b, c } = scheme;
   return (
@@ -286,7 +223,7 @@ const TankLevel3: TankLevelX = ({ transform, color, shape }) => {
   );
 };
 
-const TankLevel4: TankLevelX = ({ transform, color, shape }) => {
+const TankAIBasic: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color];
   const { a, b, c } = scheme;
   return (
@@ -334,7 +271,7 @@ const TankLevel4: TankLevelX = ({ transform, color, shape }) => {
   );
 };
 
-const TankLevel5: TankLevelX = ({ transform, color, shape }) => {
+const TankAIFast: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color];
   const { a, b, c } = scheme;
   return (
@@ -388,7 +325,7 @@ const TankLevel5: TankLevelX = ({ transform, color, shape }) => {
   );
 };
 
-const TankLevel6: TankLevelX = ({ transform, color, shape }) => {
+const TankAIPower: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color];
   const { a, b, c } = scheme;
   return (
@@ -438,7 +375,7 @@ const TankLevel6: TankLevelX = ({ transform, color, shape }) => {
   );
 };
 
-const TankLevel7: TankLevelX = ({ transform, color, shape }) => {
+const TankAIArmor: TankComponent = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color];
   const { a, b, c } = scheme;
   return (
@@ -489,6 +426,96 @@ const TankLevel7: TankLevelX = ({ transform, color, shape }) => {
   );
 };
 
-const tankLevels = [TankLevel0, TankLevel1, TankLevel2, TankLevel3, TankLevel4, TankLevel5, TankLevel6, TankLevel7];
+function resolveTankComponent(side: Side, level: TankLevel): TankComponent {
+  let component: TankComponent;
+  if (side === 'player') {
+    if (level === 'basic') {
+      component = TankHumanBasic;
+    } else if (level === 'fast') {
+      component = TankHumanFast;
+    } else if (level === 'power') {
+      component = TankHumanPower;
+    } else {
+      component = TankHumanArmor;
+    }
+  } else {
+    if (level === 'basic') {
+      component = TankAIBasic;
+    } else if (level === 'fast') {
+      component = TankAIFast;
+    } else if (level === 'power') {
+      component = TankAIPower;
+    } else {
+      component = TankAIArmor;
+    }
+  }
+  return component;
+}
+
+type P = {
+  x: number;
+  y: number;
+  color: string;
+  side: Side;
+  level: TankLevel;
+  direction: Direction;
+  tickIndex?: number;
+  moving: boolean;
+};
+
+type S = { lastShape: number };
+
+class Tank extends React.Component<P, S> {
+  static defaultProps = {
+    moving: false
+  };
+
+  constructor(props: P) {
+    super(props);
+    this.state = {
+      lastShape: 0
+    };
+  }
+
+  componentWillReceiveProps(nextProps: P) {
+    if (this.props.moving && !nextProps.moving) {
+      this.setState({ lastShape: this.props.tickIndex });
+    }
+  }
+
+  render() {
+    const { x, y, color, side, level, direction, tickIndex, moving } = this.props;
+    const { lastShape } = this.state;
+    let rotate;
+    let dx;
+    let dy;
+    if (direction === 'up') {
+      dx = x;
+      dy = y;
+      rotate = 0;
+    } else if (direction === 'down') {
+      dx = x + BLOCK_SIZE - 1;
+      dy = y + BLOCK_SIZE;
+      rotate = 180;
+    } else if (direction === 'left') {
+      dx = x;
+      dy = y + BLOCK_SIZE - 1;
+      rotate = -90;
+    } else {
+      // right
+      dx = x + BLOCK_SIZE;
+      dy = y;
+      rotate = 90;
+    }
+
+    const shape = moving ? tickIndex : lastShape;
+
+    return React.createElement(resolveTankComponent(side, level), {
+      transform: `translate(${dx}, ${dy}) rotate(${rotate})`,
+      color,
+      shape
+    });
+  }
+}
 
 export default registerTick(80, 80)(Tank);

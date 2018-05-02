@@ -2,6 +2,7 @@ export type StageConfig = {
   name: string;
   difficulty: 'easy' | 'normal' | 'hard';
   map: string[];
+  enemies: string
 };
 
 export { default as TankRecord } from 'types/TankRecord';
@@ -46,6 +47,7 @@ declare global {
   type Overlay = '' | 'gameovr' | 'statistics';
   type Direction = 'up' | 'down' | 'left' | 'right';
 
+  type TankLevel = 'basic' | 'fast' | 'power' | 'armor';
   type TankId = number;
   type BulletId = number;
   type PlayerName = string;

@@ -5,14 +5,33 @@ import { asBox, getDirectionInfo, getNextId, isInField, iterRowsAndCols, testCol
 
 import { BulletRecord, BulletsMap, State, TankRecord } from 'types';
 
+type HurtCount = number;
+type TargetTankId = TankId;
+type SourceTankId = TankId;
+
 type Context = {
   expBulletIdSet: Set<BulletId>;
   noExpBulletIdSet: Set<BulletId>;
-  tankHurtMap: Map<TankId, number>;
+  tankHurtMap: Map<TargetTankId, Map<SourceTankId, HurtCount>>;
 };
 
 function isBulletInField(bullet: BulletRecord) {
   return isInField(asBox(bullet));
+}
+
+function sum(iterable: Iterable<number>) {
+  let result = 0;
+  for (const item of iterable) {
+    result += item;
+  }
+  return result;
+}
+
+function getOrDefault<K, V>(map: Map<K, V>, key: K, getValue: () => V) {
+  if (!map.has(key)) {
+    map.set(key, getValue());
+  }
+  return map.get(key);
 }
 
 function makeExplosionFromBullet(bullet: BulletRecord): PutEffect<Action> {
@@ -42,7 +61,7 @@ function* handleTick() {
     if (bullets.isEmpty()) {
       continue;
     }
-    const updatedBullets = bullets.map((bullet) => {
+    const updatedBullets = bullets.map(bullet => {
       const { direction, speed } = bullet;
       const distance = speed * delta;
       const { xy, updater } = getDirectionInfo(direction);
@@ -199,12 +218,14 @@ function* handleBulletsCollidedWithTanks(context: Context) {
         if (bulletSide === 'player' && tankSide === 'player') {
           context.expBulletIdSet.add(bullet.bulletId);
         } else if (bulletSide === 'player' && tankSide === 'ai') {
-          const oldHurt = context.tankHurtMap.get(tank.tankId) || 0;
-          context.tankHurtMap.set(tank.tankId, oldHurt + 1);
+          const hurtSubMap = getOrDefault(context.tankHurtMap, tank.tankId, () => new Map());
+          const oldHurt = hurtSubMap.get(tank.tankId) || 0;
+          hurtSubMap.set(bullet.tankId, oldHurt + 1);
           context.expBulletIdSet.add(bullet.bulletId);
         } else if (bulletSide === 'ai' && tankSide === 'player') {
-          const oldHurt = context.tankHurtMap.get(tank.tankId) || 0;
-          context.tankHurtMap.set(tank.tankId, oldHurt + 1);
+          const hurtSubMap = getOrDefault(context.tankHurtMap, tank.tankId, () => new Map());
+          const oldHurt = hurtSubMap.get(tank.tankId) || 0;
+          hurtSubMap.set(bullet.tankId, oldHurt + 1);
           context.expBulletIdSet.add(bullet.bulletId);
         } else if (bulletSide === 'ai' && tankSide === 'ai') {
           context.noExpBulletIdSet.add(bullet.bulletId);
@@ -235,7 +256,7 @@ function* handleBulletsCollidedWithBullets(context: Context) {
 function* handleAfterTick() {
   while (true) {
     yield take('AFTER_TICK');
-    const { bullets }: State = yield select();
+    const { bullets, players, tanks }: State = yield select();
 
     const bulletsCollidedWithEagle = yield* filterBulletsCollidedWithEagle(bullets);
     if (!bulletsCollidedWithEagle.isEmpty()) {
@@ -270,9 +291,18 @@ function* handleAfterTick() {
       yield* destroySteels(expBullets);
     }
 
-    if (context.tankHurtMap.size !== 0) {
-      const tankIdSet = ISet(context.tankHurtMap.keys());
-      yield destroyTanks(tankIdSet);
+    for (const [targetTankId, hurtMap] of context.tankHurtMap.entries()) {
+      const sourceTankId = hurtMap.values().next().value;
+      yield put<Action>({
+        type: 'KILL',
+        targetTank: tanks.get(targetTankId),
+        sourceTank: tanks.get(sourceTankId),
+        targetPlayer: players.find(ply => ply.tankId === targetTankId),
+        sourcePlayer: players.find(ply => ply.tankId === sourceTankId)
+      });
+    }
+    if (context.tankHurtMap.size > 0) {
+      yield destroyTanks(ISet(context.tankHurtMap.keys()));
     }
 
     const noExpBullets = bullets.filter(bullet => context.noExpBulletIdSet.has(bullet.bulletId));
