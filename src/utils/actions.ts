@@ -191,7 +191,7 @@ declare global {
 
     export type ShowOverlayAction = {
       type: 'SHOW_OVERLAY';
-      overlay: string;
+      overlay: Overlay;
     };
 
     export type RemoveOverlayAction = {

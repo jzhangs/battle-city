@@ -43,6 +43,7 @@ declare global {
     dy: number;
   }
 
+  type Overlay = '' | 'gameovr' | 'statistics';
   type Direction = 'up' | 'down' | 'left' | 'right';
 
   type TankId = number;

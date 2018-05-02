@@ -156,6 +156,8 @@ export default function* AIMasterSaga() {
         playerName,
         tankId
       });
+    } else {
+      yield put({ type: 'CLEAR_STAGE' });
     }
   }
 

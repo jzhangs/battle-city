@@ -7,7 +7,7 @@ type Base = {
 
 export const GameRecord = Record(
   {
-    overlay: '', // gameover | <empty-string>
+    overlay: '' as Overlay,
     // status: 'idle', // idle | on | gameover | win
     remainingEnemyCount: 20
     // currentStageIndex: 0,

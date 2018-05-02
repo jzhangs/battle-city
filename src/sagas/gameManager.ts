@@ -5,10 +5,13 @@ import { getNextId, spawnTank } from 'utils/common';
 import * as selectors from 'utils/selectors';
 import { State, TankRecord } from 'types';
 
-function* animateTexts(
-  textIds: TextId[],
-  { direction, distance: totalDistance, duration }: { direction: Direction; distance: number; duration: number }
-) {
+type Animation = {
+  direction: Direction;
+  distance: number;
+  duration: number;
+};
+
+function* animateTexts(textIds: TextId[], { direction, distance: totalDistance, duration }: Animation) {
   const speed = totalDistance / duration;
   let animatedDistance = 0;
   while (true) {
@@ -98,9 +101,18 @@ function* playerSaga(playerName: string) {
   }
 }
 
+function* stageStatistics() {
+  yield put({ type: 'SHOW_OVERLAY', overlay: 'statistics' });
+  yield delay(5000);
+  yield put({ type: 'REMOVE_OVERLAY', overlay: 'statistics' });
+}
+
 export default function* gameManager() {
   yield fork(watchGameover);
   yield fork(playerSaga, 'player-1');
 
+  yield put({ type: 'LOAD_STAGE', name: 'test' });
+  yield take('CLEAR_STAGE');
+  yield* stageStatistics();
   yield put({ type: 'LOAD_STAGE', name: 'test' });
 }

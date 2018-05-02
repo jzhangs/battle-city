@@ -16,6 +16,8 @@ type P = {
 
 type S = { lastShape: number };
 
+type TankLevelX = (props: { transform: string; color: string; shape: number }) => JSX.Element;
+
 class Tank extends React.Component<P, S> {
   static defaultProps = {
     moving: false
@@ -60,15 +62,14 @@ class Tank extends React.Component<P, S> {
     }
 
     const shape = moving ? tickIndex : lastShape;
-    if (level === 0) {
-      return <TankLevel0 transform={`translate(${dx}, ${dy})rotate(${rotate})`} color={color} shape={shape} />;
-    }
-    // TODO complete level 1~7
-    return <TankLevel2 transform={`translate(${dx}, ${dy})rotate(${rotate})`} color={color} shape={shape} />;
+
+    return React.createElement(tankLevels[level], {
+      transform: `translate(${dx}, ${dy}) rotate(${rotate})`,
+      color,
+      shape
+    });
   }
 }
-
-type TankLevelX = (props: { transform: string; color: string; shape: number }) => JSX.Element;
 
 const TankLevel0: TankLevelX = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color];
@@ -124,7 +125,7 @@ const TankLevel0: TankLevelX = ({ transform, color, shape }) => {
   );
 };
 
-const TankLevel1 : TankLevelX = ({ transform, color, shape }) => {
+const TankLevel1: TankLevelX = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color];
   const { a, b, c } = scheme;
   return (
@@ -333,7 +334,7 @@ const TankLevel4: TankLevelX = ({ transform, color, shape }) => {
   );
 };
 
-const TankLevel5 : TankLevelX = ({ transform, color, shape }) => {
+const TankLevel5: TankLevelX = ({ transform, color, shape }) => {
   const scheme = TANK_COLOR_SCHEMES[color];
   const { a, b, c } = scheme;
   return (
@@ -487,5 +488,7 @@ const TankLevel7: TankLevelX = ({ transform, color, shape }) => {
     </g>
   );
 };
+
+const tankLevels = [TankLevel0, TankLevel1, TankLevel2, TankLevel3, TankLevel4, TankLevel5, TankLevel6, TankLevel7];
 
 export default registerTick(80, 80)(Tank);
