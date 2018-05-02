@@ -1,43 +1,12 @@
 import { List } from 'immutable';
 import { Channel, delay } from 'redux-saga';
-import { call, fork, race, select, take } from 'redux-saga/effects';
+import { call, race, select, take } from 'redux-saga/effects';
 import { BLOCK_SIZE, FIELD_SIZE, ITEM_SIZE_MAP, N_MAP, TANK_SIZE } from 'utils/consts';
-import { asBox, getDirectionInfo, iterRowsAndCols } from 'utils/common';
+import { asBox, getDirectionInfo, iterRowsAndCols, reverseDirection } from 'utils/common';
 import * as selectors from 'utils/selectors';
 import { State, TankRecord } from 'types';
 
 const log = console.log;
-const table: any = () => 0;
-
-function reverseDirection(direction: Direction): Direction {
-  if (direction === 'up') {
-    return 'down';
-  }
-  if (direction === 'down') {
-    return 'up';
-  }
-  if (direction === 'left') {
-    return 'right';
-  }
-  if (direction === 'right') {
-    return 'left';
-  }
-}
-
-export default function* inlineAI($$postMessage: any, inputChannel: Channel<any>) {
-  yield fork(controller, $$postMessage, inputChannel);
-  while (true) {
-    yield take(['REMOVE_TANK', 'LOAD_STAGE']);
-    const tank = yield select(selectors.playerTank, 'AI');
-    if (tank == null) {
-      const { game }: State = yield select();
-      if (game.remainingEnemyCount > 0) {
-        yield delay(2000);
-        $$postMessage({ type: 'spawn-tank', x: 10 * 16, y: 0 });
-      }
-    }
-  }
-}
 
 function canDestroy(barrierType: BarrierType) {
   return barrierType === 'brick';
@@ -266,58 +235,6 @@ function shouldFire(tank: TankRecord, { barrierInfo, tankPosition }: TankEnv) {
   return false;
 }
 
-function* controller($$postMessage: (message: AICommand) => void, inputChannel: Channel<any>) {
-  while (true) {
-    console.group('turn & forward');
-    yield race({
-      timeout: call(delay, 1000),
-      event: take(inputChannel)
-    });
-    let tank: TankRecord = yield select(selectors.playerTank, 'AI');
-    if (tank == null) {
-      console.groupEnd();
-      continue;
-    }
-
-    const env = getEnv(yield select(), tank);
-    const priorityMap = calculatePriorityMap(env);
-
-    // 降低回头的优先级
-    const reverse = reverseDirection(tank.direction);
-    priorityMap[reverse] = Math.min(priorityMap[reverse], 1);
-
-    const nextDirection = getRandomDirection(priorityMap);
-
-    log('binfo', env.barrierInfo);
-    log('pos', env.tankPosition);
-    log('priority-map', priorityMap);
-    log('next-direction', nextDirection);
-    // debugger
-
-    if (tank.direction !== nextDirection) {
-      $$postMessage({ type: 'turn', direction: nextDirection });
-      tank = tank.set('direction', nextDirection);
-      // 等待足够长的时间, 保证turn命令已经被处理
-      yield delay(100);
-    }
-
-    if (shouldFire(tank, env)) {
-      log('command fire!');
-      $$postMessage({ type: 'fire' });
-    }
-
-    log('forward-length:', env.barrierInfo[tank.direction].length);
-    $$postMessage({
-      type: 'forward',
-      // todo tank应该更加偏向于走到下一个 *路口*
-      // forwardLength: Math.max(BLOCK_SIZE, env.barrierInfo[tank.direction].length),
-      forwardLength: env.barrierInfo[tank.direction].length
-    });
-    // $$postMessage({ type: 'fire', forwardLength: 3 * BLOCK_SIZE })
-    console.groupEnd();
-  }
-}
-
 function getRandomDirection({ up, down, left, right }: PriorityMap): Direction {
   const total = up + down + left + right;
   let n = Math.random() * total;
@@ -422,5 +339,58 @@ function getAheadRiverLength(rivers: List<boolean>, tank: TankRecord) {
       }
     }
     step++;
+  }
+}
+
+export default function* inlineAI(
+  playerName: string,
+  postMessage: (command: AICommand) => void,
+  noteChannel: Channel<any>
+) {
+  while (true) {
+    console.groupCollapsed(`AI ${playerName}`);
+    const raceResult = yield race({
+      timeout: call(delay, 2000),
+      event: take(noteChannel)
+    });
+    console.log(raceResult);
+    let tank: TankRecord = yield select(selectors.playerTank, playerName);
+    if (tank == null) {
+      console.groupEnd();
+      continue;
+    }
+
+    const env = getEnv(yield select(), tank);
+    const priorityMap = calculatePriorityMap(env);
+
+    const reverse = reverseDirection(tank.direction);
+    priorityMap[reverse] = Math.min(priorityMap[reverse], 1);
+
+    const nextDirection = getRandomDirection(priorityMap);
+
+    log('binfo', env.barrierInfo);
+    log('pos', env.tankPosition);
+    log('priority-map', priorityMap);
+    log('next-direction', nextDirection);
+    // debugger
+
+    if (tank.direction !== nextDirection) {
+      postMessage({ type: 'turn', direction: nextDirection });
+      tank = tank.set('direction', nextDirection);
+      yield delay(100);
+    }
+
+    if (shouldFire(tank, env)) {
+      log('command fire!');
+      postMessage({ type: 'fire' });
+    }
+
+    log('forward-length:', env.barrierInfo[tank.direction].length);
+    postMessage({
+      type: 'forward',
+      forwardLength: env.barrierInfo[tank.direction].length
+    });
+    // $$postMessage({ type: 'fire', forwardLength: 3 * BLOCK_SIZE })
+    console.groupEnd();
   }
 }

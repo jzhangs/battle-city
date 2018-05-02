@@ -3,8 +3,7 @@ import { fork, put, select, take, PutEffect } from 'redux-saga/effects';
 import { BLOCK_SIZE, ITEM_SIZE_MAP, N_MAP, STEEL_POWER } from 'utils/consts';
 import { asBox, getDirectionInfo, getNextId, isInField, iterRowsAndCols, testCollide } from 'utils/common';
 
-import * as selectors from 'utils/selectors';
-import { BulletRecord, TankRecord, BulletsMap, State } from 'types';
+import { BulletRecord, BulletsMap, State, TankRecord } from 'types';
 
 type Context = {
   expBulletIdSet: Set<BulletId>;

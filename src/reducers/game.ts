@@ -1,4 +1,4 @@
-import { Map, Record } from 'immutable';
+import { Record } from 'immutable';
 
 type Base = {
   overlay: string;

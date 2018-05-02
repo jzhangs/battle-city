@@ -1,9 +1,9 @@
 import { delay } from 'redux-saga';
-import { select, put, fork, take, call } from 'redux-saga/effects';
-import { TANK_SPAWN_DELAY, BLOCK_SIZE } from 'utils/consts';
+import { fork, put, select, take } from 'redux-saga/effects';
+import { BLOCK_SIZE } from 'utils/consts';
 import { getNextId, spawnTank } from 'utils/common';
 import * as selectors from 'utils/selectors';
-import { TankRecord, State } from 'types';
+import { State, TankRecord } from 'types';
 
 function* animateTexts(
   textIds: TextId[],
@@ -60,7 +60,7 @@ function* animateGameover() {
 
 function* watchGameover() {
   while (true) {
-    yield take(['DESTROY_EAGLE', 'ALL_USERS_DEAD']);
+    yield take(['DESTROY_EAGLE', 'ALL_PLAYERS_DEAD']);
     yield put({ type: 'DEACTIVATE_ALL_PLAYERS' });
     yield* animateGameover();
   }
@@ -101,12 +101,6 @@ function* playerSaga(playerName: string) {
 export default function* gameManager() {
   yield fork(watchGameover);
   yield fork(playerSaga, 'player-1');
-
-  yield put({
-    type: 'CREATE_PLAYER',
-    playerName: 'AI',
-    lives: Infinity
-  });
 
   yield put({ type: 'LOAD_STAGE', name: 'test' });
 }

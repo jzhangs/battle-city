@@ -4,7 +4,6 @@ import EnemyCountIndicator from 'components/EnemyCountIndicator';
 import PlayerTankThumbnail from 'components/Icons';
 import Text from 'components/Text';
 import { BLOCK_SIZE } from 'utils/consts';
-import * as selectors from 'utils/selectors';
 
 import { State, PlayersMap } from 'types';
 

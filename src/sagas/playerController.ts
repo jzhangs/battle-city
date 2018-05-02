@@ -1,13 +1,13 @@
-import { take, fork, select, SelectEffect } from 'redux-saga/effects';
+import { take, fork, select } from 'redux-saga/effects';
 import * as selectors from 'utils/selectors';
 import * as _ from 'lodash';
 import directionController from 'sagas/directionController';
 import fireController from 'sagas/fireController';
-import { UserControllerConfig, TankRecord } from 'types';
+import { PlayerControllerConfig, TankRecord } from 'types';
 
 const Mousetrap = require('mousetrap');
 
-export default function* playerController(playerName: string, config: UserControllerConfig) {
+export default function* playerController(playerName: string, config: PlayerControllerConfig) {
   let firePressing = false;
   let firePressed = false;
   Mousetrap.bind(
@@ -70,7 +70,7 @@ export default function* playerController(playerName: string, config: UserContro
   bindKeyWithDirection(config.down, 'down');
   bindKeyWithDirection(config.right, 'right');
 
-  function* getUserPlayerInput() {
+  function* getPlayerInput() {
     const tank: TankRecord = yield select(selectors.playerTank, playerName);
     if (tank != null) {
       const { direction } = getDirectionControlInfo();
@@ -88,7 +88,7 @@ export default function* playerController(playerName: string, config: UserContro
     const action: Action.ActivatePlayerAction = yield take('ACTIVATE_PLAYER');
     if (action.playerName === playerName) {
       yield [
-        directionController(playerName, getUserPlayerInput),
+        directionController(playerName, getPlayerInput),
         fireController(playerName, shouldFire)
       ];
     }

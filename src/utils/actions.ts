@@ -33,7 +33,7 @@ declare global {
       | SetTextAction
       | UpdateTextPositionAction
       | Simple<'DESTROY_EAGLE'>
-      | Simple<'ALL_USERS_DEAD'>
+      | Simple<'ALL_PLAYERS_DEAD'>
       | SpawnTankAction
       | StartMoveAction
       | RemoveTankAction

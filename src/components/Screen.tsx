@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { connect, DispatchProp } from 'react-redux';
+import { connect } from 'react-redux';
 
 import Tank from 'components/Tank';
 import Bullet from 'components/Bullet';

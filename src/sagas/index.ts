@@ -3,9 +3,8 @@ import { fork, take, put } from 'redux-saga/effects';
 import playerController from 'sagas/playerController';
 import bulletsSaga from 'sagas/bulletsSaga';
 import gameManager from 'sagas/gameManager';
-import workerSaga from 'sagas/workerSaga';
+import AIMasterSaga from 'sagas/AISaga';
 import { CONTROL_CONFIG, TANK_SPAWN_DELAY } from 'utils/consts';
-import * as A from 'utils/actions';
 
 const tickChannel = eventChannel<Action>(emit => {
   let lastTime = performance.now();
@@ -51,7 +50,7 @@ export default function* rootSaga() {
   yield fork(playerController, 'player-1', CONTROL_CONFIG.player1);
   yield fork(playerController, 'player-2', CONTROL_CONFIG.player2);
 
-  yield fork(workerSaga);
+  yield fork(AIMasterSaga);
 
   yield fork(gameManager);
 }

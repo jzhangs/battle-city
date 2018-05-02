@@ -1,6 +1,5 @@
 import { asBox, isInField, testCollide, iterRowsAndCols } from 'utils/common';
 import { BLOCK_SIZE, ITEM_SIZE_MAP, N_MAP } from 'utils/consts';
-import * as selectors from 'utils/selectors';
 import { TankRecord, State, EagleRecord, TanksMap } from 'types';
 import { List } from 'immutable';
 

@@ -1,4 +1,4 @@
-import { Map, List, Repeat, Record } from 'immutable';
+import { List, Repeat, Record } from 'immutable';
 import { FIELD_BLOCK_SIZE, N_MAP, BLOCK_SIZE } from 'utils/consts';
 import { StageConfig } from 'types';
 // import testStage from 'stages/stage-test';

@@ -15,7 +15,7 @@ export { BulletsMap } from 'reducers/bullets';
 export { TextsMap } from 'reducers/texts';
 export { TanksMap } from 'reducers/tanks';
 
-export interface UserControllerConfig {
+export interface PlayerControllerConfig {
   fire: string;
   up: string;
   down: string;
@@ -59,10 +59,12 @@ declare global {
   type ExplosionId = number;
   type Side = 'player' | 'ai';
 
+  type Note = string;
+
   type AICommand = AICommand.AICommand;
 
   namespace AICommand {
-    type AICommand = Forward | Fire | Turn | SpawnTank;
+    type AICommand = Forward | Fire | Turn;
 
     interface Forward {
       type: 'forward';
@@ -76,12 +78,6 @@ declare global {
     interface Turn {
       type: 'turn';
       direction: Direction;
-    }
-
-    interface SpawnTank {
-      type: 'spawn-tank';
-      x: number;
-      y: number;
     }
   }
 }

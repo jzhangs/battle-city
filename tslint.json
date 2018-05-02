@@ -4,10 +4,12 @@
   "jsRules": {},
   "rules": {
     "align": [true, "parameters"],
+    "function-name": false,
     "import-name": false,
     "max-line-length": [true, 120],
     "no-else-after-return": false,
     "no-increment-decrement": false,
+    "no-unused-variable": true,
     "object-shorthand-properties-first": false,
     "prefer-array-literal": false,
     "ter-arrow-parens": false,
