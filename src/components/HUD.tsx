@@ -29,13 +29,13 @@ class HUD extends React.PureComponent<P> {
     const transform = `translate(${14.5 * BLOCK_SIZE},${7.5 * BLOCK_SIZE})`;
     return (
       <g data-role="player-1-info" transform={transform}>
-        <Text x={0} y={0} content={'\u2160P'} fill="#000000" />
+        <Text x={0} y={0} content={'\u2160P'} fill="#000" />
         <PlayerTankThumbnail x={0} y={0.5 * BLOCK_SIZE} />
         <Text
           x={0.5 * BLOCK_SIZE}
           y={0.5 * BLOCK_SIZE}
           content={String(player1.lives)}
-          fill="#000000"
+          fill="#000"
         />
       </g>
     );
@@ -52,7 +52,7 @@ class HUD extends React.PureComponent<P> {
       <g data-role="player-2-info" transform={transform}>
         <Text x={0} y={0} content={'\u2161P'} fill="#000000" />
         <PlayerTankThumbnail x={0} y={0.5 * BLOCK_SIZE} />
-        <Text x={0.5 * BLOCK_SIZE} y={BLOCK_SIZE} content={String(player2.lives)} fill="#000000" />
+        <Text x={0.5 * BLOCK_SIZE} y={0.5 * BLOCK_SIZE} content={String(player2.lives)} fill="#000" />
       </g>
     );
   }

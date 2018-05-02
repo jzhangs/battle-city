@@ -2,7 +2,7 @@ export type StageConfig = {
   name: string;
   difficulty: 'easy' | 'normal' | 'hard';
   map: string[];
-  enemies: string
+  enemies: string;
 };
 
 export { default as TankRecord } from 'types/TankRecord';
@@ -44,7 +44,8 @@ declare global {
     dy: number;
   }
 
-  type Overlay = '' | 'gameovr' | 'statistics';
+  type PowerUpName = 'tank' | 'star' | 'grenade' | 'timer' | 'helmet' | 'shovel';
+  type Overlay = '' | 'gameover' | 'statistics';
   type Direction = 'up' | 'down' | 'left' | 'right';
 
   type TankLevel = 'basic' | 'fast' | 'power' | 'armor';

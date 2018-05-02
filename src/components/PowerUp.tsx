@@ -2,15 +2,15 @@ import * as React from 'react';
 import { Bitmap } from 'components/Elements';
 import registerTick from 'hocs/registerTick';
 
-const itemColor = {
+const colorSchema = {
   ' ': 'none',
   w: '#FFFFFF',
   g: '#ADADAD',
   b: '#00424A'
 };
 
-const itemArray: { [name: string]: string[] } = {
-  chariot: [
+const powerUpDataArray = {
+  tank: [
     ' wwwwwwwwwwwwwg ',
     'w             wb',
     'w bbbbbbbbbbbbwb',
@@ -42,7 +42,7 @@ const itemArray: { [name: string]: string[] } = {
     'gwwwwwwwwwwwwwgb',
     ' bbbbbbbbbbbbbb '
   ],
-  bomb: [
+  grenade: [
     ' wwwwwwwwwwwwwg ',
     'w             wb',
     'w bbbwwwgg bbbwb',
@@ -60,7 +60,7 @@ const itemArray: { [name: string]: string[] } = {
     ' bbbbbbbbbbbbbb ',
     '                '
   ],
-  clock: [
+  timer: [
     ' wwwwwwwwwwwwwg ',
     'w             wb',
     'w bbbbwgwg bbbwb',
@@ -138,15 +138,15 @@ const itemArray: { [name: string]: string[] } = {
 type P = {
   x: number;
   y: number;
-  name: string;
+  name: PowerUpName;
   tickIndex?: number;
 };
 
-class Items extends React.Component<P, {}> {
+export class _PowerUp extends React.PureComponent<P> {
   render() {
     const { x, y, name, tickIndex } = this.props;
-    return tickIndex === 0 ? <Bitmap x={x} y={y} d={itemArray[name]} scheme={itemColor} /> : null;
+    return tickIndex === 0 ? <Bitmap x={x} y={y} d={powerUpDataArray[name]} scheme={colorSchema} /> : null;
   }
 }
 
-export default registerTick(400, 800)(Items);
+export default registerTick(400, 800)(_PowerUp);

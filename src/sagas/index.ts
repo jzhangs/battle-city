@@ -1,27 +1,11 @@
-import { takeEvery, delay, eventChannel } from 'redux-saga';
-import { fork, take, put } from 'redux-saga/effects';
+import { takeEvery, delay } from 'redux-saga';
+import { fork, put } from 'redux-saga/effects';
 import playerController from 'sagas/playerController';
 import bulletsSaga from 'sagas/bulletsSaga';
 import gameManager from 'sagas/gameManager';
 import AIMasterSaga from 'sagas/AISaga';
+import tickEmitter from 'sagas/tickEmitter';
 import { CONTROL_CONFIG, TANK_SPAWN_DELAY } from 'utils/consts';
-
-const tickChannel = eventChannel<Action>(emit => {
-  let lastTime = performance.now();
-  let requestId = requestAnimationFrame(emitTick);
-
-  function emitTick() {
-    const now = performance.now();
-    emit({ type: 'TICK', delta: now - lastTime });
-    emit({ type: 'AFTER_TICK', delta: now - lastTime });
-    lastTime = now;
-    requestId = requestAnimationFrame(emitTick);
-  }
-
-  return () => {
-    cancelAnimationFrame(requestId);
-  };
-});
 
 function* autoRemoveEffects() {
   yield takeEvery('SPAWN_EXPLOSION', function* removeExplosion({
@@ -38,11 +22,7 @@ function* autoRemoveEffects() {
 }
 
 export default function* rootSaga() {
-  yield fork(function* handleTick() {
-    while (true) {
-      yield put(yield take(tickChannel));
-    }
-  });
+  yield fork(tickEmitter);
 
   yield fork(bulletsSaga);
   yield fork(autoRemoveEffects);

@@ -70,7 +70,7 @@ type P = {
   tickIndex?: number;
 };
 
-class _BulletExplosion extends React.PureComponent<P, {}> {
+export class _BulletExplosion extends React.PureComponent<P> {
   render() {
     const { x, y, tickIndex } = this.props;
     return <Bitmap x={x} y={y} d={bulletExplosiondataArray[tickIndex]} scheme={schema} />;
@@ -150,7 +150,7 @@ const tankExplosionDataArray = [
   ]
 ];
 
-class _TankExplosion extends React.PureComponent<P, {}> {
+export class _TankExplosion extends React.PureComponent<P> {
   render() {
     const { x, y, tickIndex } = this.props;
     return <Bitmap x={x} y={y} d={tankExplosionDataArray[tickIndex]} scheme={schema} />;
@@ -159,7 +159,7 @@ class _TankExplosion extends React.PureComponent<P, {}> {
 
 const TankExplosion = registerTick(200, 9999)(_TankExplosion);
 
-export default class Explosion extends React.PureComponent<{ explosionType: ExplosionType } & P, {}> {
+export default class Explosion extends React.PureComponent<{ explosionType: ExplosionType } & P> {
   render() {
     const { explosionType } = this.props;
     if (explosionType === 'bullet') {
