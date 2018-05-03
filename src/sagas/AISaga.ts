@@ -7,8 +7,7 @@ import * as selectors from 'utils/selectors';
 import { getDirectionInfo, spawnTank } from 'utils/common';
 import { State } from 'reducers';
 import { TankRecord, PlayerRecord } from 'types';
-
-const AIWorker = require('worker-loader!ai/worker');
+import AIWorker = require('worker-loader!ai/worker');
 
 function* handleReceiveMessages(playerName: string, cmdChannel: Channel<AICommand>, noteChannel: Channel<Note>) {
   let fire = false;
