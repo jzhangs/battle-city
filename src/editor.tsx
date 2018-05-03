@@ -418,7 +418,8 @@ class Editor extends React.Component {
     const totalEnemyCount = enemies.map(e => e.count).reduce((x: number, y) => x + y);
 
     if (stageName === '') {
-      await this.showAlertPopup('stageName is empty.');
+      await this.showAlertPopup('Please enter stage name.');
+      this.setState({ view: 'config' });
       return;
     }
 
@@ -490,9 +491,9 @@ class Editor extends React.Component {
   };
 
   onShowHelpInfo = async () => {
-    await this.showAlertPopup('help info - 1');
-    await this.showAlertPopup('help info - 2');
-    await this.showAlertPopup('help info - 3');
+    await this.showAlertPopup('1. Choose an item type below');
+    await this.showAlertPopup('2. Click or pan in the left');
+    await this.showAlertPopup('3. After select Brick or Steel you can change its shape');
   };
 
   renderItemSwitchButtons() {
@@ -588,6 +589,14 @@ class Editor extends React.Component {
         </g>
         <DashLines t={t} />
         <g data-role="tools" transform={`translate(${13 * B},0)`}>
+          <TextButton
+            content="?"
+            x={2.25 * B}
+            y={0.25 * B}
+            spreadX={0.05 * B}
+            spreadY={0.05 * B}
+            onClick={this.onShowHelpInfo}
+          />
           <Text content={'\u2192'} fill="#E91E63" x={0.25 * B} y={0.25 * B + positionMap[itemType]} />
 
           <rect x={B} y={B} width={B} height={B} fill="black" />
@@ -677,7 +686,7 @@ class Editor extends React.Component {
           <g transform={`translate(${2.5 * B}, ${4.5 * B})`}>
             <rect x={-0.5 * B} y={-0.5 * B} width={12 * B} height={4 * B} fill="#e91e63" />
             <TextWithLineWrap x={0} y={0} fill="#333" maxLength={22} content={popup.message} />
-            <TextButton x={9.5 * B} y={2 * B} textFill="#333" content="OK" onClick={this.onClickOkOfAlert} />
+            <TextButton x={9.5 * B} y={2.25 * B} textFill="#333" content="OK" onClick={this.onClickOkOfAlert} />
           </g>
         </g>
       );
