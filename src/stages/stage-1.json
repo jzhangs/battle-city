@@ -1,6 +1,6 @@
 {
   "name": "1",
-  "difficulty": "1",
+  "difficulty": 1,
   "map": [
     "X  X  X  X  X  X  X  X  X  X  X  X  X  ",
     "X  Bf X  Bf X  Bf X  Bf X  Bf X  Bf X  ",
@@ -16,8 +16,5 @@
     "X  BF X  BF X  B8 Bc B4 X  BF X  BF X  ",
     "X  X  X  X  X  Ba EE B5 X  X  X  X  X  "
   ],
-  "enemies": [
-    "18*basic",
-    "2*fast"
-  ]
+  "enemies": ["18*basic", "2*fast"]
 }
