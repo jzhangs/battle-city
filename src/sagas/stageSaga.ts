@@ -3,9 +3,9 @@ import { put, select, take } from 'redux-saga/effects';
 import { State } from 'reducers';
 
 function* statistics() {
-  yield put({ type: 'SHOW_OVERLAY', overlay: 'statistics' });
+  yield put<Action>({ type: 'SHOW_OVERLAY', overlay: 'statistics' });
   yield delay(5000);
-  yield put({ type: 'REMOVE_OVERLAY', overlay: 'statistics' });
+  yield put<Action>({ type: 'REMOVE_OVERLAY' });
 }
 
 export default function* stageSaga(stageName: string) {
@@ -15,7 +15,7 @@ export default function* stageSaga(stageName: string) {
     const { sourcePlayer, targetTank }: Action.KillAction = yield take('KILL');
     const {
       players,
-      game: { remainingEnemyCount },
+      game: { remainingEnemies },
       tanks
     }: State = yield select();
 
@@ -26,7 +26,7 @@ export default function* stageSaga(stageName: string) {
         level: targetTank.level
       });
 
-      if (remainingEnemyCount === 0 && tanks.filter(t => t.side === 'ai').size === 0) {
+      if (remainingEnemies.isEmpty() && tanks.filter(t => t.side === 'ai').size === 0) {
         yield* statistics();
         return { status: 'clear' };
       }

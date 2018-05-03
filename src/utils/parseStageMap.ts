@@ -9,7 +9,7 @@ import { EagleRecord, MapRecord } from 'reducers/map';
 // forest F
 // steel  T<n>
 // eagle  E
-export default function parseStageMap(map: string[]) {
+export default function parseStageMap(map: StageConfig['map']) {
   const bricks = new Set();
   const steels = new Set();
   const rivers = new Set();

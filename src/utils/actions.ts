@@ -20,7 +20,7 @@ declare global {
       | Simple<'GAMEOVER'>
       | ShowOverlayAction
       | RemoveOverlayAction
-      | Simple<'DECREMENT_REMAINING_ENEMY_COUNT'>
+      | Simple<'REMOVE_FIRST_REMAINING_ENEMY'>
       | DecrementPlayerLiveAction
       | ActivatePlayerAction
       | CreatePlayerAction
@@ -31,7 +31,6 @@ declare global {
       | SetTextAction
       | UpdateTextPositionAction
       | Simple<'DESTROY_EAGLE'>
-      | Simple<'ALL_PLAYERS_DEAD'>
       | SpawnTankAction
       | StartMoveAction
       | RemoveTankAction

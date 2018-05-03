@@ -9,7 +9,7 @@ import { State, PlayersMap } from 'types';
 
 function mapStateToProps(state: State) {
   return {
-    remainingEnemyCount: state.game.remainingEnemyCount,
+    remainingEnemyCount: state.game.remainingEnemies.size,
     players: state.players,
   };
 }

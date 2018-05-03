@@ -1,9 +1,4 @@
-export type StageConfig = {
-  name: string;
-  difficulty: 'easy' | 'normal' | 'hard';
-  map: string[];
-  enemies: string;
-};
+
 
 export { default as TankRecord } from 'types/TankRecord';
 export { default as FlickerRecord } from 'types/FlickerRecord';
@@ -45,11 +40,19 @@ declare global {
     dy: number;
   }
 
+  interface StageConfig {
+    name: string;
+    difficulty: 'easy' | 'normal' | 'hard';
+    map: string[];
+    enemies: string[];
+  }
+
   type PowerUpName = 'tank' | 'star' | 'grenade' | 'timer' | 'helmet' | 'shovel';
   type Overlay = '' | 'gameover' | 'statistics';
   type Direction = 'up' | 'down' | 'left' | 'right';
 
   type TankLevel = 'basic' | 'fast' | 'power' | 'armor';
+  type TankColor = 'green' | 'yellow' | 'silver' | 'red';
   type TankId = number;
   type BulletId = number;
   type PlayerName = string;

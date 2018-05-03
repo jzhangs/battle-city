@@ -1,19 +1,21 @@
-import { Map, Record } from 'immutable';
+import { Map, Record, List } from 'immutable';
+import parseStageEnemies from 'utils/parseStageEnemies';
+import stageConfigs from 'stages';
 
 type Base = {
   overlay: string;
-  remainingEnemyCount: number;
+  currentStage: string;
+  remainingEnemies: List<TankLevel>;
+  killInfo: Map<PlayerName, Map<TankLevel, KillCount>>;
 };
 
 type KillCount = number;
-
-const defaultRemainingEnemyCount = 20;
 
 export const GameRecord = Record(
   {
     overlay: '' as Overlay,
     currentStage: null as string,
-    remainingEnemyCount: defaultRemainingEnemyCount,
+    remainingEnemies: List<TankLevel>(),
     killInfo: Map<PlayerName, Map<TankLevel, KillCount>>()
   },
   'GameRecord'
@@ -27,12 +29,13 @@ export default function game(state = GameRecord(), action: Action) {
   } else if (action.type === 'REMOVE_OVERLAY') {
     return state.set('overlay', null);
   } else if (action.type === 'LOAD_STAGE') {
-    return state
-      .set('currentStage', action.name)
-      .set('remainingEnemyCount', defaultRemainingEnemyCount)
-      .set('killInfo', Map());
-  } else if (action.type === 'DECREMENT_REMAINING_ENEMY_COUNT') {
-    return state.update('remainingEnemyCount', x => x - 1);
+    return state.merge({
+      currentStage: action.name,
+      killInfo: Map(),
+      remainingEnemies: parseStageEnemies(stageConfigs[action.name].enemies)
+    });
+  } else if (action.type === 'REMOVE_FIRST_REMAINING_ENEMY') {
+    return state.update('remainingEnemies', enemies => enemies.shift());
   } else if (action.type === 'INC_KILL_COUNT') {
     const { playerName, level } = action;
     return state.updateIn(['killInfo', playerName, level], x => (!x ? 1 : x + 1));
