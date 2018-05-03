@@ -38,12 +38,19 @@ declare global {
       | RemoveTextAction
       | RemoveFlickerAction
       | SpawnFlickerAction
+      | HurtAction
       | KillAction
       | IncKillCout
       | UpdateTransientKillInfo
       | Simple<'SHOW_TOTAL_KILL_COUNT'>;
 
     export type ActionType = Action['type'];
+
+    export type HurtAction = {
+      type: 'HURT';
+      targetTank: TankRecord;
+      hurt: number;
+    };
 
     export type KillAction = {
       type: 'KILL';
@@ -54,8 +61,8 @@ declare global {
     };
 
     export type UpdateTransientKillInfo = {
-      type: 'UPDATE_TRANSIENT_KILL_INFO',
-      info: Map<PlayerName, Map<TankLevel, KillCount>>
+      type: 'UPDATE_TRANSIENT_KILL_INFO';
+      info: Map<PlayerName, Map<TankLevel, KillCount>>;
     };
 
     export type IncKillCout = {
