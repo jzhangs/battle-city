@@ -109,11 +109,13 @@ export default function parseStageMap(map: StageConfig['map']) {
   }
 
   return MapRecord({
-    eagle: EagleRecord({
-      x: eaglePos.x,
-      y: eaglePos.y,
-      broken: false
-    }),
+    eagle: eaglePos
+      ? EagleRecord({
+          x: eaglePos.x,
+          y: eaglePos.y,
+          broken: false
+        })
+      : null,
     bricks: Repeat(false, N_MAP.BRICK ** 2)
       .map((set, index) => bricks.has(index))
       .toList(),

@@ -12,7 +12,9 @@
     "no-unused-variable": true,
     "object-shorthand-properties-first": false,
     "prefer-array-literal": false,
+    "semicolon": false,
     "ter-arrow-parens": false,
+    "ter-indent": false,
     "trailing-comma": false,
     "variable-name": [true, "allow-pascal-case"]
   },

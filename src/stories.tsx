@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom';
 import { Map } from 'immutable';
 import { Provider } from 'react-redux';
 import { applyMiddleware, combineReducers, createStore } from 'redux';
-import createSgaMiddleware from 'redux-saga';
+import createSagaMiddleware from 'redux-saga';
 import players from 'reducers/players';
 import { time } from 'reducers';
 import game from 'reducers/game';
@@ -33,7 +33,7 @@ const BulletExplosion = registerTick(500, 500, 1000)(_BulletExplosion);
 const TankExplosion = registerTick(500, 1000)(_TankExplosion);
 const PowerUp = ({ name }: any) => <_PowerUp tickIndex={0} name={name} x={0} y={0} />;
 
-const simpleSagaMiddleware = createSgaMiddleware();
+const simpleSagaMiddleware = createSagaMiddleware();
 const simpleReducer = combineReducers({ time, players, game });
 const initialState = {
   time: undefined as number,

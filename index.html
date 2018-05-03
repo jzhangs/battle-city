@@ -17,6 +17,35 @@
       user-select: none;
       cursor: default;
     }
+
+    .button-area {
+      fill: transparent;
+      cursor: pointer;
+      transition: stroke 250ms;
+    }
+
+    .button-area:hover {
+      stroke: #e91e63;
+    }
+
+    .text-area {
+      fill: transparent;
+      cursor: pointer;
+    }
+
+    .text-area:hover {
+      fill: #865b69;
+    }
+
+    .text-area.selected,
+    .text-area:active {
+      fill: #e91e63;
+    }
+
+    .text-area.disabled {
+      fill: transparent;
+      cursor: default;
+    }
   </style>
 </head>
 

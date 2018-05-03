@@ -261,7 +261,26 @@ const chars: Chars = {
       d="M1,0 h7 v2 h-1 v1 h-1 v1 h-1 v1 h-1 v1 h4 v1 h-7 v-2 h1 v-1 h1 v-1 h1 v-1 h1 v-1 h-4 v-1"
     />
   ),
-  '-': ({ fill }) => <rect role="character-dash" fill={fill} x="1" y="3" width="6" height="2" />,
+  '-': ({ fill }) => <rect data-role="character-dash" fill={fill} x="1" y="3" width="6" height="2" />,
+  '+': ({ fill }) => (
+    <g data-role="character-plus" fill={fill}>
+      <rect x="1" y="3" width="6" height="2" />
+      <rect x="3" y="1" width="2" height="6" />
+    </g>
+  ),
+  ':': ({ fill }) => (
+    <g role="character-colon" fill={fill}>
+      <rect x="2" y="1" width="2" height="2" />
+      <rect x="2" y="5" width="2" height="2" />
+    </g>
+  ),
+  '.': ({ fill }) => <rect role="character-dot" x="2" y="5" width="2" height="2" fill={fill} />,
+  '?': ({ fill }) => (
+    <g role="character-question-mark" fill={fill}>
+      <path d="M2,0 h5 v1 h1 v2 h-1 v1 h-1 v1 h-3 v-1 h2 v-1 h1 v-2 h-3 v2 h-2 v-2 h1 v-1" />
+      <rect x="3" y="6" width="3" height="1" />
+    </g>
+  ),
   ⅰ: ({ fill }) => (
     <path data-role="character-roman-numeral-one" fill={fill} d="M2,0 h4 v1 h-1 v5 h1 v1 h-4 v-1 h1 v-5 h-1 v-1" />
   ),
@@ -275,14 +294,14 @@ const chars: Chars = {
   ),
   ['\u2190'.toLowerCase()]: ({ fill }) => (
     <path
-      role="character-leftwards-arrow"
+      data-role="character-leftwards-arrow"
       fill={fill}
       d="M1,3 h1 v-1 h1 v-1 h1 v-1 h1 v2 h3 v3 h-3 v2 h-1 v-1 h-1 v-1 h-1 v-1 h-1 v-1"
     />
   ),
   ['\u2192'.toLowerCase()]: ({ fill }) => (
     <path
-      role="character-rightwards-arrow"
+      data-role="character-rightwards-arrow"
       fill={fill}
       d="M1,2 h3 v-2 h1 v1 h1 v1 h1 v1 h1 v1 h-1 v1 h-1 v1 h-1 v1 h-1 v-2 h-3 v-3"
     />
@@ -293,14 +312,19 @@ type Props = {
   content: string;
   x: number;
   y: number;
-  fill: string;
+  fill?: string;
+  style?: React.CSSProperties;
 };
 
-export default class Text extends React.PureComponent<Props, {}> {
+export default class Text extends React.PureComponent<Props> {
+  static support(char: string) {
+    return char in chars;
+  }
+
   render() {
-    const { content, x, y, fill } = this.props;
+    const { content, x, y, fill = 'white', style = {} } = this.props;
     return (
-      <g data-role="text" transform={`translate(${x},${y})`}>
+      <g data-role="text" transform={`translate(${x},${y})`} style={style}>
         {Array.from(content.toLowerCase()).map((char, i) => {
           const Component = chars[char];
           if (Component != null) {

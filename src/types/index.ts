@@ -1,5 +1,3 @@
-
-
 export { default as TankRecord } from 'types/TankRecord';
 export { default as FlickerRecord } from 'types/FlickerRecord';
 export { default as TextRecord } from 'types/TextRecord';
@@ -42,7 +40,7 @@ declare global {
 
   interface StageConfig {
     name: string;
-    difficulty: 'easy' | 'normal' | 'hard';
+    difficulty: number;
     map: string[];
     enemies: string[];
   }

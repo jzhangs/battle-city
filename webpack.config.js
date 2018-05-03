@@ -4,7 +4,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   entry: {
     main: './src/index.tsx',
-    stories: './src/stories.tsx'
+    stories: './src/stories.tsx',
+    editor: './src/editor.tsx'
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -36,6 +37,11 @@ module.exports = {
       filename: 'stories.html',
       template: './index.html',
       chunks: ['stories'],
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'editor.html',
+      template: './index.html',
+      chunks: ['editor'],
     })
   ],
   devServer: {
