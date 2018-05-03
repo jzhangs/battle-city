@@ -151,8 +151,8 @@ export default function* AIMasterSaga() {
         })
       });
 
-      const { x, y } = yield select(selectors.avaliableSpawnPosition);
-      yield put({ type: 'REMOVE_FIRST_REMAING_ENEMY' });
+      const { x, y } = yield select(selectors.availableSpawnPosition);
+      yield put<Action>({ type: 'REMOVE_FIRST_REMAINING_ENEMY' });
       const tankId = yield* spawnTank(
         TankRecord({ x, y, side: 'ai', color: 'silver', level: remainingEnemies.first() })
       );

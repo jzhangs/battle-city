@@ -11,7 +11,7 @@ export const playerTank = (state: State, playerName: string) => {
   return state.tanks.get(tankId, null);
 };
 
-export const avaliableSpawnPosition = ({ tanks }: State): Box => {
+export const availableSpawnPosition = ({ tanks }: State): Box => {
   const result: Box[] = [];
   outer: for (const x of [0, 6 * BLOCK_SIZE, 12 * BLOCK_SIZE]) {
     const option = { x, y: 0, width: TANK_SIZE, height: TANK_SIZE };

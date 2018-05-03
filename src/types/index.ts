@@ -55,6 +55,8 @@ declare global {
   type TankColor = 'green' | 'yellow' | 'silver' | 'red';
   type TankId = number;
   type BulletId = number;
+  type KillCount = number;
+
   type PlayerName = string;
   type TextId = number;
   type FlickerId = number;

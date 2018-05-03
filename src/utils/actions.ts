@@ -39,7 +39,9 @@ declare global {
       | RemoveFlickerAction
       | SpawnFlickerAction
       | KillAction
-      | IncKillCout;
+      | IncKillCout
+      | UpdateTransientKillInfo
+      | Simple<'SHOW_TOTAL_KILL_COUNT'>;
 
     export type ActionType = Action['type'];
 
@@ -49,6 +51,11 @@ declare global {
       sourceTank: TankRecord;
       targetPlayer: PlayerRecord;
       sourcePlayer: PlayerRecord;
+    };
+
+    export type UpdateTransientKillInfo = {
+      type: 'UPDATE_TRANSIENT_KILL_INFO',
+      info: Map<PlayerName, Map<TankLevel, KillCount>>
     };
 
     export type IncKillCout = {

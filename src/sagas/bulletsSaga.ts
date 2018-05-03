@@ -285,7 +285,7 @@ function* handleAfterTick() {
 
     const kills: PutEffect<Action.KillAction>[] = [];
     for (const [targetTankId, hurtMap] of context.tankHurtMap.entries()) {
-      const sourceTankId = hurtMap.values().next().value;
+      const sourceTankId = hurtMap.keys().next().value;
       kills.push(
         put<Action.KillAction>({
           type: 'KILL',

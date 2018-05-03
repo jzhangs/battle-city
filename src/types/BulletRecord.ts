@@ -2,7 +2,7 @@ import { Record } from 'immutable';
 
 const BulletRecord = Record({
   bulletId: 0 as BulletId,
-  direction: null as Direction,
+  direction: 'up' as Direction,
   speed: 0,
   x: 0,
   y: 0,
