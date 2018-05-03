@@ -1,13 +1,148 @@
 import { List } from 'immutable';
-import { Channel, delay } from 'redux-saga';
-import { call, race, select, take } from 'redux-saga/effects';
+import { compose } from 'redux';
+import { delay } from 'redux-saga';
 import { BLOCK_SIZE, FIELD_SIZE, ITEM_SIZE_MAP, N_MAP, TANK_SIZE } from 'utils/consts';
 import { asBox, getDirectionInfo, iterRowsAndCols, reverseDirection } from 'utils/common';
-import * as selectors from 'utils/selectors';
-import { State, TankRecord } from 'types';
+import { EagleRecord, MapRecord, TankRecord, TanksMap } from 'types';
 
 // const log = console.log;
 const log: any = () => 0;
+
+interface PostMessage {
+  (msg: AICommand): void;
+}
+
+const post = postMessage as PostMessage;
+
+type ResolveFn = (value?: any) => void;
+const pendingNotes = {
+  'bullet-complete': [] as ResolveFn[],
+  reach: [] as ResolveFn[]
+};
+
+const pendingQueries = {
+  'my-tank-info': [] as ResolveFn[],
+  'map-info': [] as ResolveFn[],
+  'tanks-info': [] as ResolveFn[]
+};
+
+self.onmessage = function (event) {
+  const d: Note = event.data;
+  if (d.type === 'query-result') {
+    const fns = pendingQueries[d.result.type];
+    pendingQueries[d.result.type] = [];
+    fns.forEach(fn => fn(d.result));
+  } else {
+    const fns = pendingNotes[d.type];
+    pendingNotes[d.type] = [];
+    fns.forEach(fn => fn(d));
+  }
+};
+
+const queryMyTank = () =>
+  new Promise<TankRecord>(resolve => {
+    post({ type: 'query', query: 'my-tank' });
+    pendingQueries['my-tank-info'].push(compose(resolve, (result: QueryResult.MyTankInfo) => TankRecord(result.tank)));
+  });
+
+const queryMapInfo = () =>
+  new Promise<MapRecord>(resolve => {
+    post({ type: 'query', query: 'map' });
+    pendingQueries['map-info'].push(
+      compose(resolve, (result: QueryResult.MapInfo) =>
+        MapRecord(result.map as any)
+          .update('eagle', EagleRecord)
+          .update('bricks', List)
+          .update('steels', List)
+          .update('rivers', List)
+          .update('snows', List)
+          .update('forests', List)
+      )
+    );
+  });
+
+const queryTanksInfo = () =>
+  new Promise<TanksMap>(resolve => {
+    post({ type: 'query', query: 'tanks' });
+    pendingQueries['tanks-info'].push(
+      compose(resolve, (result: QueryResult.TanksInfo) =>
+        List(result.tanks)
+          .toMap()
+          .map(TankRecord)
+          .mapKeys((_, t) => t.tankId)
+      )
+    );
+  });
+
+const noteBulletComplete = () =>
+  new Promise(resolve => {
+    pendingNotes['bullet-complete'].push(resolve);
+  });
+
+const noteReach = () =>
+  new Promise(resolve => {
+    pendingNotes['reach'].push(resolve);
+  });
+
+function race<V, T extends { [key: string]: Promise<V> }>(map: T) {
+  return Promise.race(Object.entries(map).map(([key, promise]) => promise.then(value => ({ key, value })))).then(
+    ({ key: resolvedKey, value }) => ({ [resolvedKey]: value })
+  );
+}
+
+async function main() {
+  while (true) {
+    await race({
+      timeout: delay(2000),
+      bulletComplete: noteBulletComplete(),
+      reach: noteReach()
+    });
+    // debugger
+    let tank = await queryMyTank();
+    if (tank == null) {
+      continue;
+    }
+    const map = await queryMapInfo();
+    const tanks = await queryTanksInfo();
+
+    const env = getEnv(map, tanks, tank);
+    const priorityMap = calculatePriorityMap(env);
+
+    const reverse = reverseDirection(tank.direction);
+    priorityMap[reverse] = Math.min(priorityMap[reverse], 1);
+
+    const nextDirection = getRandomDirection(priorityMap);
+
+    log('binfo', env.barrierInfo);
+    log('pos', env.tankPosition);
+    log('priority-map', priorityMap);
+    log('next-direction', nextDirection);
+
+    if (tank.direction !== nextDirection) {
+      post({ type: 'turn', direction: nextDirection });
+      tank = tank.set('direction', nextDirection);
+      // 等待足够长的时间, 保证turn命令已经被处理
+      await delay(100);
+    }
+
+    if (shouldFire(tank, env)) {
+      log('command fire!');
+      post({ type: 'fire' });
+    }
+
+    // log('forward-length:', env.barrierInfo[tank.direction].length)
+    post({
+      type: 'forward',
+      // todo tank应该更加偏向于走到下一个 *路口*
+      // forwardLength: Math.max(BLOCK_SIZE, env.barrierInfo[tank.direction].length),
+      forwardLength: env.barrierInfo[tank.direction].length
+    });
+    // $$postMessage({ type: 'fire', forwardLength: 3 * BLOCK_SIZE })
+    // console.groupEnd()
+  }
+}
+
+main();
 
 function canDestroy(barrierType: BarrierType) {
   return barrierType === 'brick';
@@ -103,16 +238,13 @@ function calculatePriorityMap({ tankPosition: pos, barrierInfo: binfo }: TankEnv
   return priorityMap;
 }
 
-function getEnv(state: State, tank: TankRecord): TankEnv {
+function getEnv(map: MapRecord, tanks: TanksMap, tank: TankRecord): TankEnv {
   const pos = {
     eagle: {},
     nearestHumanTank: {}
   } as TankPosition;
 
-  const {
-    map: { eagle },
-    tanks
-  } = state;
+  const { eagle } = map;
   pos.eagle.dx = eagle.y - tank.y;
   pos.eagle.dy = eagle.x - tank.x;
 
@@ -136,10 +268,10 @@ function getEnv(state: State, tank: TankRecord): TankEnv {
   }
 
   const binfo: BarrierInfo = {
-    down: lookAhead(state, tank.set('direction', 'down')),
-    right: lookAhead(state, tank.set('direction', 'right')),
-    left: lookAhead(state, tank.set('direction', 'left')),
-    up: lookAhead(state, tank.set('direction', 'up'))
+    down: lookAhead(map, tank.set('direction', 'down')),
+    right: lookAhead(map, tank.set('direction', 'right')),
+    left: lookAhead(map, tank.set('direction', 'left')),
+    up: lookAhead(map, tank.set('direction', 'up'))
   };
 
   return {
@@ -254,7 +386,7 @@ function getRandomDirection({ up, down, left, right }: PriorityMap): Direction {
   return 'right';
 }
 
-function lookAhead({ map: { bricks, steels, rivers } }: State, tank: TankRecord): BarrierInfoEntry {
+function lookAhead({ bricks, steels, rivers }: MapRecord, tank: TankRecord): BarrierInfoEntry {
   const brickAheadLength = getAheadBrickLength(bricks, tank);
   const steelAheadLength = getAheadSteelLength(steels, tank);
   const riverAheadLength = getAheadRiverLength(rivers, tank);
@@ -340,58 +472,5 @@ function getAheadRiverLength(rivers: List<boolean>, tank: TankRecord) {
       }
     }
     step++;
-  }
-}
-
-export default function* inlineAI(
-  playerName: string,
-  postMessage: (command: AICommand) => void,
-  noteChannel: Channel<any>
-) {
-  while (true) {
-    const raceResult = yield race({
-      timeout: call(delay, 2000),
-      event: take(noteChannel)
-    });
-    console.groupCollapsed(`AI ${playerName}`);
-    console.log(raceResult);
-    let tank: TankRecord = yield select(selectors.playerTank, playerName);
-    if (tank == null) {
-      // console.groupEnd();
-      continue;
-    }
-
-    const env = getEnv(yield select(), tank);
-    const priorityMap = calculatePriorityMap(env);
-
-    const reverse = reverseDirection(tank.direction);
-    priorityMap[reverse] = Math.min(priorityMap[reverse], 1);
-
-    const nextDirection = getRandomDirection(priorityMap);
-
-    log('binfo', env.barrierInfo);
-    log('pos', env.tankPosition);
-    log('priority-map', priorityMap);
-    log('next-direction', nextDirection);
-    // debugger
-
-    if (tank.direction !== nextDirection) {
-      postMessage({ type: 'turn', direction: nextDirection });
-      tank = tank.set('direction', nextDirection);
-      yield delay(100);
-    }
-
-    if (shouldFire(tank, env)) {
-      log('command fire!');
-      postMessage({ type: 'fire' });
-    }
-
-    log('forward-length:', env.barrierInfo[tank.direction].length);
-    postMessage({
-      type: 'forward',
-      forwardLength: env.barrierInfo[tank.direction].length
-    });
-    // $$postMessage({ type: 'fire', forwardLength: 3 * BLOCK_SIZE })
-    // console.groupEnd();
   }
 }

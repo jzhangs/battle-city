@@ -3,13 +3,12 @@ import { fork, put, select, take, spawn, all } from 'redux-saga/effects';
 
 import directionController from 'sagas/directionController';
 import fireController from 'sagas/fireController';
-import inlineAI from 'sagas/inlineAI';
 import * as selectors from 'utils/selectors';
 import { getDirectionInfo, spawnTank } from 'utils/common';
 import { State } from 'reducers';
 import { TankRecord, PlayerRecord } from 'types';
 
-const EmptyWorker = require('worker-loader!ai/emptyWorker');
+const AIWorker = require('worker-loader!ai/worker');
 
 function* handleReceiveMessages(playerName: string, cmdChannel: Channel<AICommand>, noteChannel: Channel<Note>) {
   let fire = false;
@@ -33,7 +32,7 @@ function* handleReceiveMessages(playerName: string, cmdChannel: Channel<AIComman
       if (tank != null) {
         if (bullets.some(b => b.tankId === tank.tankId)) {
           console.debug('bullet-completed. notify');
-          noteChannel.put('bullet-complete');
+          noteChannel.put({ type: 'bullet-complete' });
         }
       }
     }
@@ -54,6 +53,32 @@ function* handleReceiveMessages(playerName: string, cmdChannel: Channel<AIComman
       fire = true;
     } else if (command.type === 'turn') {
       nextDirection = command.direction;
+    } else if (command.type === 'query') {
+      if (command.query === 'my-tank') {
+        const tank: TankRecord = yield select(selectors.playerTank, playerName);
+        noteChannel.put({
+          type: 'query-result',
+          result: {
+            type: 'my-tank-info',
+            tank: tank && tank.toObject()
+          }
+        });
+      } else if (command.query === 'map') {
+        const { map }: State = yield select();
+        noteChannel.put({
+          type: 'query-result',
+          result: { type: 'map-info', map: map.toJS() }
+        });
+      } else if (command.query === 'tanks') {
+        const { tanks }: State = yield select();
+        noteChannel.put({
+          type: 'query-result',
+          result: {
+            type: 'tanks-info',
+            tanks: tanks.map(t => t.toObject()).toArray()
+          }
+        });
+      }
     } else {
       throw new Error();
     }
@@ -76,7 +101,7 @@ function* handleReceiveMessages(playerName: string, cmdChannel: Channel<AIComman
       const maxDistance = forwardLength - movedLength;
       if (movedLength === forwardLength) {
         forwardLength = 0;
-        noteChannel.put('reach');
+        noteChannel.put({ type: 'reach' });
         return null;
       } else {
         return {
@@ -90,16 +115,10 @@ function* handleReceiveMessages(playerName: string, cmdChannel: Channel<AIComman
 }
 
 function* sendMessagesToWorker(worker: Worker, noteChannel: Channel<Note>) {
-  yield fork(function* sendCommanActions() {
+  yield fork(function* sendNote() {
     while (true) {
-      const action = yield take(
-        (action: Action) =>
-          action.type !== 'TICK' &&
-          action.type !== 'AFTER_TICK' &&
-          action.type !== 'MOVE' &&
-          action.type !== 'UPDATE_BULLETS'
-      );
-      worker.postMessage(JSON.stringify(action));
+      const note: Note = yield take(noteChannel);
+      worker.postMessage(note);
     }
   });
 }
@@ -112,26 +131,21 @@ function* AIWorkerSaga(playerName: string, WorkerClass: WorkerConstructor) {
   const worker = new WorkerClass();
   try {
     const noteChannel = makeChannel<Note>();
-    let postMessage = null;
     const cmdChannel = eventChannel<AICommand>(emitter => {
       const listener = (e: MessageEvent) => emitter(e.data);
-      postMessage = emitter;
       worker.addEventListener('message', listener);
 
       return () => worker.removeEventListener('message', listener);
     });
 
-    yield all([
-      handleReceiveMessages(playerName, cmdChannel, noteChannel),
-      inlineAI(playerName, postMessage, noteChannel),
-      sendMessagesToWorker(worker, noteChannel)
-    ]);
+    yield all([handleReceiveMessages(playerName, cmdChannel, noteChannel), sendMessagesToWorker(worker, noteChannel)]);
   } finally {
     worker.terminate();
   }
 }
 
 export default function* AIMasterSaga() {
+  const max = 1;
   const taskMap: { [key: string]: Task } = {};
 
   let nextAIPlayerIndex = 0;
@@ -155,10 +169,8 @@ export default function* AIMasterSaga() {
       yield put<Action>({ type: 'REMOVE_FIRST_REMAINING_ENEMY' });
       const level = remainingEnemies.first();
       const hp = level === 'armor' ? 4 : 1;
-      const tankId = yield* spawnTank(
-        TankRecord({ x, y, side: 'ai', level: remainingEnemies.first(), hp })
-      );
-      taskMap[playerName] = yield spawn(AIWorkerSaga, playerName, EmptyWorker);
+      const tankId = yield* spawnTank(TankRecord({ x, y, side: 'ai', level: remainingEnemies.first(), hp }));
+      taskMap[playerName] = yield spawn(AIWorkerSaga, playerName, AIWorker);
       yield put<Action.ActivatePlayerAction>({
         type: 'ACTIVATE_PLAYER',
         playerName,
@@ -170,8 +182,9 @@ export default function* AIMasterSaga() {
   while (true) {
     const action: Action = yield take(['KILL', 'LOAD_STAGE']);
     if (action.type === 'LOAD_STAGE') {
-      yield* addAI();
-      yield* addAI();
+      for (let i = 0; i < max; i++) {
+        yield* addAI();
+      }
     } else if (action.type === 'KILL') {
       const { targetTank, targetPlayer } = action;
       if (targetTank.side === 'ai') {

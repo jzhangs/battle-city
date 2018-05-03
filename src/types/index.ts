@@ -3,7 +3,8 @@ export { default as FlickerRecord } from 'types/FlickerRecord';
 export { default as TextRecord } from 'types/TextRecord';
 export { default as BulletRecord } from 'types/BulletRecord';
 export { default as PlayerRecord } from 'types/PlayerRecord';
-export { EagleRecord } from 'reducers/map';
+export { default as EagleRecord } from 'types/EagleRecord';
+export { default as MapRecord } from 'types/MapRecord';
 export { State } from 'reducers';
 export { PlayersMap } from 'reducers/players';
 export { BulletsMap } from 'reducers/bullets';
@@ -67,12 +68,10 @@ declare global {
   type ExplosionId = number;
   type Side = 'player' | 'ai';
 
-  type Note = string;
-
   type AICommand = AICommand.AICommand;
 
   namespace AICommand {
-    type AICommand = Forward | Fire | Turn;
+    type AICommand = Forward | Fire | Turn | Query;
 
     interface Forward {
       type: 'forward';
@@ -86,6 +85,51 @@ declare global {
     interface Turn {
       type: 'turn';
       direction: Direction;
+    }
+
+    interface Query {
+      type: 'query';
+      query: 'my-tank' | 'map' | 'tanks'
+    }
+  }
+
+  type Note = Note.Note
+
+  namespace Note {
+    type Note = BulletComplete | Reach | QueryResultNote
+
+    interface BulletComplete {
+      type: 'bullet-complete'
+    }
+
+    interface Reach {
+      type: 'reach'
+    }
+
+    interface QueryResultNote {
+      type: 'query-result'
+      result: QueryResult
+    }
+  }
+
+  type QueryResult = QueryResult.QueryResult
+
+  namespace QueryResult {
+    type QueryResult = MapInfo | MyTankInfo | TanksInfo
+
+    interface MyTankInfo {
+      type: 'my-tank-info'
+      tank: Object
+    }
+
+    interface MapInfo {
+      type: 'map-info'
+      map: Object
+    }
+
+    interface TanksInfo {
+      type: 'tanks-info'
+      tanks: Object[]
     }
   }
 }
