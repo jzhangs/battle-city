@@ -52,7 +52,7 @@ declare global {
   type Direction = 'up' | 'down' | 'left' | 'right';
 
   type TankLevel = 'basic' | 'fast' | 'power' | 'armor';
-  type TankColor = 'green' | 'yellow' | 'silver' | 'red';
+  type TankColor = 'green' | 'yellow' | 'silver' | 'red' | 'auto';
   type TankId = number;
   type BulletId = number;
   type KillCount = number;

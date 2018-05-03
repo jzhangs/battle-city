@@ -1,4 +1,4 @@
-import { Map, Record, List } from 'immutable';
+import { Map, Record, List, Repeat } from 'immutable';
 import parseStageEnemies from 'utils/parseStageEnemies';
 import stageConfigs from 'stages';
 
@@ -17,6 +17,8 @@ const emptyTransientKillInfo = Map({
   })
 }) as Map<PlayerName, Map<TankLevel, KillCount>>;
 
+const defaultRemainingEnemies = Repeat('basic' as TankLevel, 20).toList();
+
 type Base = {
   overlay: string;
   currentStage: string;
@@ -30,7 +32,7 @@ export const GameRecord = Record(
   {
     overlay: '' as Overlay,
     currentStage: null as string,
-    remainingEnemies: List<TankLevel>(),
+    remainingEnemies: defaultRemainingEnemies,
     killInfo: Map<PlayerName, Map<TankLevel, KillCount>>(),
     transientKillInfo: emptyTransientKillInfo,
     showTotalKillCount: false

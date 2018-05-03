@@ -4,7 +4,7 @@ import { spawnTank } from 'utils/common';
 import { State } from 'reducers';
 import { TankRecord, PlayerRecord } from 'types';
 
-export default function* playerSaga(playerName: string) {
+export default function* playerSaga(playerName: string, tankColor: TankColor) {
   yield put({
     type: 'CREATE_PLAYER',
     player: PlayerRecord({
@@ -28,6 +28,7 @@ export default function* playerSaga(playerName: string) {
           x: 4 * BLOCK_SIZE,
           y: 12 * BLOCK_SIZE,
           side: 'player',
+          color: tankColor,
           level: 'basic'
         })
       );

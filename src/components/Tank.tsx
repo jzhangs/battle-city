@@ -1,8 +1,10 @@
 import * as React from 'react';
 import * as _ from 'lodash';
 import { Bitmap, Pixel } from 'components/Elements';
-import registerTick from 'hocs/registerTick';
 import { BLOCK_SIZE, TANK_COLOR_SCHEMES } from 'utils/consts';
+import { TankRecord } from 'types';
+import { State } from 'reducers';
+import { connect } from 'react-redux';
 
 interface TankComponent {
   (props: { transform: string; color: string; shape: number }): JSX.Element;
@@ -426,6 +428,32 @@ const TankAIArmor: TankComponent = ({ transform, color, shape }) => {
   );
 };
 
+type TankColorConfig = [TankColor, number][];
+
+function resolveTankColorConfig(tank: TankRecord): TankColorConfig {
+  if (tank.color !== 'auto') {
+    return [[tank.color, Infinity]];
+  }
+  if (tank.withPowerUp) {
+    return [['red', 300], ['silver', 300]];
+  }
+  if (tank.level === 'basic') {
+    return [['silver', Infinity]];
+  } else if (tank.level === 'fast') {
+    return [['silver', Infinity]];
+  } else if (tank.level === 'power') {
+    return [['silver', Infinity]];
+  } else {
+    const map: { [key: number]: TankColorConfig } = {
+      1: [['silver', Infinity]],
+      2: [['green', 100], ['yellow', 100]],
+      3: [['silver', 100], ['yellow', 100]],
+      4: [['green', 100], ['silver', 100]]
+    };
+    return map[tank.hp];
+  }
+}
+
 function resolveTankComponent(side: Side, level: TankLevel): TankComponent {
   let component: TankComponent;
   if (side === 'player') {
@@ -452,70 +480,82 @@ function resolveTankComponent(side: Side, level: TankLevel): TankComponent {
   return component;
 }
 
+const tireShapeConfig: [number, number][] = [[0, 80], [1, 80]];
+const add = (x: number, y: number) => x + y;
+
+function calculate<T>(config: [T, number][], startTime: number, time: number): T {
+  const sum = config.map(item => item[1]).reduce(add);
+  let t = (time - startTime) % sum;
+  let index = 0;
+  while (config[index][1] < t) {
+    t -= config[index][1];
+    index += 1;
+  }
+  return config[index][0];
+}
+
+function calculateTankTransform(tank: TankRecord) {
+  let rotate;
+  let dx;
+  let dy;
+  if (tank.direction === 'up') {
+    dx = tank.x;
+    dy = tank.y;
+    rotate = 0;
+  } else if (tank.direction === 'down') {
+    dx = tank.x + BLOCK_SIZE - 1;
+    dy = tank.y + BLOCK_SIZE;
+    rotate = 180;
+  } else if (tank.direction === 'left') {
+    dx = tank.x;
+    dy = tank.y + BLOCK_SIZE - 1;
+    rotate = -90;
+  } else {
+    // RIGHT
+    dx = tank.x + BLOCK_SIZE;
+    dy = tank.y;
+    rotate = 90;
+  }
+
+  return `translate(${dx}, ${dy})rotate(${rotate})`;
+}
+
 type P = {
-  x: number;
-  y: number;
-  color: string;
-  side: Side;
-  level: TankLevel;
-  direction: Direction;
-  tickIndex?: number;
-  moving?: boolean;
+  tank: TankRecord;
+  time: number;
 };
 
-type S = { lastShape: number };
+type S = { lastTireShape: number };
 
 class Tank extends React.Component<P, S> {
-  static defaultProps = {
-    moving: false
-  };
+  private startTime: number;
 
   constructor(props: P) {
     super(props);
     this.state = {
-      lastShape: 0
+      lastTireShape: 0
     };
+    this.startTime = props.time;
   }
 
   componentWillReceiveProps(nextProps: P) {
-    if (this.props.moving && !nextProps.moving) {
-      this.setState({ lastShape: this.props.tickIndex });
+    if (this.props.tank.moving && !nextProps.tank.moving) {
+      this.setState({ lastTireShape: calculate(tireShapeConfig, this.startTime, nextProps.time) });
     }
   }
 
   render() {
-    const { x, y, color, side, level, direction, tickIndex, moving } = this.props;
-    const { lastShape } = this.state;
-    let rotate;
-    let dx;
-    let dy;
-    if (direction === 'up') {
-      dx = x;
-      dy = y;
-      rotate = 0;
-    } else if (direction === 'down') {
-      dx = x + BLOCK_SIZE - 1;
-      dy = y + BLOCK_SIZE;
-      rotate = 180;
-    } else if (direction === 'left') {
-      dx = x;
-      dy = y + BLOCK_SIZE - 1;
-      rotate = -90;
-    } else {
-      // right
-      dx = x + BLOCK_SIZE;
-      dy = y;
-      rotate = 90;
-    }
-
-    const shape = moving ? tickIndex : lastShape;
+    const { tank, time } = this.props;
+    const { lastTireShape } = this.state;
+    const { side, level, moving } = tank;
 
     return React.createElement(resolveTankComponent(side, level), {
-      transform: `translate(${dx}, ${dy}) rotate(${rotate})`,
-      color,
-      shape
+      transform: calculateTankTransform(tank),
+      color: calculate(resolveTankColorConfig(tank), this.startTime, time),
+      shape: moving ? calculate(tireShapeConfig, this.startTime, time) : lastTireShape
     });
   }
 }
 
-export default registerTick(80, 80)(Tank);
+const mapStateToProps = ({ time }: State, { tank }: { tank: TankRecord }) => ({ time, tank });
+export default connect(mapStateToProps)(Tank);

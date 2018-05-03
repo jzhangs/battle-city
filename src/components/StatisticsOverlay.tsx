@@ -4,7 +4,8 @@ import { Map } from 'immutable';
 import Text from 'components/Text';
 import Tank from 'components/Tank';
 import { BLOCK_SIZE as B } from 'utils/consts';
-import { State } from 'reducers/index';
+import { State } from 'reducers';
+import { TankRecord } from 'types';
 
 type P = {
   stageName: string;
@@ -48,10 +49,10 @@ class StatisticsOverlay extends React.PureComponent<P> {
           <Text content="20000" x={10 * B} y={3.5 * B} fill="#feac4e" />
           <Text content={`STAGE  ${stageName}`} x={6.5 * B} y={4.5 * B} fill="#ffffff" />
 
-          <Tank x={8 * B} y={7.7 * B} color="silver" side="ai" level="basic" direction="up" />
-          <Tank x={8 * B} y={9.2 * B} color="silver" side="ai" level="fast" direction="up" />
-          <Tank x={8 * B} y={10.7 * B} color="silver" side="ai" level="power" direction="up" />
-          <Tank x={8 * B} y={12.2 * B} color="silver" side="ai" level="armor" direction="up" />
+          <Tank tank={TankRecord({ x: 8 * B, y: 7.7 * B, side: 'ai', level: 'basic' })} />
+          <Tank tank={TankRecord({ x: 8 * B, y: 9.2 * B, side: 'ai', level: 'fast' })} />
+          <Tank tank={TankRecord({ x: 8 * B, y: 10.7 * B, side: 'ai', level: 'power' })} />
+          <Tank tank={TankRecord({ x: 8 * B, y: 12.2 * B, side: 'ai', level: 'armor' })} />
           <rect x={6.5 * B} y={13.3 * B} width={4 * B} height={2} fill="white" />
 
           <Text content={'\u2160-PLAYER'} x={2 * B} y={5.5 * B} fill="#e44437" />

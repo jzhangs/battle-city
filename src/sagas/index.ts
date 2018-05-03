@@ -32,7 +32,7 @@ export default function* rootSaga() {
   yield fork(playerController, 'player-2', CONTROL_CONFIG.player2);
 
   yield fork(AIMasterSaga);
-  yield fork(playerSage, 'player-1');
+  yield fork(playerSage, 'player-1', 'yellow');
 
   yield fork(gameManager);
 }

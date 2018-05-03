@@ -26,7 +26,7 @@ import { BLOCK_SIZE } from 'utils/consts';
 import tickEmitter from 'sagas/tickEmitter';
 import stageConfigs from 'stages';
 import registerTick from 'hocs/registerTick';
-import PlayerRecord from 'types/PlayerRecord';
+import { PlayerRecord, TankRecord } from 'types';
 import { _PowerUp } from './components/PowerUp';
 
 const BulletExplosion = registerTick(500, 500, 1000)(_BulletExplosion);
@@ -62,11 +62,12 @@ const X8 = ({ width = 128, height = 128, children }: any) => (
   </svg>
 );
 
-const X8Tank = (props: any) => (
+const X8Tank = ({ tank }: { tank: TankRecord }) => (
   <X8>
-    <Tank x={0} y={0} {...props} />
+    <Tank tank={tank.merge({ x: 0, y: 0 })} />
   </X8>
 );
+
 const X8Text = ({ content }: { content: string }) => (
   <X8 width={content.length * 64} height={64}>
     <Text x={0} y={0} fill="#feac4e" content={content} />
@@ -75,10 +76,10 @@ const X8Text = ({ content }: { content: string }) => (
 
 const FontLevel1 = ({ children }: any) => <span style={{ fontSize: 30, lineHeight: '50px' }}>{children}</span>;
 
-const colors = ['yellow', 'green', 'silver', 'red'];
-const sides = ['ai', 'human'];
-const levels = ['basic', 'fast', 'power', 'armor'];
-const powerUpNames = ['tank', 'star', 'grenade', 'timer', 'helmet', 'shovel'];
+const colors: TankColor[] = ['yellow', 'green', 'silver', 'red'];
+const sides: Side[] = ['ai', 'player'];
+const levels: TankLevel[] = ['basic', 'fast', 'power', 'armor'];
+const powerUpNames: PowerUpName[] = ['tank', 'star', 'grenade', 'timer', 'helmet', 'shovel'];
 
 function Stories() {
   const { bricks, steels, rivers, snows, forests, eagle } = parseStageMap(stageConfigs['1'].map).toObject();
@@ -96,11 +97,41 @@ function Stories() {
             </p>
             <div style={{ display: 'flex' }}>
               {[0, 1, 2, 3].map(index => (
-                <X8Tank key={index} side={side} level={levels[index]} color={colors[index]} direction="up" />
+                <X8Tank key={index} tank={TankRecord({ side, level: levels[index], color: colors[index] })} />
               ))}
             </div>
           </div>
         ))}
+        <div>
+          <p style={{ fontSize: 20 }}>armor tank hp 1/2/3/4</p>
+          <div style={{ display: 'flex' }}>
+            {[1, 2, 3, 4].map(hp => (
+              <X8Tank
+                key={hp}
+                tank={TankRecord({
+                  side: 'ai',
+                  level: 'armor',
+                  hp
+                })}
+              />
+            ))}
+          </div>
+        </div>
+        <div>
+          <p style={{ fontSize: 20 }}>tank with power up basic/fast/power/armor</p>
+          <div style={{ display: 'flex' }}>
+            {levels.map(level => (
+              <X8Tank
+                key={level}
+                tank={TankRecord({
+                  side: 'ai',
+                  level,
+                  withPowerUp: true
+                })}
+              />
+            ))}
+          </div>
+        </div>
       </details>
       <details open>
         <summary>

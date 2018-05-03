@@ -6,7 +6,8 @@ import { asBox, getDirectionInfo, iterRowsAndCols, reverseDirection } from 'util
 import * as selectors from 'utils/selectors';
 import { State, TankRecord } from 'types';
 
-const log = console.log;
+// const log = console.log;
+const log: any = () => 0;
 
 function canDestroy(barrierType: BarrierType) {
   return barrierType === 'brick';
@@ -356,7 +357,7 @@ export default function* inlineAI(
     console.log(raceResult);
     let tank: TankRecord = yield select(selectors.playerTank, playerName);
     if (tank == null) {
-      console.groupEnd();
+      // console.groupEnd();
       continue;
     }
 
@@ -391,6 +392,6 @@ export default function* inlineAI(
       forwardLength: env.barrierInfo[tank.direction].length
     });
     // $$postMessage({ type: 'fire', forwardLength: 3 * BLOCK_SIZE })
-    console.groupEnd();
+    // console.groupEnd();
   }
 }

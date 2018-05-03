@@ -41,22 +41,7 @@ class Screen extends React.Component<State> {
           <g data-role="bullet-layer">
             {bullets.map((b, i) => <Bullet key={i} direction={b.direction} x={b.x} y={b.y} />).toArray()}
           </g>
-          <g data-role="tank-layer">
-            {tanks
-              .map(tank => (
-                <Tank
-                  key={tank.tankId}
-                  x={tank.x}
-                  y={tank.y}
-                  direction={tank.direction}
-                  side={tank.side}
-                  level={tank.level}
-                  color={tank.color}
-                  moving={tank.moving}
-                />
-              ))
-              .toArray()}
-          </g>
+          <g data-role="tank-layer">{tanks.map(tank => <Tank key={tank.tankId} tank={tank} />).toArray()}</g>
           <ForestLayer forests={forests} />
           <g data-role="explosion-layer">
             {explosions
