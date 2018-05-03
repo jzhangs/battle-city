@@ -1,6 +1,9 @@
-const stageConfigs: { [name: string]: StageConfig } = {
-  1: require('stages/stage-1.json'),
-  2: require('stages/stage-2.json')
-};
+const stageConfigs: { [name: string]: StageConfig } = {};
+const requireStage = (require as any).context('stages', false, /\.json/);
+
+for (const filename of requireStage.keys()) {
+  const stage: StageConfig = requireStage(filename);
+  stageConfigs[stage.name] = stage;
+}
 
 export default stageConfigs;
