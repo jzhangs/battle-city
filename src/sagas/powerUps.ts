@@ -1,8 +1,8 @@
 import { delay } from 'redux-saga';
 import { fork, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
-import { State, MapRecord } from 'types';
+import { State, MapRecord, ScoreRecord } from 'types';
 import { N_MAP, ITEM_SIZE_MAP } from 'utils/consts';
-import { iterRowsAndCols, asBox } from 'utils/common';
+import { iterRowsAndCols, asBox, getNextId } from 'utils/common';
 import { destroyTanks } from 'sagas/bulletsSaga';
 
 // const log = console.log;
@@ -120,7 +120,7 @@ function* timer() {
 
 function* grenade(action: Action.PickPowerUpAction) {
   const { tanks, players }: State = yield select();
-  const activeAITanks = tanks.filter(t => (t.active && t.side === 'ai'));
+  const activeAITanks = tanks.filter(t => t.active && t.side === 'ai');
   const aiTankIdSet = activeAITanks.map(t => t.tankId).toSet();
 
   yield* destroyTanks(aiTankIdSet);
@@ -162,7 +162,7 @@ function* handleHelmetDuration() {
     const { delta }: Action.TickAction = yield take('TICK');
     const { tanks }: State = yield select();
     yield* tanks
-      .filter(tank => (tank.active && tank.helmetDuration > 0))
+      .filter(tank => tank.active && tank.helmetDuration > 0)
       .map(tank =>
         put({
           type: 'SET_HELMET_DURATION',
@@ -174,7 +174,29 @@ function* handleHelmetDuration() {
   }
 }
 
+function* pickScore(action: Action.PickPowerUpAction) {
+  const {
+    powerUp: { x, y }
+  } = action;
+  const scoreId = getNextId('score');
+  yield put<Action.AddScoreAction>({
+    type: 'ADD_SCORE',
+    score: ScoreRecord({
+      scoreId,
+      score: 500,
+      x,
+      y
+    })
+  });
+  yield delay(500);
+  yield put<Action.RemoveScoreAction>({
+    type: 'REMOVE_SCORE',
+    scoreId
+  });
+}
+
 export default function* powerUps() {
+  yield takeEvery('PICK_POWER_UP', pickScore);
   yield takeLatest(is('shovel'), shovel);
   yield takeLatest(is('timer'), timer);
 

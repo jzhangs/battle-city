@@ -1,5 +1,6 @@
 export { default as TankRecord } from 'types/TankRecord';
 export { default as PowerUpRecord } from 'types/PowerUpRecord';
+export { default as ScoreRecord } from 'types/ScoreRecord';
 export { default as FlickerRecord } from 'types/FlickerRecord';
 export { default as TextRecord } from 'types/TextRecord';
 export { default as BulletRecord } from 'types/BulletRecord';
@@ -11,6 +12,7 @@ export { PlayersMap } from 'reducers/players';
 export { BulletsMap } from 'reducers/bullets';
 export { TextsMap } from 'reducers/texts';
 export { TanksMap } from 'reducers/tanks';
+export { ScoresMap } from 'reducers/scores';
 
 export interface PlayerControllerConfig {
   fire: string;
@@ -52,6 +54,7 @@ declare global {
   type BulletId = number;
   type KillCount = number;
   type PowerUpId = number;
+  type ScoreId = number;
 
   type PlayerName = string;
   type TextId = number;

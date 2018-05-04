@@ -21,6 +21,7 @@ import GameTitleScene from 'components/GameTitleScene';
 import GameoverScene from 'components/GameoverScene';
 import StatisticsScene from 'components/StatisticsScene';
 import HUD from 'components/HUD';
+import Score from 'components/Score';
 import { _BulletExplosion, _TankExplosion } from 'components/Explosion';
 import parseStageMap from 'utils/parseStageMap';
 import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ } from 'utils/consts';
@@ -259,6 +260,28 @@ class Stories extends React.Component<{}, { stage: string }> {
           <X4 width={496} height={96} style={{ background: 'black' }}>
             {powerUpNames.map((name, index) => <PowerUpItem key={name} name={name} x={index * 20 + 4} y={4} />)}
           </X4>
+        </details>
+        <details open>
+          <summary>
+            <FontLevel1>Scores</FontLevel1>
+          </summary>
+          <Row>
+            <X4>
+              <Score score={100} />
+            </X4>
+            <X4>
+              <Score score={200} />
+            </X4>
+            <X4>
+              <Score score={300} />
+            </X4>
+            <X4>
+              <Score score={400} />
+            </X4>
+            <X4>
+              <Score score={500} />
+            </X4>
+          </Row>
         </details>
       </div>
     );
