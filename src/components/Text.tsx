@@ -107,11 +107,11 @@ const chars: Chars = {
     </g>
   ),
   e: ({ fill }) => (
-    <g data-role="character-e" fill={fill}>
-      <rect x={1} y={0} width={2} height={7} />
-      <rect x={3} y={0} width={5} height={1} />
-      <rect x={3} y={3} width={4} height={1} />
-      <rect x={3} y={6} width={5} height={1} />
+    <g role="character-e" fill={fill}>
+      <rect x={2} y={0} width={2} height={7} />
+      <rect x={4} y={0} width={4} height={1} />
+      <rect x={4} y={3} width={3} height={1} />
+      <rect x={4} y={6} width={4} height={1} />
     </g>
   ),
   f: ({ fill }) => (
@@ -305,6 +305,19 @@ const chars: Chars = {
       fill={fill}
       d="M1,2 h3 v-2 h1 v1 h1 v1 h1 v1 h1 v1 h-1 v1 h-1 v1 h-1 v1 h-1 v-2 h-3 v-3"
     />
+  ),
+  ['\u00a9'.toLocaleLowerCase()]: ({ fill }) => (
+    <g role="character-copyright-sign" fill={fill}>
+      <rect x={2} y={0} width={4} height={1} />
+      <rect x={2} y={7} width={4} height={1} />
+      <rect x={0} y={2} width={1} height={4} />
+      <rect x={7} y={2} width={1} height={4} />
+      <rect x={1} y={1} width={1} height={1} />
+      <rect x={6} y={1} width={1} height={1} />
+      <rect x={1} y={6} width={1} height={1} />
+      <rect x={6} y={6} width={1} height={1} />
+      <path d="M3,2 h3 v1 h-3 v2 h3 v1 h-3 v-1 h-1 v-2 h1 v-1" />
+    </g>
   )
 };
 

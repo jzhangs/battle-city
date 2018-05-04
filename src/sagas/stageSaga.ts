@@ -6,7 +6,7 @@ import { State } from 'reducers';
 const tankLevels: TankLevel[] = ['basic', 'fast', 'power', 'armor'];
 
 function* statistics() {
-  yield put<Action>({ type: 'SHOW_OVERLAY', overlay: 'statistics' });
+  yield put<Action>({ type: 'LOAD_SCENE', scene: 'statistics' });
 
   const {
     game: { killInfo }
@@ -39,13 +39,13 @@ function* statistics() {
     }
     yield delay(300);
   }
+  yield delay(1000);
   yield put<Action>({ type: 'SHOW_TOTAL_KILL_COUNT' });
   yield delay(3000);
-
-  yield put<Action>({ type: 'REMOVE_OVERLAY' });
 }
 
 export default function* stageSaga(stageName: string) {
+  yield put<Action>({ type: 'LOAD_SCENE', scene: 'game' });
   yield put<Action>({ type: 'LOAD_STAGE', name: stageName });
 
   while (true) {

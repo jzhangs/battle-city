@@ -12,8 +12,6 @@ import Eagle from 'components/Eagle';
 import Explosion from 'components/Explosion';
 import Flicker from 'components/Flicker';
 import TextLayer from 'components/TextLayer';
-import GameoverOverlay from 'components/GameoverOverlay';
-import StatisticsOverlay from 'components/StatisticsOverlay';
 import HUD from 'components/HUD';
 
 import { BLOCK_SIZE } from 'utils/consts';
@@ -23,13 +21,12 @@ function mapStateToProps(state: State) {
   return { ...state };
 }
 
-class Screen extends React.Component<State> {
+class GameScene extends React.Component<State> {
   render() {
-    const { bullets, map, explosions, flickers, tanks, game, texts } = this.props;
-    const { overlay } = game;
+    const { bullets, map, explosions, flickers, tanks, texts } = this.props;
     const { bricks, steels, rivers, snows, forests, eagle } = map;
     return (
-      <g data-role="screen">
+      <g data-role="game-screen">
         <HUD />
         <g data-role="battle-field" transform={`translate(${BLOCK_SIZE},${BLOCK_SIZE})`}>
           <rect width={13 * BLOCK_SIZE} height={13 * BLOCK_SIZE} fill="#000" />
@@ -52,12 +49,10 @@ class Screen extends React.Component<State> {
             {flickers.map(flicker => <Flicker key={flicker.flickerId} x={flicker.x} y={flicker.y} />).toArray()}
           </g>
         </g>
-        {overlay === 'gameover' ? <GameoverOverlay /> : null}
-        {overlay === 'statistics' ? <StatisticsOverlay /> : null}
         <TextLayer texts={texts} />
       </g>
     );
   }
 }
 
-export default connect(mapStateToProps)(Screen);
+export default connect(mapStateToProps)(GameScene);

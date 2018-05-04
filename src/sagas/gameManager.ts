@@ -3,6 +3,7 @@ import { put, take } from 'redux-saga/effects';
 import { BLOCK_SIZE } from 'utils/consts';
 import { getNextId } from 'utils/common';
 import stageSaga from 'sagas/stageSaga';
+import stageConfigs from 'stages';
 
 type Animation = {
   direction: Direction;
@@ -55,9 +56,9 @@ function* animateGameover() {
     duration: 1000
   });
   yield delay(500);
-  yield put({ type: 'REMOVE_TEXT', textId: textId1 });
-  yield put({ type: 'REMOVE_TEXT', textId: textId2 });
-  yield put({ type: 'SHOW_OVERLAY', overlay: 'gameover' });
+  yield put<Action>({ type: 'REMOVE_TEXT', textId: textId1 });
+  yield put<Action>({ type: 'REMOVE_TEXT', textId: textId2 });
+  yield put<Action>({ type: 'LOAD_SCENE', scene: 'gameover' });
 }
 
 interface StageResult {
@@ -66,7 +67,10 @@ interface StageResult {
 }
 
 export default function* gameManager() {
-  const stages = ['1', '2', '3'];
+  yield take((action: Action) => action.type === 'GAMESTART');
+  console.log('gamestart');
+
+  const stages = Object.keys(stageConfigs);
   for (const stageName of stages) {
     const stageResult: StageResult = yield* stageSaga(stageName);
     if (stageResult.status === 'clear') {

@@ -20,7 +20,7 @@ const emptyTransientKillInfo = Map({
 const defaultRemainingEnemies = Repeat('basic' as TankLevel, 20).toList();
 
 type Base = {
-  overlay: string;
+  scene: Scene;
   currentStage: string;
   remainingEnemies: List<TankLevel>;
   killInfo: Map<PlayerName, Map<TankLevel, KillCount>>;
@@ -30,7 +30,7 @@ type Base = {
 
 export const GameRecord = Record(
   {
-    overlay: '' as Overlay,
+    scene: 'game-title' as Scene,
     currentStage: null as string,
     remainingEnemies: defaultRemainingEnemies,
     killInfo: Map<PlayerName, Map<TankLevel, KillCount>>(),
@@ -43,10 +43,8 @@ export const GameRecord = Record(
 export type GameRecord = Record.Instance<Base> & Readonly<Base>;
 
 export default function game(state = GameRecord(), action: Action) {
-  if (action.type === 'SHOW_OVERLAY') {
-    return state.set('overlay', action.overlay);
-  } else if (action.type === 'REMOVE_OVERLAY') {
-    return state.set('overlay', null);
+  if (action.type === 'LOAD_SCENE') {
+    return state.set('scene', action.scene);
   } else if (action.type === 'LOAD_STAGE') {
     return state.merge({
       currentStage: action.name,

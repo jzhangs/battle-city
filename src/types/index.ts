@@ -42,7 +42,7 @@ declare global {
   }
 
   type PowerUpName = 'tank' | 'star' | 'grenade' | 'timer' | 'helmet' | 'shovel';
-  type Overlay = '' | 'gameover' | 'statistics';
+  type Scene = 'game-title' | 'game' | 'gameover' | 'statistics';
   type Direction = 'up' | 'down' | 'left' | 'right';
 
   type TankLevel = 'basic' | 'fast' | 'power' | 'armor';

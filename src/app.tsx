@@ -1,11 +1,31 @@
 import * as React from 'react';
-import Screen from 'components/Screen';
-import { BLOCK_SIZE } from 'utils/consts';
+import { connect } from 'react-redux';
+import { BLOCK_SIZE as B } from 'utils/consts';
+import GameScene from 'components/GameScene';
+import GameoverScene from 'components/GameoverScene';
+import StatisticsScene from 'components/StatisticsScene';
+import GameTitleScene from 'components/GameTitleScene';
+import { State } from 'types';
 
-const App = () => (
-  <svg className="svg" width={16 * BLOCK_SIZE} height={15 * BLOCK_SIZE} >
-    <Screen />
-  </svg>
-);
+class App extends React.PureComponent<{ scene: Scene }> {
+  render() {
+    const { scene } = this.props;
 
-export default App;
+    return (
+      <svg className="svg" style={{ background: '#757575' }} width={16 * B} height={15 * B}>
+        {scene === 'game-title' ? <GameTitleScene /> : null}
+        {scene === 'game' ? <GameScene /> : null}
+        {scene === 'gameover' ? <GameoverScene /> : null}
+        {scene === 'statistics' ? <StatisticsScene /> : null}
+      </svg>
+    );
+  }
+}
+
+function mapStateToProps(state: State) {
+  return {
+    scene: state.game.scene
+  };
+}
+
+export default connect(mapStateToProps)(App);

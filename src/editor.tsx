@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import * as classNames from 'classnames';
+// import * as classNames from 'classnames';
 import { saveAs } from 'file-saver';
 import createSagaMiddleware from 'redux-saga';
 import { applyMiddleware, combineReducers, createStore } from 'redux';
@@ -21,6 +21,7 @@ import BrickWall from 'components/BrickWall';
 import SteelWall from 'components/SteelWall';
 import Tank from 'components/Tank';
 import TextInput from 'components/TextInput';
+import TextButton from 'components/TextButton';
 import tickEmitter from 'sagas/tickEmitter';
 import { time } from 'reducers/index';
 import game from 'reducers/game';
@@ -199,50 +200,6 @@ const AreaButton = ({ x, y, width, height, onClick, strokeWidth = 1, spreadX = 2
     stroke="transparent"
     strokeWidth={strokeWidth}
   />
-);
-
-type TextButtonProps = {
-  x: number;
-  y: number;
-  content: string;
-  spreadX?: number;
-  spreadY?: number;
-  onClick?: () => void;
-  selected?: boolean;
-  textFill?: string;
-  selectedTextFill?: string;
-  disabled?: boolean;
-};
-
-const TextButton = ({
-  x,
-  y,
-  content,
-  spreadX = 0.25 * B,
-  spreadY = 0.125 * B,
-  onClick,
-  selected,
-  textFill = '#ccc',
-  selectedTextFill = '#333',
-  disabled = false
-}: TextButtonProps) => (
-  <g role="text-button">
-    <rect
-      className={classNames('text-area', { selected, disabled })}
-      x={x - spreadX}
-      y={y - spreadY}
-      width={content.length * 0.5 * B + 2 * spreadX}
-      height={0.5 * B + 2 * spreadY}
-      onClick={disabled ? null : onClick}
-    />
-    <Text
-      style={{ pointerEvents: 'none', opacity: disabled ? 0.3 : 1 }}
-      x={x}
-      y={y}
-      content={content}
-      fill={selected ? selectedTextFill : textFill}
-    />
-  </g>
 );
 
 type TextWithLineWrapProps = {
