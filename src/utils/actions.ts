@@ -16,8 +16,8 @@ declare global {
       | SetFrozenTimeoutAction
       | SetAIFrozenTimeoutAction
       | DestroyBulletsAction
-      | DestroySteelsAction
-      | DestroyBricksAction
+      | RemoveSteelsAction
+      | RemoveBricksAction
       | UpdateMapAction
       | UpdateBulletsAction
       | LoadStageAction
@@ -147,13 +147,13 @@ declare global {
       spawnExplosion: boolean;
     };
 
-    export type DestroySteelsAction = {
-      type: 'DESTROY_STEELS';
+    export type RemoveSteelsAction = {
+      type: 'REMOVE_STEELS';
       ts: Set<SteelIndex>;
     };
 
-    export type DestroyBricksAction = {
-      type: 'DESTROY_BRICKS';
+    export type RemoveBricksAction = {
+      type: 'REMOVE_BRICKS';
       ts: Set<BrickIndex>;
     };
 

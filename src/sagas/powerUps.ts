@@ -120,18 +120,18 @@ function* timer() {
 
 function* grenade(action: Action.PickPowerUpAction) {
   const { tanks, players }: State = yield select();
-  const aiTanks = tanks.filter(t => t.side === 'ai');
-  const aiTankIdSet = aiTanks.map(t => t.tankId).toSet();
+  const activeAITanks = tanks.filter(t => (t.active && t.side === 'ai'));
+  const aiTankIdSet = activeAITanks.map(t => t.tankId).toSet();
 
   yield* destroyTanks(aiTankIdSet);
 
-  yield* aiTanks
+  yield* activeAITanks
     .map(targetTank =>
       put<Action.KillAction>({
         type: 'KILL',
         sourcePlayer: action.player,
         sourceTank: action.tank,
-        targetPlayer: players.find(p => p.tankId === targetTank.tankId),
+        targetPlayer: players.find(p => p.activeTankId === targetTank.tankId),
         targetTank
       })
     )
@@ -162,7 +162,7 @@ function* handleHelmetDuration() {
     const { delta }: Action.TickAction = yield take('TICK');
     const { tanks }: State = yield select();
     yield* tanks
-      .filter(tank => tank.helmetDuration > 0)
+      .filter(tank => (tank.active && tank.helmetDuration > 0))
       .map(tank =>
         put({
           type: 'SET_HELMET_DURATION',

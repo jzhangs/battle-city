@@ -18,9 +18,20 @@ export default function tanks(state = Map() as TanksMap, action: Action) {
   } else if (action.type === 'STOP_MOVE') {
     return state.setIn([action.tankId, 'moving'], false);
   } else if (action.type === 'REMOVE_TANK') {
-    return state.delete(action.tankId);
+    return state.update(action.tankId, tank =>
+      tank.merge({
+        active: false,
+        cooldown: 0,
+        frozenTimeout: 0,
+        helmetDuration: 0,
+        moving: false,
+        withPowerUp: false
+      })
+    );
   } else if (action.type === 'SET_COOLDOWN') {
     return state.update(action.tankId, tank => tank.set('cooldown', action.cooldown));
+  } else if (action.type === 'SET_AI_FROZEN_TIMEOUT') {
+    return state.map(tank => (tank.side === 'ai' ? tank.set('moving', false) : tank));
   } else if (action.type === 'SET_FROZEN_TIMEOUT') {
     return state.update(action.tankId, tank =>
       tank

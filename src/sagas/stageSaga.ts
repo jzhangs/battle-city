@@ -118,7 +118,9 @@ export default function* stageSaga(stageName: string) {
         );
       }
 
-      if (remainingEnemies.isEmpty() && tanks.filter(t => t.side === 'ai').isEmpty()) {
+      const activeAITanks = tanks.filter(t => (t.active && t.side === 'ai'));
+
+      if (remainingEnemies.isEmpty() && activeAITanks.isEmpty()) {
         yield delay(6000);
         yield* statistics();
         return { status: 'clear' };

@@ -139,7 +139,7 @@ function* destroySteels(collidedBullets: BulletsMap) {
 
   if (steelsNeedToDestroy.length > 0) {
     yield put({
-      type: 'DESTROY_STEELS',
+      type: 'REMOVE_STEELS',
       ts: ISet(steelsNeedToDestroy)
     });
   }
@@ -162,7 +162,7 @@ function* destroyBricks(collidedBullets: BulletsMap) {
 
   if (bricksNeedToDestroy.length > 0) {
     yield put({
-      type: 'DESTROY_BRICKS',
+      type: 'REMOVE_BRICKS',
       ts: ISet(bricksNeedToDestroy)
     });
   }
@@ -201,9 +201,10 @@ function* filterBulletsCollidedWithEagle(bullets: BulletsMap) {
 
 function* handleBulletsCollidedWithTanks(context: Context) {
   const { bullets, tanks }: State = yield select();
+  const activeTanks = tanks.filter(t => t.active);
 
   for (const bullet of bullets.values()) {
-    for (const tank of tanks.values()) {
+    for (const tank of activeTanks.values()) {
       if (tank.tankId === bullet.tankId) {
         continue;
       }
@@ -214,7 +215,7 @@ function* handleBulletsCollidedWithTanks(context: Context) {
         height: BLOCK_SIZE
       };
       if (testCollide(subject, asBox(bullet), -0.02)) {
-        const bulletSide = tanks.find(t => t.tankId === bullet.tankId).side;
+        const bulletSide = activeTanks.find(t => t.tankId === bullet.tankId).side;
         const tankSide = tank.side;
         if (bulletSide === 'player' && tankSide === 'player') {
           context.expBulletIdSet.add(bullet.bulletId);
@@ -263,6 +264,7 @@ function* handleAfterTick() {
   while (true) {
     yield take('AFTER_TICK');
     const { bullets, players, tanks }: State = yield select();
+    const activeTanks = tanks.filter(t => t.active);
 
     const bulletsCollidedWithEagle = yield* filterBulletsCollidedWithEagle(bullets);
     if (!bulletsCollidedWithEagle.isEmpty()) {
@@ -310,7 +312,7 @@ function* handleAfterTick() {
     const destroyedTankIdSet = new Set<TargetTankId>();
     for (const [targetTankId, hurtMap] of context.tankHurtMap.entries()) {
       const hurt = sum(hurtMap.values());
-      const targetTank = tanks.get(targetTankId);
+      const targetTank = activeTanks.get(targetTankId);
       if (hurt >= targetTank.hp) {
         const sourceTankId = hurtMap.keys().next().value;
         kills.push(
@@ -318,8 +320,8 @@ function* handleAfterTick() {
             type: 'KILL',
             targetTank,
             sourceTank: tanks.get(sourceTankId),
-            targetPlayer: players.find(ply => ply.tankId === targetTankId),
-            sourcePlayer: players.find(ply => ply.tankId === sourceTankId)
+            targetPlayer: players.find(p => p.activeTankId === targetTankId),
+            sourcePlayer: players.find(p => p.activeTankId === sourceTankId)
           })
         );
         destroyedTankIdSet.add(targetTankId);

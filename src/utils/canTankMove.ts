@@ -70,8 +70,8 @@ function isTankCollidedWithRivers(rivers: List<boolean>, tankTarget: Box, thresh
   return false;
 }
 
-function isTankCollidedWithOtherTanks(tanks: TanksMap, tank: TankRecord, tankTarget: Box, threshhold: number) {
-  for (const otherTank of tanks.values()) {
+function isTankCollidedWithOtherTanks(activeTanks: TanksMap, tank: TankRecord, tankTarget: Box, threshhold: number) {
+  for (const otherTank of activeTanks.values()) {
     if (tank.tankId === otherTank.tankId) {
       continue;
     }
@@ -107,7 +107,8 @@ export default function canTankMove(
     return false;
   }
 
-  if (isTankCollidedWithOtherTanks(tanks, tank, tankTarget, threshhold)) {
+  const activeTanks = tanks.filter(t => t.active);
+  if (isTankCollidedWithOtherTanks(activeTanks, tank, tankTarget, threshhold)) {
     return false;
   }
 

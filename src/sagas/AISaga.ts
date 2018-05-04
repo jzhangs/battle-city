@@ -53,7 +53,7 @@ function* handleCmds(playerName: string, cmdChannel: Channel<AICommand>, noteCha
     } else if (command.type === 'turn') {
       nextDirection = command.direction;
     } else if (command.type === 'query') {
-      if (command.query === 'my-tank') {
+      if (command.query === 'my-tank-info') {
         const tank: TankRecord = yield select(selectors.playerTank, playerName);
         if (!tank) continue;
         noteChannel.put({
@@ -63,19 +63,22 @@ function* handleCmds(playerName: string, cmdChannel: Channel<AICommand>, noteCha
             tank: tank && tank.toObject()
           }
         });
-      } else if (command.query === 'map') {
+      } else if (command.query === 'map-info') {
         const { map }: State = yield select();
         noteChannel.put({
           type: 'query-result',
           result: { type: 'map-info', map: map.toJS() }
         });
-      } else if (command.query === 'tanks') {
+      } else if (command.query === 'active-tanks-info') {
         const { tanks }: State = yield select();
         noteChannel.put({
           type: 'query-result',
           result: {
-            type: 'tanks-info',
-            tanks: tanks.map(t => t.toObject()).toArray()
+            type: 'active-tanks-info',
+            tanks: tanks
+              .filter(t => t.active)
+              .map(t => t.toObject())
+              .toArray()
           }
         });
       } else if (command.query === 'my-fire-info') {

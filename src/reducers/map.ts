@@ -10,9 +10,9 @@ export default function mapReducer(state = MapRecord(), action: Action) {
     return parseStageMap(stageConfigs[name].map);
   } else if (action.type === 'DESTROY_EAGLE') {
     return state.setIn(['eagle', 'broken'], true);
-  } else if (action.type === 'DESTROY_BRICKS') {
+  } else if (action.type === 'REMOVE_BRICKS') {
     return state.update('bricks', bricks => bricks.map((set, t) => (action.ts.has(t) ? false : set)));
-  } else if (action.type === 'DESTROY_STEELS') {
+  } else if (action.type === 'REMOVE_STEELS') {
     return state.update('steels', steels => steels.map((set, t) => (action.ts.has(t) ? false : set)));
   } else if (action.type === 'UPDATE_MAP') {
     return action.map;

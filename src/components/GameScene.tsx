@@ -27,6 +27,7 @@ class GameScene extends React.Component<State> {
   render() {
     const { bullets, map, explosions, flickers, tanks, texts, powerUps } = this.props;
     const { bricks, steels, rivers, snows, forests, eagle } = map;
+    const activeTanks = tanks.filter(t => t.active);
     return (
       <g data-role="game-screen">
         <HUD />
@@ -40,9 +41,9 @@ class GameScene extends React.Component<State> {
           <g data-role="bullet-layer">
             {bullets.map((b, i) => <Bullet key={i} direction={b.direction} x={b.x} y={b.y} />).toArray()}
           </g>
-          <g data-role="tank-layer">{tanks.map(tank => <Tank key={tank.tankId} tank={tank} />).toArray()}</g>
+          <g data-role="tank-layer">{activeTanks.map(tank => <Tank key={tank.tankId} tank={tank} />).toArray()}</g>
           <g role="helmet-layer">
-            {tanks
+            {activeTanks
               .map(tank => (tank.helmetDuration > 0 ? <TankHelmet key={tank.tankId} x={tank.x} y={tank.y} /> : null))
               .toArray()}
           </g>
