@@ -35,6 +35,7 @@ const simpleReducer = combineReducers({ time, game });
 const simpleStore = createStore(simpleReducer, undefined, applyMiddleware(simpleSagaMiddleware));
 simpleSagaMiddleware.run(tickEmitter);
 
+const zoomLevel = 2;
 const totalWidth = 16 * B;
 const totalHeight = 15 * B;
 
@@ -268,8 +269,16 @@ class Editor extends React.Component {
   };
 
   getT(event: React.MouseEvent<SVGSVGElement>) {
-    const row = Math.floor((event.clientY - this.svg.clientTop) / B);
-    const col = Math.floor((event.clientX - this.svg.clientLeft) / B);
+    let totalTop = 0;
+    let totalLeft = 0;
+    let node: Element = this.svg;
+    while (node) {
+      totalTop += node.scrollTop + node.clientTop;
+      totalLeft += node.scrollLeft + node.clientLeft;
+      node = node.parentElement;
+    }
+    const row = Math.floor((event.clientY + totalTop - this.svg.clientTop) / zoomLevel / B);
+    const col = Math.floor((event.clientX + totalLeft - this.svg.clientLeft) / zoomLevel / B);
     if (row >= 0 && row < FBZ && col >= 0 && col < FBZ) {
       return row * FBZ + col;
     } else {
@@ -741,8 +750,9 @@ class Editor extends React.Component {
         ref={node => (this.svg = node)}
         className="svg"
         style={{ background: '#333' }}
-        width={totalWidth}
-        height={totalHeight}
+        width={totalWidth * zoomLevel}
+        height={totalHeight * zoomLevel}
+        viewBox={`0 0 ${totalWidth} ${totalHeight}`}
         onMouseDown={this.onMouseDown}
         onMouseUp={this.onMouseUp}
         onMouseMove={this.onMouseMove}
