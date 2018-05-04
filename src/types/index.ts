@@ -1,4 +1,5 @@
 export { default as TankRecord } from 'types/TankRecord';
+export { default as PowerUpRecord } from 'types/PowerUpRecord';
 export { default as FlickerRecord } from 'types/FlickerRecord';
 export { default as TextRecord } from 'types/TextRecord';
 export { default as BulletRecord } from 'types/BulletRecord';
@@ -50,6 +51,7 @@ declare global {
   type TankId = number;
   type BulletId = number;
   type KillCount = number;
+  type PowerUpId = number;
 
   type PlayerName = string;
   type TextId = number;

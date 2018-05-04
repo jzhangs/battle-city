@@ -19,6 +19,16 @@ export default function tanks(state = Map() as TanksMap, action: Action) {
     return state.setIn([action.tankId, 'moving'], false);
   } else if (action.type === 'REMOVE_TANK') {
     return state.delete(action.tankId);
+  } else if (action.type === 'SET_COOLDOWN') {
+    return state.update(action.tankId, tank => tank.set('cooldown', action.cooldown));
+  } else if (action.type === 'SET_FROZEN_TIMEOUT') {
+    return state.update(action.tankId, tank =>
+      tank
+        .set('frozenTimeout', action.frozenTimeout)
+        .set('moving', tank.frozenTimeout <= 0 && action.frozenTimeout > 0 && tank.moving)
+    );
+  } else if (action.type === 'SET_HELMET_DURATION') {
+    return state.update(action.tankId, tank => tank.set('helmetDuration', Math.max(0, action.duration)));
   }
   return state;
 }

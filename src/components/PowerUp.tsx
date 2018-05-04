@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Bitmap } from 'components/Elements';
-import registerTick from 'hocs/registerTick';
+import { PowerUpRecord } from 'types';
 
 const colorSchema = {
   ' ': 'none',
@@ -26,7 +26,7 @@ const powerUpDataArray = {
     'w bbb       bbwb',
     'gwwwwwwwwwwwwwwg',
     ' bbbbbbbbbbbbbb ',
-    '                ',
+    '                '
   ],
   star: [
     ' wwwwwwwwwwwwwg ',
@@ -44,7 +44,7 @@ const powerUpDataArray = {
     'w b  bbbbbb  bwb',
     'gwwwwwwwwwwwwwgb',
     ' bbbbbbbbbbbbbb ',
-    '                ',
+    '                '
   ],
   grenade: [
     ' wwwwwwwwwwwwwg ',
@@ -61,7 +61,7 @@ const powerUpDataArray = {
     'w bbbwgg bbbbbwb',
     'w bbb   bbbbbbwb',
     'gwwwwwwwwwwwwwgb',
-    ' bbbbbbbbbbbbbb ',
+    ' bbbbbbbbbbbbbb '
   ],
   timer: [
     ' wwwwwwwwwwwwwg ',
@@ -138,17 +138,22 @@ const powerUpDataArray = {
 };
 
 type P = {
-  x: number;
-  y: number;
-  name: PowerUpName;
-  tickIndex?: number;
+  powerUp: PowerUpRecord;
 };
 
-export class _PowerUp extends React.PureComponent<P> {
+export default class PowerUp extends React.PureComponent<P> {
   render() {
-    const { x, y, name, tickIndex } = this.props;
-    return tickIndex === 0 ? <Bitmap x={x} y={y} d={powerUpDataArray[name]} scheme={colorSchema} /> : null;
+    const {
+      powerUp: { visible, x, y, powerUpName }
+    } = this.props;
+    return (
+      <Bitmap
+        style={{ visibility: visible ? 'hidden' : 'visible' }}
+        x={x}
+        y={y}
+        d={powerUpDataArray[powerUpName]}
+        scheme={colorSchema}
+      />
+    );
   }
 }
-
-export default registerTick(400, 800)(_PowerUp);

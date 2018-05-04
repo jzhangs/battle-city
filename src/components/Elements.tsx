@@ -13,13 +13,19 @@ type BitMapProps = {
   y: number;
   d: string[];
   scheme: { [key: string]: string };
+  style?: React.CSSProperties;
 };
 
-export const Bitmap = ({ x, y, d, scheme }: BitMapProps) => {
-  const cols = d[0].length;
-  return (
-    <g transform={`translate(${x},${y})`}>
-      {d.map((cs, dy) => Array.from(cs).map((c, dx) => <Pixel key={dy * cols + dx} x={dx} y={dy} fill={scheme[c]} />))}
-    </g>
-  );
-};
+export class Bitmap extends React.PureComponent<BitMapProps> {
+  render() {
+    const { x, y, d, scheme, style = {} } = this.props;
+    const cols = d[0].length;
+    return (
+      <g transform={`translate(${x},${y})`} style={style}>
+        {d.map((cs, dy) =>
+          Array.from(cs).map((c, dx) => <Pixel key={dy * cols + dx} x={dx} y={dy} fill={scheme[c]} />)
+        )}
+      </g>
+    );
+  }
+}

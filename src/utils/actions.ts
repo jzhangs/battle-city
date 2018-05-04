@@ -1,6 +1,5 @@
 import { Map, Set } from 'immutable';
-import { TankRecord, BulletRecord } from 'types';
-import PlayerRecord from 'types/PlayerRecord';
+import { TankRecord, BulletRecord, PlayerRecord, PowerUpRecord, MapRecord } from 'types';
 
 declare global {
   type Action = Action.Action;
@@ -13,10 +12,14 @@ declare global {
       | AfterTickAction
       | AddBulletAction
       | SetCooldownAction
+      | SetHelmetDurationAction
+      | SetFrozenTimeoutAction
+      | SetAIFrozenTimeoutAction
       | DestroyBulletsAction
       | DestroySteelsAction
       | DestroyBricksAction
-      | UpdaetBulletsAction
+      | UpdateMapAction
+      | UpdateBulletsAction
       | LoadStageAction
       | Simple<'GAMEOVER'>
       | Simple<'GAMESTART'>
@@ -43,7 +46,13 @@ declare global {
       | KillAction
       | IncKillCout
       | UpdateTransientKillInfo
-      | Simple<'SHOW_TOTAL_KILL_COUNT'>;
+      | Simple<'SHOW_TOTAL_KILL_COUNT'>
+      | AddPowerUpAction
+      | RemovePowerUpAction
+      | UpdatePowerUpAction
+      | PickPowerUpAction
+      | AddOneLifeAction
+      | UpgradeTankAction;
 
     export type ActionType = Action['type'];
 
@@ -109,10 +118,27 @@ declare global {
       tankId: TankId;
     };
 
+    export type SetHelmetDurationAction = {
+      type: 'SET_HELMET_DURATION';
+      tankId: TankId;
+      duration: number;
+    };
+
     export type SetCooldownAction = {
       type: 'SET_COOLDOWN';
       tankId: TankId;
       cooldown: number;
+    };
+
+    export type SetAIFrozenTimeoutAction = {
+      type: 'SET_AI_FROZEN_TIMEOUT';
+      AIFrozenTimeout: number;
+    };
+
+    export type SetFrozenTimeoutAction = {
+      type: 'SET_FROZEN_TIMEOUT';
+      tankId: TankId;
+      frozenTimeout: number;
     };
 
     export type DestroyBulletsAction = {
@@ -131,7 +157,12 @@ declare global {
       ts: Set<BrickIndex>;
     };
 
-    export type UpdaetBulletsAction = {
+    export type UpdateMapAction = {
+      type: 'UPDATE_MAP';
+      map: MapRecord;
+    };
+
+    export type UpdateBulletsAction = {
       type: 'UPDATE_BULLETS';
       updatedBullets: Map<BulletId, BulletRecord>;
     };
@@ -221,6 +252,38 @@ declare global {
     export type LoadSceneAction = {
       type: 'LOAD_SCENE';
       scene: Scene;
+    };
+
+    export type AddPowerUpAction = {
+      type: 'ADD_POWER_UP';
+      powerUp: PowerUpRecord;
+    };
+
+    export type RemovePowerUpAction = {
+      type: 'REMOVE_POWER_UP';
+      powerUpId: PowerUpId;
+    };
+
+    export type UpdatePowerUpAction = {
+      type: 'UPDATE_POWER_UP';
+      powerUp: PowerUpRecord;
+    };
+
+    export type PickPowerUpAction = {
+      type: 'PICK_POWER_UP';
+      player: PlayerRecord;
+      tank: TankRecord;
+      powerUp: PowerUpRecord;
+    };
+
+    export type AddOneLifeAction = {
+      type: 'ADD_ONE_LIFE';
+      playerName: PlayerName;
+    };
+
+    export type UpgradeTankAction = {
+      type: 'UPGRADE_TANK';
+      tankId: TankId;
     };
 
     export type Simple<T> = {

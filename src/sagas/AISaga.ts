@@ -4,7 +4,7 @@ import { fork, put, select, take, spawn, all } from 'redux-saga/effects';
 import directionController from 'sagas/directionController';
 import fireController from 'sagas/fireController';
 import * as selectors from 'utils/selectors';
-import { getDirectionInfo, spawnTank } from 'utils/common';
+import { getDirectionInfo, spawnTank, getNextId } from 'utils/common';
 import { State } from 'reducers';
 import { TankRecord, PlayerRecord } from 'types';
 import AIWorker = require('worker-loader!ai/worker');
@@ -55,6 +55,7 @@ function* handleCmds(playerName: string, cmdChannel: Channel<AICommand>, noteCha
     } else if (command.type === 'query') {
       if (command.query === 'my-tank') {
         const tank: TankRecord = yield select(selectors.playerTank, playerName);
+        if (!tank) continue;
         noteChannel.put({
           type: 'query-result',
           result: {
@@ -79,18 +80,17 @@ function* handleCmds(playerName: string, cmdChannel: Channel<AICommand>, noteCha
         });
       } else if (command.query === 'my-fire-info') {
         const tank: TankRecord = yield select(selectors.playerTank, playerName);
-        console.assert(tank != null, 'tank is null when query `my-fire-info`');
-        const { cooldowns, bullets }: State = yield select();
-        const cooldown = cooldowns.get(tank.tankId);
+        if (!tank) continue;
+        const { bullets }: State = yield select();
         const bulletCount = bullets.filter(b => b.tankId === tank.tankId).count();
-        const canFire = bulletCount < tank.bulletLimit && cooldown <= 0;
+        const canFire = bulletCount < tank.bulletLimit && tank.cooldown <= 0;
         noteChannel.put({
           type: 'query-result',
           result: {
             type: 'my-fire-info',
             bulletCount,
             canFire,
-            cooldown,
+            cooldown: tank.cooldown,
             bulletLimit: tank.bulletLimit
           }
         });
@@ -161,37 +161,49 @@ function* AIWorkerSaga(playerName: string, WorkerClass: WorkerConstructor) {
 }
 
 export default function* AIMasterSaga() {
-  const max = 1;
+  const max = 2;
   const taskMap: { [key: string]: Task } = {};
 
-  let nextAIPlayerIndex = 0;
+  const addAICommandChannel = makeChannel<'add'>();
+  yield fork(addAIHandler);
 
-  function* addAI() {
-    const {
-      game: { remainingEnemies }
-    }: State = yield select();
-    if (!remainingEnemies.isEmpty()) {
-      const playerName = `AI-${nextAIPlayerIndex++}`;
-      yield put<Action>({
-        type: 'CREATE_PLAYER',
-        player: PlayerRecord({
+  function* addAIHandler() {
+    while (true) {
+      yield take(addAICommandChannel);
+      const {
+        game: { remainingEnemies }
+      }: State = yield select();
+      if (!remainingEnemies.isEmpty()) {
+        const playerName = `AI-${getNextId('AI-player')}`;
+        yield put<Action>({
+          type: 'CREATE_PLAYER',
+          player: PlayerRecord({
+            playerName,
+            lives: Infinity,
+            side: 'ai'
+          })
+        });
+        const { x, y } = yield select(selectors.availableSpawnPosition);
+        yield put<Action>({ type: 'REMOVE_FIRST_REMAINING_ENEMY' });
+        const level = remainingEnemies.first();
+        const hp = level === 'armor' ? 4 : 1;
+        const tankId = yield* spawnTank(
+          TankRecord({
+            x,
+            y,
+            side: 'ai',
+            level,
+            hp
+          })
+        );
+        taskMap[playerName] = yield spawn(AIWorkerSaga, playerName, AIWorker);
+
+        yield put<Action.ActivatePlayerAction>({
+          type: 'ACTIVATE_PLAYER',
           playerName,
-          lives: Infinity,
-          side: 'ai'
-        })
-      });
-
-      const { x, y } = yield select(selectors.availableSpawnPosition);
-      yield put<Action>({ type: 'REMOVE_FIRST_REMAINING_ENEMY' });
-      const level = remainingEnemies.first();
-      const hp = level === 'armor' ? 4 : 1;
-      const tankId = yield* spawnTank(TankRecord({ x, y, side: 'ai', level: remainingEnemies.first(), hp }));
-      taskMap[playerName] = yield spawn(AIWorkerSaga, playerName, AIWorker);
-      yield put<Action.ActivatePlayerAction>({
-        type: 'ACTIVATE_PLAYER',
-        playerName,
-        tankId
-      });
+          tankId
+        });
+      }
     }
   }
 
@@ -199,7 +211,7 @@ export default function* AIMasterSaga() {
     const action: Action = yield take(['KILL', 'LOAD_STAGE', 'GAMEOVER']);
     if (action.type === 'LOAD_STAGE') {
       for (let i = 0; i < max; i++) {
-        yield* addAI();
+        addAICommandChannel.put('add');
       }
     } else if (action.type === 'KILL') {
       const { targetTank, targetPlayer } = action;
@@ -207,12 +219,12 @@ export default function* AIMasterSaga() {
         const task = taskMap[targetPlayer.playerName];
         task.cancel();
         delete taskMap[targetPlayer.playerName];
-        yield* addAI();
+        addAICommandChannel.put('add');
       }
     } else if (action.type === 'GAMEOVER') {
       for (const [playerName, task] of Object.entries(taskMap)) {
-        task.cancel()
-        delete taskMap[playerName]
+        task.cancel();
+        delete taskMap[playerName];
       }
     }
   }

@@ -27,13 +27,13 @@ import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ } from 'utils/consts';
 import tickEmitter from 'sagas/tickEmitter';
 import stageConfigs from 'stages';
 import registerTick from 'hocs/registerTick';
-import { PlayerRecord, TankRecord } from 'types';
-import { _PowerUp } from './components/PowerUp';
+import { PlayerRecord, TankRecord, PowerUpRecord } from 'types';
+import PowerUp from './components/PowerUp';
 
 const BulletExplosion = registerTick(500, 500, 1000)(_BulletExplosion);
 const TankExplosion = registerTick(500, 1000)(_TankExplosion);
-const PowerUp = ({ name, x, y }: { name: PowerUpName; x: number; y: number }) => (
-  <_PowerUp tickIndex={0} name={name} x={x} y={y} />
+const PowerUpItem = ({ name, x, y }: { name: PowerUpName; x: number; y: number }) => (
+  <PowerUp powerUp={PowerUpRecord({ powerUpName: name, x, y, visible: true })} />
 );
 const simpleSagaMiddleware = createSagaMiddleware();
 const simpleReducer = combineReducers({ time, players, game });
@@ -255,18 +255,9 @@ class Stories extends React.Component<{}, { stage: string }> {
           <summary>
             <FontLevel1>PowerUp</FontLevel1>
           </summary>
-          <p style={{ fontSize: 20, margin: 0, lineHeight: 1.5 }}>
-            tank / star / grenade / timer / helmet / shoval
-          </p>
+          <p style={{ fontSize: 20, margin: 0, lineHeight: 1.5 }}>tank / star / grenade / timer / helmet / shoval</p>
           <X4 width={496} height={96} style={{ background: 'black' }}>
-            {powerUpNames.map((name, index) =>
-              <PowerUp
-                key={name}
-                name={name}
-                x={index * 20 + 4}
-                y={4}
-              />
-            )}
+            {powerUpNames.map((name, index) => <PowerUpItem key={name} name={name} x={index * 20 + 4} y={4} />)}
           </X4>
         </details>
       </div>

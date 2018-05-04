@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import { State } from 'types';
-import { BLOCK_SIZE, TANK_SIZE } from 'utils/consts';
-import { testCollide } from 'utils/common';
+import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ, TANK_SIZE, ITEM_SIZE_MAP, N_MAP } from 'utils/consts';
+import { testCollide, iterRowsAndCols, asBox } from 'utils/common';
 
 export const playerTank = (state: State, playerName: string) => {
   const { active, tankId } = state.players.get(playerName);
@@ -13,7 +13,7 @@ export const playerTank = (state: State, playerName: string) => {
 
 export const availableSpawnPosition = ({ tanks }: State): Box => {
   const result: Box[] = [];
-  outer: for (const x of [0, 6 * BLOCK_SIZE, 12 * BLOCK_SIZE]) {
+  outer: for (const x of [0, 6 * B, 12 * B]) {
     const option = { x, y: 0, width: TANK_SIZE, height: TANK_SIZE };
     for (const tank of tanks.values()) {
       if (testCollide(option, { x: tank.x, y: tank.y, width: TANK_SIZE, height: TANK_SIZE })) {
@@ -23,4 +23,47 @@ export const availableSpawnPosition = ({ tanks }: State): Box => {
     result.push(option);
   }
   return _.sample(result);
+};
+
+export const validPowerUpSpawnPositions = ({ map: { bricks, rivers, steels, eagle } }: State): Point[] => {
+  const validPositions: Point[] = [];
+  for (let y = 0; y < (FBZ - 1) * B; y += 0.5 * B) {
+    for (let x = 0; x < (FBZ - 1) * B; x += 0.5 * B) {
+      let collideCount = 0;
+
+      partLoop: for (const part of [
+        { x: x + 4, y: y + 4, width: 4, height: 4 },
+        { x: x + 8, y: y + 4, width: 4, height: 4 },
+        { x: x + 4, y: y + 8, width: 4, height: 4 },
+        { x: x + 8, y: y + 8, width: 4, height: 4 }
+      ]) {
+        for (const [brow, bcol] of iterRowsAndCols(ITEM_SIZE_MAP.BRICK, part)) {
+          if (bricks.get(brow * N_MAP.BRICK + bcol)) {
+            collideCount++;
+            continue partLoop;
+          }
+        }
+        for (const [trow, tcol] of iterRowsAndCols(ITEM_SIZE_MAP.STEEL, part)) {
+          if (steels.get(trow * N_MAP.STEEL + tcol)) {
+            collideCount++;
+            continue partLoop;
+          }
+        }
+        for (const [rrow, rcol] of iterRowsAndCols(ITEM_SIZE_MAP.RIVER, part)) {
+          if (rivers.get(rrow * N_MAP.RIVER + rcol)) {
+            collideCount++;
+            continue partLoop;
+          }
+        }
+        if (testCollide(asBox(eagle), part)) {
+          collideCount++;
+          continue partLoop;
+        }
+      }
+      if (collideCount === 1 || collideCount === 2 || collideCount === 3) {
+        validPositions.push({ x, y });
+      }
+    }
+  }
+  return validPositions;
 };

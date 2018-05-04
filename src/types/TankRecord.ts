@@ -9,11 +9,15 @@ const TankRecord = Record({
   moving: false,
   level: 'basic' as TankLevel,
   color: 'auto' as TankColor,
-  bulletSpeed: 0.12,
-  bulletLimit: 2,
-  bulletInterval: 200,
+  bulletSpeed: 0.08,
+  bulletLimit: 1,
+  bulletInterval: 300,
   hp: 1,
-  withPowerUp: false
+  withPowerUp: false,
+
+  helmetDuration: 0,
+  frozenTimeout: 0,
+  cooldown: 0
 });
 
 const record = TankRecord();

@@ -11,7 +11,9 @@ import ForestLayer from 'components/ForestLayer';
 import Eagle from 'components/Eagle';
 import Explosion from 'components/Explosion';
 import Flicker from 'components/Flicker';
+import TankHelmet from 'components/TankHelmet';
 import TextLayer from 'components/TextLayer';
+import PowerUp from 'components/PowerUp';
 import HUD from 'components/HUD';
 
 import { BLOCK_SIZE } from 'utils/consts';
@@ -23,7 +25,7 @@ function mapStateToProps(state: State) {
 
 class GameScene extends React.Component<State> {
   render() {
-    const { bullets, map, explosions, flickers, tanks, texts } = this.props;
+    const { bullets, map, explosions, flickers, tanks, texts, powerUps } = this.props;
     const { bricks, steels, rivers, snows, forests, eagle } = map;
     return (
       <g data-role="game-screen">
@@ -39,7 +41,15 @@ class GameScene extends React.Component<State> {
             {bullets.map((b, i) => <Bullet key={i} direction={b.direction} x={b.x} y={b.y} />).toArray()}
           </g>
           <g data-role="tank-layer">{tanks.map(tank => <Tank key={tank.tankId} tank={tank} />).toArray()}</g>
+          <g role="helmet-layer">
+            {tanks
+              .map(tank => (tank.helmetDuration > 0 ? <TankHelmet key={tank.tankId} x={tank.x} y={tank.y} /> : null))
+              .toArray()}
+          </g>
           <ForestLayer forests={forests} />
+          <g data-role="power-up-layer">
+            {powerUps.map(powerUp => <PowerUp key={powerUp.powerUpId} powerUp={powerUp} />).toArray()}
+          </g>
           <g data-role="explosion-layer">
             {explosions
               .map(exp => <Explosion key={exp.explosionId} x={exp.x} y={exp.y} explosionType={exp.explosionType} />)

@@ -26,6 +26,7 @@ type Base = {
   killInfo: Map<PlayerName, Map<TankLevel, KillCount>>;
   transientKillInfo: Map<PlayerName, Map<TankLevel, KillCount>>;
   showTotalKillCount: boolean;
+  AIFrozenTimeout: number;
 };
 
 export const GameRecord = Record(
@@ -35,7 +36,8 @@ export const GameRecord = Record(
     remainingEnemies: defaultRemainingEnemies,
     killInfo: Map<PlayerName, Map<TankLevel, KillCount>>(),
     transientKillInfo: emptyTransientKillInfo,
-    showTotalKillCount: false
+    showTotalKillCount: false,
+    AIFrozenTimeout: 0
   },
   'GameRecord'
 );
@@ -62,6 +64,8 @@ export default function game(state = GameRecord(), action: Action) {
     return state.set('transientKillInfo', action.info);
   } else if (action.type === 'SHOW_TOTAL_KILL_COUNT') {
     return state.set('showTotalKillCount', true);
+  } else if (action.type === 'SET_AI_FROZEN_TIMEOUT') {
+    return state.set('AIFrozenTimeout', action.AIFrozenTimeout);
   }
 
   return state;

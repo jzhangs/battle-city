@@ -6,29 +6,19 @@ import { State, TankRecord } from 'types';
 export default function* fireController(playerName: string, shouldFire: () => boolean) {
   while (true) {
     const { delta }: Action.TickAction = yield take('TICK');
-    const { bullets: allBullets, cooldowns }: State = yield select();
+    const { bullets: allBullets }: State = yield select();
     const tank: TankRecord = yield select(selectors.playerTank, playerName);
-    if (tank == null) {
+    const {
+      game: { AIFrozenTimeout }
+    }: State = yield select();
+    if (tank == null || (tank.side === 'ai' && AIFrozenTimeout > 0)) {
       continue;
     }
-    const cooldown = cooldowns.get(tank.tankId);
-    if (cooldown > 0) {
-      yield put<Action>({
-        type: 'SET_COOLDOWN',
-        tankId: tank.tankId,
-        cooldown: cooldown - delta
-      });
-    } else {
-      if (shouldFire()) {
-        const tank: TankRecord = yield select(selectors.playerTank, playerName);
-        if (tank == null) {
-          continue;
-        }
-        const bullets = allBullets.filter(bullet => bullet.tankId === tank.tankId);
-        if (bullets.count() >= tank.bulletLimit) {
-          continue;
-        }
+    let nextCooldown = tank.cooldown <= 0 ? 0 : tank.cooldown - delta;
 
+    if (tank.cooldown <= 0 && shouldFire()) {
+      const bullets = allBullets.filter(bullet => bullet.tankId === tank.tankId);
+      if (bullets.count() < tank.bulletLimit) {
         const { x, y } = getBulletStartPosition(tank);
         yield put({
           type: 'ADD_BULLET',
@@ -39,12 +29,16 @@ export default function* fireController(playerName: string, shouldFire: () => bo
           speed: tank.bulletSpeed,
           tankId: tank.tankId
         });
-        yield put<Action>({
-          type: 'SET_COOLDOWN',
-          tankId: tank.tankId,
-          cooldown: tank.bulletInterval
-        });
+        nextCooldown = tank.bulletInterval;
       }
+    }
+
+    if (tank.cooldown !== nextCooldown) {
+      yield put<Action>({
+        type: 'SET_COOLDOWN',
+        tankId: tank.tankId,
+        cooldown: nextCooldown
+      });
     }
   }
 }

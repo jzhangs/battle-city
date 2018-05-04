@@ -1,7 +1,7 @@
 import { delay } from 'redux-saga';
 import { put } from 'redux-saga/effects';
 import { BLOCK_SIZE, BULLET_SIZE, FIELD_SIZE, TANK_SIZE, TANK_SPAWN_DELAY } from 'utils/consts';
-import { BulletRecord, TankRecord } from 'types';
+import { BulletRecord, TankRecord, EagleRecord, PowerUpRecord } from 'types';
 
 // Calculte bullet start postion according to postion and
 // direction of tank.
@@ -62,7 +62,7 @@ export function getNextId(tag = '') {
   return 1;
 }
 
-export function asBox(item: BulletRecord | TankRecord, enlargement = 0): Box {
+export function asBox(item: BulletRecord | TankRecord | EagleRecord | PowerUpRecord, enlargement = 0): Box {
   if (item instanceof BulletRecord) {
     return {
       x: item.x - BULLET_SIZE / 2 * enlargement,
@@ -77,6 +77,20 @@ export function asBox(item: BulletRecord | TankRecord, enlargement = 0): Box {
       width: TANK_SIZE * (1 + enlargement),
       height: TANK_SIZE * (1 + enlargement)
     };
+  } else if (item instanceof EagleRecord) {
+    return {
+      x: item.x - BLOCK_SIZE / 2 * enlargement,
+      y: item.y - BLOCK_SIZE / 2 * enlargement,
+      width: BLOCK_SIZE * (1 + enlargement),
+      height: BLOCK_SIZE * (1 + enlargement),
+    }
+  } else if (item instanceof PowerUpRecord) {
+    return {
+      x: item.x - BLOCK_SIZE / 2 * enlargement,
+      y: item.y - BLOCK_SIZE / 2 * enlargement,
+      width: BLOCK_SIZE * (1 + enlargement),
+      height: BLOCK_SIZE * (1 + enlargement),
+    }
   } else {
     throw new Error('Cannot convert to type Box');
   }

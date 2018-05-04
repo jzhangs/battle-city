@@ -13,6 +13,7 @@ type Context = {
   expBulletIdSet: Set<BulletId>;
   noExpBulletIdSet: Set<BulletId>;
   tankHurtMap: Map<TargetTankId, Map<SourceTankId, HurtCount>>;
+  frozenTankIdSet: Set<TankId>;
 };
 
 function isBulletInField(bullet: BulletRecord) {
@@ -167,7 +168,7 @@ function* destroyBricks(collidedBullets: BulletsMap) {
   }
 }
 
-function* destroyTanks(tankIdSet: ISet<TankId>) {
+export function* destroyTanks(tankIdSet: ISet<TankId>) {
   const { tanks }: State = yield select();
   yield* tankIdSet.map(tankId =>
     put({
@@ -217,18 +218,23 @@ function* handleBulletsCollidedWithTanks(context: Context) {
         const tankSide = tank.side;
         if (bulletSide === 'player' && tankSide === 'player') {
           context.expBulletIdSet.add(bullet.bulletId);
+          context.frozenTankIdSet.add(tank.tankId);
         } else if (bulletSide === 'player' && tankSide === 'ai') {
           const hurtSubMap = getOrDefault(context.tankHurtMap, tank.tankId, () => new Map());
           const oldHurt = hurtSubMap.get(tank.tankId) || 0;
           hurtSubMap.set(bullet.tankId, oldHurt + 1);
           context.expBulletIdSet.add(bullet.bulletId);
         } else if (bulletSide === 'ai' && tankSide === 'player') {
-          const hurtSubMap = getOrDefault(context.tankHurtMap, tank.tankId, () => new Map());
-          const oldHurt = hurtSubMap.get(tank.tankId) || 0;
-          hurtSubMap.set(bullet.tankId, oldHurt + 1);
-          context.expBulletIdSet.add(bullet.bulletId);
+          if (tank.helmetDuration > 0) {
+            context.noExpBulletIdSet.add(bullet.bulletId);
+          } else {
+            const hurtSubMap = getOrDefault(context.tankHurtMap, tank.tankId, () => new Map());
+            const oldHurt = hurtSubMap.get(tank.tankId) || 0;
+            hurtSubMap.set(bullet.tankId, oldHurt + 1);
+            context.expBulletIdSet.add(bullet.bulletId);
+          }
         } else if (bulletSide === 'ai' && tankSide === 'ai') {
-          context.noExpBulletIdSet.add(bullet.bulletId);
+          // context.noExpBulletIdSet.add(bullet.bulletId);
         } else {
           throw new Error('Error side status');
         }
@@ -271,7 +277,8 @@ function* handleAfterTick() {
     const context = {
       expBulletIdSet: new Set(),
       noExpBulletIdSet: new Set(),
-      tankHurtMap: new Map()
+      tankHurtMap: new Map(),
+      frozenTankIdSet: new Set()
     };
 
     yield* handleBulletsCollidedWithTanks(context);
@@ -289,6 +296,14 @@ function* handleAfterTick() {
 
       yield* destroyBricks(expBullets);
       yield* destroySteels(expBullets);
+    }
+
+    for (const tankId of context.frozenTankIdSet) {
+      yield put<Action.SetFrozenTimeoutAction>({
+        type: 'SET_FROZEN_TIMEOUT',
+        tankId,
+        frozenTimeout: 500
+      });
     }
 
     const kills: PutEffect<Action.KillAction>[] = [];
