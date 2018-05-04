@@ -1,88 +1,11 @@
-import { List } from 'immutable';
-import { compose } from 'redux';
 import { delay } from 'redux-saga';
-import { BLOCK_SIZE, FIELD_SIZE, ITEM_SIZE_MAP, N_MAP, TANK_SIZE } from 'utils/consts';
-import { asBox, getDirectionInfo, iterRowsAndCols, reverseDirection } from 'utils/common';
-import { EagleRecord, MapRecord, TankRecord, TanksMap } from 'types';
+import { reverseDirection } from 'utils/common';
+import { calculatePriorityMap, getEnv, getRandomDirection, shouldFire } from 'ai/AIUtils';
+import GameAIClient from 'ai/AIClient';
 
-// const log = console.log;
-const log: any = () => 0;
+const logFire = (...args: any[]) => console.log('[fire]', ...args);
 
-interface PostMessage {
-  (msg: AICommand): void;
-}
-
-const post = postMessage as PostMessage;
-
-type ResolveFn = (value?: any) => void;
-const pendingNotes = {
-  'bullet-complete': [] as ResolveFn[],
-  reach: [] as ResolveFn[]
-};
-
-const pendingQueries = {
-  'my-tank-info': [] as ResolveFn[],
-  'map-info': [] as ResolveFn[],
-  'tanks-info': [] as ResolveFn[]
-};
-
-self.onmessage = function (event) {
-  const d: Note = event.data;
-  if (d.type === 'query-result') {
-    const fns = pendingQueries[d.result.type];
-    pendingQueries[d.result.type] = [];
-    fns.forEach(fn => fn(d.result));
-  } else {
-    const fns = pendingNotes[d.type];
-    pendingNotes[d.type] = [];
-    fns.forEach(fn => fn(d));
-  }
-};
-
-const queryMyTank = () =>
-  new Promise<TankRecord>(resolve => {
-    post({ type: 'query', query: 'my-tank' });
-    pendingQueries['my-tank-info'].push(compose(resolve, (result: QueryResult.MyTankInfo) => TankRecord(result.tank)));
-  });
-
-const queryMapInfo = () =>
-  new Promise<MapRecord>(resolve => {
-    post({ type: 'query', query: 'map' });
-    pendingQueries['map-info'].push(
-      compose(resolve, (result: QueryResult.MapInfo) =>
-        MapRecord(result.map as any)
-          .update('eagle', EagleRecord)
-          .update('bricks', List)
-          .update('steels', List)
-          .update('rivers', List)
-          .update('snows', List)
-          .update('forests', List)
-      )
-    );
-  });
-
-const queryTanksInfo = () =>
-  new Promise<TanksMap>(resolve => {
-    post({ type: 'query', query: 'tanks' });
-    pendingQueries['tanks-info'].push(
-      compose(resolve, (result: QueryResult.TanksInfo) =>
-        List(result.tanks)
-          .toMap()
-          .map(TankRecord)
-          .mapKeys((_, t) => t.tankId)
-      )
-    );
-  });
-
-const noteBulletComplete = () =>
-  new Promise(resolve => {
-    pendingNotes['bullet-complete'].push(resolve);
-  });
-
-const noteReach = () =>
-  new Promise(resolve => {
-    pendingNotes['reach'].push(resolve);
-  });
+const client = new GameAIClient();
 
 function race<V, T extends { [key: string]: Promise<V> }>(map: T) {
   return Promise.race(Object.entries(map).map(([key, promise]) => promise.then(value => ({ key, value })))).then(
@@ -90,20 +13,23 @@ function race<V, T extends { [key: string]: Promise<V> }>(map: T) {
   );
 }
 
-async function main() {
+async function moveLoop() {
+  let skipDelayAtFirstTime = true;
   while (true) {
-    await race({
-      timeout: delay(2000),
-      bulletComplete: noteBulletComplete(),
-      reach: noteReach()
-    });
-    // debugger
-    let tank = await queryMyTank();
-    if (tank == null) {
-      continue;
+    if (skipDelayAtFirstTime) {
+      skipDelayAtFirstTime = false;
+    } else {
+      await race({
+        timeout: delay(1000),
+        reach: client.noteReach()
+        // bulletComplete: client.noteBulletComplete(),
+      });
     }
-    const map = await queryMapInfo();
-    const tanks = await queryTanksInfo();
+
+    let tank = await client.queryMyTank();
+    console.assert(tank != null, 'tank is null in mvoeLoop!');
+    const map = await client.queryMapInfo();
+    const tanks = await client.queryTanksInfo();
 
     const env = getEnv(map, tanks, tank);
     const priorityMap = calculatePriorityMap(env);
@@ -113,364 +39,54 @@ async function main() {
 
     const nextDirection = getRandomDirection(priorityMap);
 
-    log('binfo', env.barrierInfo);
-    log('pos', env.tankPosition);
-    log('priority-map', priorityMap);
-    log('next-direction', nextDirection);
-
     if (tank.direction !== nextDirection) {
-      post({ type: 'turn', direction: nextDirection });
+      client.post({ type: 'turn', direction: nextDirection });
       tank = tank.set('direction', nextDirection);
-      // 等待足够长的时间, 保证turn命令已经被处理
       await delay(100);
     }
 
-    if (shouldFire(tank, env)) {
-      log('command fire!');
-      post({ type: 'fire' });
-    }
-
-    // log('forward-length:', env.barrierInfo[tank.direction].length)
-    post({
+    client.post({
       type: 'forward',
-      // todo tank应该更加偏向于走到下一个 *路口*
-      // forwardLength: Math.max(BLOCK_SIZE, env.barrierInfo[tank.direction].length),
       forwardLength: env.barrierInfo[tank.direction].length
     });
-    // $$postMessage({ type: 'fire', forwardLength: 3 * BLOCK_SIZE })
-    // console.groupEnd()
   }
+}
+
+async function fireLoop() {
+  let skipDelayAtFirstTime = true;
+  while (true) {
+    if (skipDelayAtFirstTime) {
+      skipDelayAtFirstTime = false;
+    } else {
+      await race({
+        timeout: delay(300),
+        bulletComplete: client.noteBulletComplete()
+      });
+    }
+
+    const tank = await client.queryMyTank();
+    console.assert(tank != null, 'tank is null in fireLoop!');
+    const fireInfo = await client.queryMyFireInfo();
+    if (fireInfo.canFire) {
+      //   logFire('can not fire skip...')
+      // } else {
+      // logFire('can fire!')
+
+      const map = await client.queryMapInfo();
+      const tanks = await client.queryTanksInfo();
+
+      const env = getEnv(map, tanks, tank);
+      if (shouldFire(tank, env)) {
+        logFire('fire!');
+        client.post({ type: 'fire' });
+        await delay(500);
+      }
+    }
+  }
+}
+
+async function main() {
+  await Promise.all([moveLoop(), fireLoop()]);
 }
 
 main();
-
-function canDestroy(barrierType: BarrierType) {
-  return barrierType === 'brick';
-}
-
-interface PriorityMap {
-  up: number;
-  down: number;
-  left: number;
-  right: number;
-}
-
-interface BarrierInfoEntry {
-  type: BarrierType;
-  length: number;
-}
-
-interface BarrierInfo {
-  up: BarrierInfoEntry;
-  down: BarrierInfoEntry;
-  left: BarrierInfoEntry;
-  right: BarrierInfoEntry;
-}
-
-interface TankPosition {
-  eagle: Vector;
-  nearestHumanTank: Vector;
-}
-
-interface TankEnv {
-  tankPosition: TankPosition;
-  barrierInfo: BarrierInfo;
-}
-
-type BarrierType = 'border' | 'steel' | 'river' | 'brick';
-
-function calculatePriorityMap({ tankPosition: pos, barrierInfo: binfo }: TankEnv): PriorityMap {
-  const priorityMap: PriorityMap = {
-    up: 2,
-    down: 2,
-    left: 2,
-    right: 2
-  };
-
-  if (pos.eagle.dy >= 4 * BLOCK_SIZE) {
-    priorityMap.down += 2;
-  } else if (pos.eagle.dy >= 2 * BLOCK_SIZE) {
-    priorityMap.down += 1;
-  }
-  // if (binfo.down.length <= 2 * BLOCK_SIZE && !canDestroy(binfo.down.type)) {
-  //   priorityMap.down = 1
-  // }
-  if (binfo.down.length < 4 && !canDestroy(binfo.down.type)) {
-    priorityMap.down = 0;
-  }
-
-  if (pos.eagle.dy <= -4 * BLOCK_SIZE) {
-    priorityMap.up += 2;
-  } else if (pos.eagle.dy < -2 * BLOCK_SIZE) {
-    priorityMap.up += 1;
-  }
-  // if (binfo.up.length <= 2 * BLOCK_SIZE && !canDestroy(binfo.up.type)) {
-  //   priorityMap.up = 1
-  // }
-  if (binfo.up.length < 4 && !canDestroy(binfo.up.type)) {
-    priorityMap.up = 0;
-  }
-
-  if (pos.eagle.dx <= -4 * BLOCK_SIZE) {
-    priorityMap.left += 2;
-  } else if (pos.eagle.dx <= -2 * BLOCK_SIZE) {
-    priorityMap.left += 1;
-  }
-  // if (binfo.left.length <= 2 * BLOCK_SIZE && !canDestroy(binfo.left.type)) {
-  //   priorityMap.left = 1
-  // }
-  if (binfo.left.length < 4 && !canDestroy(binfo.left.type)) {
-    priorityMap.left = 0;
-  }
-
-  if (pos.eagle.dx >= 4 * BLOCK_SIZE) {
-    priorityMap.right += 2;
-  } else if (pos.eagle.dx >= 2 * BLOCK_SIZE) {
-    priorityMap.right += 1;
-  }
-  // if (binfo.right.length <= 2 * BLOCK_SIZE && !canDestroy(binfo.right.type)) {
-  //   priorityMap.right = 1
-  // }
-  if (binfo.right.length < 4 && !canDestroy(binfo.right.type)) {
-    priorityMap.right = 0;
-  }
-
-  return priorityMap;
-}
-
-function getEnv(map: MapRecord, tanks: TanksMap, tank: TankRecord): TankEnv {
-  const pos = {
-    eagle: {},
-    nearestHumanTank: {}
-  } as TankPosition;
-
-  const { eagle } = map;
-  pos.eagle.dx = eagle.y - tank.y;
-  pos.eagle.dy = eagle.x - tank.x;
-
-  const { nearestHumanTank } = tanks.reduce(
-    (reduction, next) => {
-      if (next.side === 'player') {
-        const distance = Math.abs(next.x - tank.x) + Math.abs(next.y - tank.y);
-        if (distance < reduction.minDistance) {
-          return { minDistance: distance, nearestHumanTank: next };
-        }
-      }
-      return reduction;
-    },
-    { minDistance: Infinity, nearestHumanTank: null as TankRecord }
-  );
-  if (nearestHumanTank) {
-    pos.nearestHumanTank.dx = tank.x - nearestHumanTank.x;
-    pos.nearestHumanTank.dy = tank.y - nearestHumanTank.y;
-  } else {
-    pos.nearestHumanTank = null;
-  }
-
-  const binfo: BarrierInfo = {
-    down: lookAhead(map, tank.set('direction', 'down')),
-    right: lookAhead(map, tank.set('direction', 'right')),
-    left: lookAhead(map, tank.set('direction', 'left')),
-    up: lookAhead(map, tank.set('direction', 'up'))
-  };
-
-  return {
-    tankPosition: pos,
-    barrierInfo: binfo
-  };
-}
-
-function shouldFire(tank: TankRecord, { barrierInfo, tankPosition }: TankEnv) {
-  const random = Math.random();
-
-  const ahead = barrierInfo[tank.direction];
-  if (canDestroy(ahead.type)) {
-    const threshhold = 1 - ahead.length / 10 * BLOCK_SIZE;
-    if (random < threshhold) {
-      return true;
-    }
-  }
-
-  if (
-    tank.direction === 'left' &&
-    tankPosition.eagle.dy <= 4 &&
-    -4 * BLOCK_SIZE <= tankPosition.eagle.dx &&
-    tankPosition.eagle.dx <= 0
-  ) {
-    if (random < 0.8) {
-      return true;
-    }
-  }
-  if (
-    tank.direction === 'right' &&
-    tankPosition.eagle.dy <= 4 &&
-    0 <= tankPosition.eagle.dx &&
-    tankPosition.eagle.dx <= 4 * BLOCK_SIZE
-  ) {
-    if (random < 0.8) {
-      return true;
-    }
-  }
-  if (
-    tank.direction === 'down' &&
-    tankPosition.eagle.dx <= 4 &&
-    0 <= tankPosition.eagle.dy &&
-    tankPosition.eagle.dy <= 4 * BLOCK_SIZE
-  ) {
-    if (random < 0.8) {
-      return true;
-    }
-  }
-
-  if (tankPosition.nearestHumanTank) {
-    if (
-      tank.direction === 'left' &&
-      tankPosition.nearestHumanTank.dy <= 4 &&
-      -4 * BLOCK_SIZE <= tankPosition.nearestHumanTank.dx &&
-      tankPosition.nearestHumanTank.dx <= 0
-    ) {
-      if (random < 0.6) {
-        return true;
-      }
-    }
-    if (
-      tank.direction === 'right' &&
-      tankPosition.nearestHumanTank.dy <= 4 &&
-      0 <= tankPosition.nearestHumanTank.dx &&
-      tankPosition.nearestHumanTank.dx <= 4 * BLOCK_SIZE
-    ) {
-      if (random < 0.6) {
-        return true;
-      }
-    }
-    if (
-      tank.direction === 'up' &&
-      tankPosition.nearestHumanTank.dx <= 4 &&
-      -4 * BLOCK_SIZE <= tankPosition.nearestHumanTank.dy &&
-      tankPosition.nearestHumanTank.dy <= 0
-    ) {
-      if (random < 0.6) {
-        return true;
-      }
-    }
-    if (
-      tank.direction === 'down' &&
-      tankPosition.nearestHumanTank.dx <= 4 &&
-      0 <= tankPosition.nearestHumanTank.dy &&
-      tankPosition.nearestHumanTank.dy <= 4 * BLOCK_SIZE
-    ) {
-      if (random < 0.6) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
-function getRandomDirection({ up, down, left, right }: PriorityMap): Direction {
-  const total = up + down + left + right;
-  let n = Math.random() * total;
-  n -= up;
-  if (n < 0) {
-    return 'up';
-  }
-  n -= down;
-  if (n < 0) {
-    return 'down';
-  }
-  n -= left;
-  if (n < 0) {
-    return 'left';
-  }
-  return 'right';
-}
-
-function lookAhead({ bricks, steels, rivers }: MapRecord, tank: TankRecord): BarrierInfoEntry {
-  const brickAheadLength = getAheadBrickLength(bricks, tank);
-  const steelAheadLength = getAheadSteelLength(steels, tank);
-  const riverAheadLength = getAheadRiverLength(rivers, tank);
-  if (steelAheadLength === Infinity && brickAheadLength === Infinity && riverAheadLength === Infinity) {
-    let borderAheadLength;
-    if (tank.direction === 'up') {
-      borderAheadLength = tank.y;
-    } else if (tank.direction === 'down') {
-      borderAheadLength = FIELD_SIZE - tank.y - TANK_SIZE;
-    } else if (tank.direction === 'left') {
-      borderAheadLength = tank.x;
-    } else {
-      // RIGHT
-      borderAheadLength = FIELD_SIZE - tank.x - TANK_SIZE;
-    }
-    return { type: 'border', length: borderAheadLength };
-  } else if (steelAheadLength <= brickAheadLength && steelAheadLength <= riverAheadLength) {
-    return { type: 'border', length: steelAheadLength };
-  } else if (riverAheadLength <= brickAheadLength) {
-    return { type: 'river', length: riverAheadLength };
-  } else {
-    return { type: 'brick', length: brickAheadLength };
-  }
-}
-
-function getAheadBrickLength(bricks: List<boolean>, tank: TankRecord) {
-  const size = ITEM_SIZE_MAP.BRICK;
-  const N = N_MAP.BRICK;
-  const { xy, updater } = getDirectionInfo(tank.direction);
-  let step = 1;
-  while (true) {
-    const iterable = iterRowsAndCols(size, asBox(tank.update(xy, updater(step * size)), -0.02));
-    const array = Array.from(iterable);
-    if (array.length === 0) {
-      return Infinity;
-    }
-    for (const [row, col] of array) {
-      const t = row * N + col;
-      if (bricks.get(t)) {
-        return (step - 1) * size;
-      }
-    }
-    step++;
-  }
-}
-
-function getAheadSteelLength(steels: List<boolean>, tank: TankRecord) {
-  const size = ITEM_SIZE_MAP.STEEL;
-  const N = N_MAP.STEEL;
-  const { xy, updater } = getDirectionInfo(tank.direction);
-  let step = 1;
-  while (true) {
-    const iterable = iterRowsAndCols(size, asBox(tank.update(xy, updater(step * size)), -0.02));
-    const array = Array.from(iterable);
-    if (array.length === 0) {
-      return Infinity;
-    }
-    for (const [row, col] of array) {
-      const t = row * N + col;
-      if (steels.get(t)) {
-        return (step - 1) * size;
-      }
-    }
-    step++;
-  }
-}
-
-function getAheadRiverLength(rivers: List<boolean>, tank: TankRecord) {
-  const size = ITEM_SIZE_MAP.RIVER;
-  const N = N_MAP.RIVER;
-  const { xy, updater } = getDirectionInfo(tank.direction);
-  let step = 1;
-  while (true) {
-    const iterable = iterRowsAndCols(size, asBox(tank.update(xy, updater(step * size)), -0.02));
-    const array = Array.from(iterable);
-    if (array.length === 0) {
-      return Infinity;
-    }
-    for (const [row, col] of array) {
-      const t = row * N + col;
-      if (rivers.get(t)) {
-        return (step - 1) * size;
-      }
-    }
-    step++;
-  }
-}

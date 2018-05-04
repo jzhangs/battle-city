@@ -12,6 +12,7 @@ declare global {
       | TickAction
       | AfterTickAction
       | AddBulletAction
+      | SetCooldownAction
       | DestroyBulletsAction
       | DestroySteelsAction
       | DestroyBricksAction
@@ -106,6 +107,12 @@ declare global {
       y: number;
       power?: number;
       tankId: TankId;
+    };
+
+    export type SetCooldownAction = {
+      type: 'SET_COOLDOWN';
+      tankId: TankId;
+      cooldown: number;
     };
 
     export type DestroyBulletsAction = {

@@ -9,7 +9,7 @@ import { State } from 'reducers';
 import { TankRecord, PlayerRecord } from 'types';
 import AIWorker = require('worker-loader!ai/worker');
 
-function* handleReceiveMessages(playerName: string, cmdChannel: Channel<AICommand>, noteChannel: Channel<Note>) {
+function* handleCmds(playerName: string, cmdChannel: Channel<AICommand>, noteChannel: Channel<Note>) {
   let fire = false;
   let nextDirection: Direction = null;
   let forwardLength = 0;
@@ -77,6 +77,23 @@ function* handleReceiveMessages(playerName: string, cmdChannel: Channel<AIComman
             tanks: tanks.map(t => t.toObject()).toArray()
           }
         });
+      } else if (command.query === 'my-fire-info') {
+        const tank: TankRecord = yield select(selectors.playerTank, playerName);
+        console.assert(tank != null, 'tank is null when query `my-fire-info`');
+        const { cooldowns, bullets }: State = yield select();
+        const cooldown = cooldowns.get(tank.tankId);
+        const bulletCount = bullets.filter(b => b.tankId === tank.tankId).count();
+        const canFire = bulletCount < tank.bulletLimit && cooldown <= 0;
+        noteChannel.put({
+          type: 'query-result',
+          result: {
+            type: 'my-fire-info',
+            bulletCount,
+            canFire,
+            cooldown,
+            bulletLimit: tank.bulletLimit
+          }
+        });
       }
     } else {
       throw new Error();
@@ -113,7 +130,7 @@ function* handleReceiveMessages(playerName: string, cmdChannel: Channel<AIComman
   }
 }
 
-function* sendMessagesToWorker(worker: Worker, noteChannel: Channel<Note>) {
+function* sendNotes(worker: Worker, noteChannel: Channel<Note>) {
   yield fork(function* sendNote() {
     while (true) {
       const note: Note = yield take(noteChannel);
@@ -137,7 +154,7 @@ function* AIWorkerSaga(playerName: string, WorkerClass: WorkerConstructor) {
       return () => worker.removeEventListener('message', listener);
     });
 
-    yield all([handleReceiveMessages(playerName, cmdChannel, noteChannel), sendMessagesToWorker(worker, noteChannel)]);
+    yield all([handleCmds(playerName, cmdChannel, noteChannel), sendNotes(worker, noteChannel)]);
   } finally {
     worker.terminate();
   }
@@ -179,7 +196,7 @@ export default function* AIMasterSaga() {
   }
 
   while (true) {
-    const action: Action = yield take(['KILL', 'LOAD_STAGE']);
+    const action: Action = yield take(['KILL', 'LOAD_STAGE', 'GAMEOVER']);
     if (action.type === 'LOAD_STAGE') {
       for (let i = 0; i < max; i++) {
         yield* addAI();
@@ -191,6 +208,11 @@ export default function* AIMasterSaga() {
         task.cancel();
         delete taskMap[targetPlayer.playerName];
         yield* addAI();
+      }
+    } else if (action.type === 'GAMEOVER') {
+      for (const [playerName, task] of Object.entries(taskMap)) {
+        task.cancel()
+        delete taskMap[playerName]
       }
     }
   }

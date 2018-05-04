@@ -4,33 +4,47 @@ import * as selectors from 'utils/selectors';
 import { State, TankRecord } from 'types';
 
 export default function* fireController(playerName: string, shouldFire: () => boolean) {
-  let countDown = 0;
   while (true) {
-    const { delta } = yield take('TICK');
-    if (countDown > 0) {
-      countDown -= delta;
-    } else if (shouldFire()) {
-      const tank: TankRecord = yield select(selectors.playerTank, playerName);
-      if (tank == null) {
-        continue;
-      }
-      const { bullets: allBullets }: State = yield select();
-      const bullets = allBullets.filter(bullet => bullet.tankId === tank.tankId);
-      if (bullets.count() >= tank.bulletLimit) {
-        continue;
-      }
-
-      const { x, y } = getBulletStartPosition(tank);
-      yield put({
-        type: 'ADD_BULLET',
-        bulletId: getNextId('bullet'),
-        direction: tank.direction,
-        x,
-        y,
-        speed: tank.bulletSpeed,
+    const { delta }: Action.TickAction = yield take('TICK');
+    const { bullets: allBullets, cooldowns }: State = yield select();
+    const tank: TankRecord = yield select(selectors.playerTank, playerName);
+    if (tank == null) {
+      continue;
+    }
+    const cooldown = cooldowns.get(tank.tankId);
+    if (cooldown > 0) {
+      yield put<Action>({
+        type: 'SET_COOLDOWN',
         tankId: tank.tankId,
+        cooldown: cooldown - delta
       });
-      countDown = tank.bulletInterval;
+    } else {
+      if (shouldFire()) {
+        const tank: TankRecord = yield select(selectors.playerTank, playerName);
+        if (tank == null) {
+          continue;
+        }
+        const bullets = allBullets.filter(bullet => bullet.tankId === tank.tankId);
+        if (bullets.count() >= tank.bulletLimit) {
+          continue;
+        }
+
+        const { x, y } = getBulletStartPosition(tank);
+        yield put({
+          type: 'ADD_BULLET',
+          bulletId: getNextId('bullet'),
+          direction: tank.direction,
+          x,
+          y,
+          speed: tank.bulletSpeed,
+          tankId: tank.tankId
+        });
+        yield put<Action>({
+          type: 'SET_COOLDOWN',
+          tankId: tank.tankId,
+          cooldown: tank.bulletInterval
+        });
+      }
     }
   }
 }

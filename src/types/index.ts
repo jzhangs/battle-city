@@ -34,11 +34,6 @@ declare global {
     y: number;
   }
 
-  interface Vector {
-    dx: number;
-    dy: number;
-  }
-
   interface StageConfig {
     name: string;
     difficulty: number;
@@ -89,47 +84,55 @@ declare global {
 
     interface Query {
       type: 'query';
-      query: 'my-tank' | 'map' | 'tanks'
+      query: 'my-tank' | 'map' | 'tanks' | 'my-fire-info';
     }
   }
 
-  type Note = Note.Note
+  type Note = Note.Note;
 
   namespace Note {
-    type Note = BulletComplete | Reach | QueryResultNote
+    type Note = BulletComplete | Reach | QueryResultNote;
 
     interface BulletComplete {
-      type: 'bullet-complete'
+      type: 'bullet-complete';
     }
 
     interface Reach {
-      type: 'reach'
+      type: 'reach';
     }
 
     interface QueryResultNote {
-      type: 'query-result'
-      result: QueryResult
+      type: 'query-result';
+      result: QueryResult;
     }
   }
 
-  type QueryResult = QueryResult.QueryResult
+  type QueryResult = QueryResult.QueryResult;
 
   namespace QueryResult {
-    type QueryResult = MapInfo | MyTankInfo | TanksInfo
+    type QueryResult = MapInfo | MyTankInfo | TanksInfo | MyFireInfo;
 
     interface MyTankInfo {
-      type: 'my-tank-info'
-      tank: Object
+      type: 'my-tank-info';
+      tank: Object;
     }
 
     interface MapInfo {
-      type: 'map-info'
-      map: Object
+      type: 'map-info';
+      map: Object;
     }
 
     interface TanksInfo {
-      type: 'tanks-info'
-      tanks: Object[]
+      type: 'tanks-info';
+      tanks: Object[];
+    }
+
+    interface MyFireInfo {
+      type: 'my-fire-info';
+      canFire: boolean;
+      cooldown: number;
+      bulletCount: number;
+      bulletLimit: number;
     }
   }
 }
