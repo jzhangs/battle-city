@@ -1,5 +1,6 @@
 import { Map } from 'immutable';
 import { TankRecord } from 'types';
+import { incTankLevel } from 'utils/common';
 
 export type TanksMap = Map<TankId, TankRecord>;
 
@@ -17,6 +18,8 @@ export default function tanks(state = Map() as TanksMap, action: Action) {
     return state.setIn([action.tankId, 'moving'], true);
   } else if (action.type === 'STOP_MOVE') {
     return state.setIn([action.tankId, 'moving'], false);
+  } else if (action.type === 'UPGRADE_TANK') {
+    return state.update(action.tankId, incTankLevel);
   } else if (action.type === 'REMOVE_TANK') {
     return state.update(action.tankId, tank =>
       tank.merge({

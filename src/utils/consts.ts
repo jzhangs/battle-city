@@ -9,7 +9,10 @@ export const BULLET_SIZE = 3;
 export const STEEL_POWER = 3;
 export const TANK_SPAWN_DELAY = 1500;
 
-type Schema = { [color: string]: { a: string, b: string, c: string } };
+export const TANK_MOVE_SPEED_UNIT = 0.02;
+export const BULLET_MOVE_SPEED_UNIT = 0.08;
+
+type Schema = { [color: string]: { a: string; b: string; c: string } };
 export const TANK_COLOR_SCHEMES: Schema = {
   yellow: {
     a: '#E7E794',

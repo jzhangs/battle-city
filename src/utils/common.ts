@@ -1,6 +1,14 @@
 import { delay } from 'redux-saga';
 import { put } from 'redux-saga/effects';
-import { BLOCK_SIZE, BULLET_SIZE, FIELD_SIZE, TANK_SIZE, TANK_SPAWN_DELAY } from 'utils/consts';
+import {
+  BLOCK_SIZE,
+  BULLET_SIZE,
+  FIELD_SIZE,
+  TANK_SIZE,
+  TANK_SPAWN_DELAY,
+  TANK_MOVE_SPEED_UNIT,
+  BULLET_MOVE_SPEED_UNIT
+} from 'utils/consts';
 import { BulletRecord, TankRecord, EagleRecord, PowerUpRecord } from 'types';
 
 // Calculte bullet start postion according to postion and
@@ -82,15 +90,15 @@ export function asBox(item: BulletRecord | TankRecord | EagleRecord | PowerUpRec
       x: item.x - BLOCK_SIZE / 2 * enlargement,
       y: item.y - BLOCK_SIZE / 2 * enlargement,
       width: BLOCK_SIZE * (1 + enlargement),
-      height: BLOCK_SIZE * (1 + enlargement),
-    }
+      height: BLOCK_SIZE * (1 + enlargement)
+    };
   } else if (item instanceof PowerUpRecord) {
     return {
       x: item.x - BLOCK_SIZE / 2 * enlargement,
       y: item.y - BLOCK_SIZE / 2 * enlargement,
       width: BLOCK_SIZE * (1 + enlargement),
-      height: BLOCK_SIZE * (1 + enlargement),
-    }
+      height: BLOCK_SIZE * (1 + enlargement)
+    };
   } else {
     throw new Error('Cannot convert to type Box');
   }
@@ -147,5 +155,67 @@ export function reverseDirection(direction: Direction): Direction {
   }
   if (direction === 'right') {
     return 'left';
+  }
+}
+
+export function incTankLevel(tank: TankRecord) {
+  if (tank.level === 'basic') {
+    return tank.set('level', 'fast');
+  } else if (tank.level === 'fast') {
+    return tank.set('level', 'power');
+  } else {
+    return tank.set('level', 'armor');
+  }
+}
+
+export function getTankBulletLimit(tank: TankRecord) {
+  if (tank.side === 'ai' || tank.level === 'basic' || tank.level === 'fast') {
+    return 1;
+  } else {
+    return 2;
+  }
+}
+
+export function getTankBulletSpeed(tank: TankRecord) {
+  if (tank.side === 'player') {
+    if (tank.level === 'basic') {
+      return 2 * BULLET_MOVE_SPEED_UNIT;
+    } else {
+      return 3 * BULLET_MOVE_SPEED_UNIT;
+    }
+  } else {
+    if (tank.level === 'basic') {
+      return BULLET_MOVE_SPEED_UNIT;
+    } else if (tank.level === 'power') {
+      return 3 * BULLET_MOVE_SPEED_UNIT;
+    } else {
+      return 2 * BULLET_MOVE_SPEED_UNIT;
+    }
+  }
+}
+
+export function getTankBulletInterval(tank: TankRecord) {
+  return 300;
+}
+
+export function getTankMoveSpeed(tank: TankRecord) {
+  if (tank.side === 'player') {
+    return 2 * TANK_MOVE_SPEED_UNIT;
+  } else if (tank.level === 'basic') {
+    return TANK_MOVE_SPEED_UNIT;
+  } else if (tank.level === 'fast') {
+    return 3 * TANK_MOVE_SPEED_UNIT;
+  } else {
+    return 2 * TANK_MOVE_SPEED_UNIT;
+  }
+}
+
+export function getTankBulletPower(tank: TankRecord) {
+  if (tank.side === 'player' && tank.level === 'armor') {
+    return 3;
+  } else if (tank.side === 'ai' && tank.level === 'power') {
+    return 2;
+  } else {
+    return 1;
   }
 }

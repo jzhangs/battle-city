@@ -4,7 +4,7 @@ import { fork, put, select, take, spawn, all } from 'redux-saga/effects';
 import directionController from 'sagas/directionController';
 import fireController from 'sagas/fireController';
 import * as selectors from 'utils/selectors';
-import { getDirectionInfo, spawnTank, getNextId } from 'utils/common';
+import { getDirectionInfo, spawnTank, getNextId, getTankBulletLimit } from 'utils/common';
 import { State } from 'reducers';
 import { TankRecord, PlayerRecord } from 'types';
 import AIWorker = require('worker-loader!ai/worker');
@@ -86,15 +86,14 @@ function* handleCmds(playerName: string, cmdChannel: Channel<AICommand>, noteCha
         if (!tank) continue;
         const { bullets }: State = yield select();
         const bulletCount = bullets.filter(b => b.tankId === tank.tankId).count();
-        const canFire = bulletCount < tank.bulletLimit && tank.cooldown <= 0;
+        const canFire = bulletCount < getTankBulletLimit(tank) && tank.cooldown <= 0;
         noteChannel.put({
           type: 'query-result',
           result: {
             type: 'my-fire-info',
             bulletCount,
             canFire,
-            cooldown: tank.cooldown,
-            bulletLimit: tank.bulletLimit
+            cooldown: tank.cooldown
           }
         });
       }

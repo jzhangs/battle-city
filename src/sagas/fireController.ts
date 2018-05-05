@@ -1,7 +1,14 @@
 import { take, put, select } from 'redux-saga/effects';
-import { getBulletStartPosition, getNextId } from 'utils/common';
+import {
+  getBulletStartPosition,
+  getNextId,
+  getTankBulletLimit,
+  getTankBulletSpeed,
+  getTankBulletInterval,
+  getTankBulletPower
+} from 'utils/common';
 import * as selectors from 'utils/selectors';
-import { State, TankRecord } from 'types';
+import { State, TankRecord, BulletRecord } from 'types';
 
 export default function* fireController(playerName: string, shouldFire: () => boolean) {
   while (true) {
@@ -18,18 +25,21 @@ export default function* fireController(playerName: string, shouldFire: () => bo
 
     if (tank.cooldown <= 0 && shouldFire()) {
       const bullets = allBullets.filter(bullet => bullet.tankId === tank.tankId);
-      if (bullets.count() < tank.bulletLimit) {
+      if (bullets.count() < getTankBulletLimit(tank)) {
         const { x, y } = getBulletStartPosition(tank);
-        yield put({
+        yield put<Action.AddBulletAction>({
           type: 'ADD_BULLET',
-          bulletId: getNextId('bullet'),
-          direction: tank.direction,
-          x,
-          y,
-          speed: tank.bulletSpeed,
-          tankId: tank.tankId
+          bullet: BulletRecord({
+            bulletId: getNextId('bullet'),
+            direction: tank.direction,
+            x,
+            y,
+            power: getTankBulletPower(tank),
+            speed: getTankBulletSpeed(tank),
+            tankId: tank.tankId
+          })
         });
-        nextCooldown = tank.bulletInterval;
+        nextCooldown = getTankBulletInterval(tank);
       }
     }
 

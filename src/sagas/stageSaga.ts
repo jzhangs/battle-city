@@ -104,8 +104,7 @@ export default function* stageSaga(stageName: string) {
       /* todo targetTank.withPowerUp */
       if (true) {
         const powerUpName = _.sample(['tank', 'star', 'grenade', 'timer', 'helmet', 'shovel'] as PowerUpName[]);
-        const validPositions: Point[] = yield select(selectors.validPowerUpSpawnPositions);
-        const position = _.sample(validPositions);
+        const position = _.sample(yield select(selectors.validPowerUpSpawnPositions));
         yield fork(
           powerUp,
           PowerUpRecord({
@@ -118,7 +117,7 @@ export default function* stageSaga(stageName: string) {
         );
       }
 
-      const activeAITanks = tanks.filter(t => (t.active && t.side === 'ai'));
+      const activeAITanks = tanks.filter(t => t.active && t.side === 'ai');
 
       if (remainingEnemies.isEmpty() && activeAITanks.isEmpty()) {
         yield delay(6000);

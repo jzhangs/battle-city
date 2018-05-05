@@ -55,10 +55,7 @@ export default function* playerSaga(playerName: string, tankColor: TankColor) {
           y: 12 * BLOCK_SIZE,
           side: 'player',
           color: tankColor,
-          level: 'basic',
-          bulletSpeed: 0.2,
-          bulletInterval: 100,
-          bulletLimit: Infinity
+          level: 'basic'
         })
       );
       yield put({

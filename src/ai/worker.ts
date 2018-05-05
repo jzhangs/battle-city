@@ -3,7 +3,8 @@ import { reverseDirection } from 'utils/common';
 import { calculatePriorityMap, getEnv, getRandomDirection, shouldFire } from 'ai/AIUtils';
 import GameAIClient from 'ai/AIClient';
 
-const logFire = (...args: any[]) => console.log('[fire]', ...args);
+// const logFire = (...args: any[]) => console.log('[fire]', ...args);
+const logFire = (...args: any[]) => 0;
 
 const client = new GameAIClient();
 
