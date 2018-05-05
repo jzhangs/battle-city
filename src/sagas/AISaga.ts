@@ -217,17 +217,23 @@ export default function* AIMasterSaga() {
         addAICommandChannel.put('add');
       }
     } else if (action.type === 'KILL') {
-      const { targetTank, targetPlayer } = action;
+      const {
+        targetTank,
+        targetPlayer: { playerName }
+      } = action;
+
       if (targetTank.side === 'ai') {
-        const task = taskMap[targetPlayer.playerName];
+        const task = taskMap[playerName];
         task.cancel();
-        delete taskMap[targetPlayer.playerName];
+        delete taskMap[playerName];
+        yield put<Action>({ type: 'REMOVE_PLAYER', playerName });
         addAICommandChannel.put('add');
       }
     } else if (action.type === 'GAMEOVER') {
       for (const [playerName, task] of Object.entries(taskMap)) {
         task.cancel();
         delete taskMap[playerName];
+        yield put<Action>({ type: 'REMOVE_PLAYER', playerName });
       }
     }
   }

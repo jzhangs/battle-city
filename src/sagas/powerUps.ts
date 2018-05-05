@@ -143,7 +143,7 @@ function* star({ tank }: Action.PickPowerUpAction) {
 }
 
 function* tank({ player }: Action.PickPowerUpAction) {
-  yield put<Action>({ type: 'ADD_ONE_LIFE', playerName: player.playerName });
+  yield put<Action>({ type: 'INCREMENT_PLAYER_LIFE', playerName: player.playerName });
 }
 
 function* helmet({ tank }: Action.PickPowerUpAction) {
@@ -174,7 +174,7 @@ function* handleHelmetDuration() {
   }
 }
 
-function* pickScore(action: Action.PickPowerUpAction) {
+function* showScoreWhenPickPowerUp(action: Action.PickPowerUpAction) {
   const {
     powerUp: { x, y }
   } = action;
@@ -188,15 +188,10 @@ function* pickScore(action: Action.PickPowerUpAction) {
       y
     })
   });
-  yield delay(500);
-  yield put<Action.RemoveScoreAction>({
-    type: 'REMOVE_SCORE',
-    scoreId
-  });
 }
 
 export default function* powerUps() {
-  yield takeEvery('PICK_POWER_UP', pickScore);
+  yield takeEvery('PICK_POWER_UP', showScoreWhenPickPowerUp);
   yield takeLatest(is('shovel'), shovel);
   yield takeLatest(is('timer'), timer);
 

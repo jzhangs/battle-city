@@ -15,11 +15,15 @@ function* autoRemoveEffects() {
     explosionType
   }: Action.SpawnExplosionAction) {
     yield delay(explosionType === 'tank' ? 500 : 200);
-    yield put({ type: 'REMOVE_EXPLOSION', explosionId });
+    yield put<Action>({ type: 'REMOVE_EXPLOSION', explosionId });
   });
   yield takeEvery('SPAWN_FLICKER', function* removeFlicker({ flickerId }: Action.SpawnFlickerAction) {
     yield delay(TANK_SPAWN_DELAY);
-    yield put({ type: 'REMOVE_FLICKER', flickerId });
+    yield put<Action>({ type: 'REMOVE_FLICKER', flickerId });
+  });
+  yield takeEvery('ADD_SCORE', function* removeScore({ score: { scoreId } }: Action.AddScoreAction) {
+    yield delay(2000);
+    yield put<Action>({ type: 'REMOVE_SCORE', scoreId });
   });
 }
 

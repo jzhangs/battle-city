@@ -13,6 +13,7 @@
     "object-shorthand-properties-first": false,
     "prefer-array-literal": false,
     "semicolon": false,
+    "space-before-function-paren": false,
     "ter-arrow-parens": false,
     "ter-indent": false,
     "trailing-comma": false,

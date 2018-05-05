@@ -1,3 +1,4 @@
+import { delay } from 'redux-saga';
 import { put, fork, select, take } from 'redux-saga/effects';
 import { BLOCK_SIZE } from 'utils/consts';
 import { spawnTank, testCollide, asBox } from 'utils/common';
@@ -46,7 +47,8 @@ export default function* playerSaga(playerName: string, tankColor: TankColor) {
     const { players }: State = yield select();
     const player = players.get(playerName);
     if (player.lives > 0) {
-      yield put({ type: 'DECREMENT_PLAYER_LIVE', playerName });
+      yield delay(500);
+      yield put<Action>({ type: 'DECREMENT_PLAYER_LIFE', playerName });
       const tankId = yield* spawnTank(
         TankRecord({
           x: 4 * BLOCK_SIZE,

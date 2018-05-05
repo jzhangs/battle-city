@@ -25,7 +25,8 @@ declare global {
       | Simple<'GAMESTART'>
       | LoadSceneAction
       | Simple<'REMOVE_FIRST_REMAINING_ENEMY'>
-      | DecrementPlayerLiveAction
+      | IncrementPlayerLifeAction
+      | DecrementPlayerLifeAction
       | ActivatePlayerAction
       | CreatePlayerAction
       | RemovePlayerAction
@@ -53,7 +54,6 @@ declare global {
       | PickPowerUpAction
       | AddScoreAction
       | RemoveScoreAction
-      | AddOneLifeAction
       | UpgradeTankAction;
 
     export type ActionType = Action['type'];
@@ -246,8 +246,13 @@ declare global {
       distance: number;
     };
 
-    export type DecrementPlayerLiveAction = {
-      type: 'DECREMENT_PLAYER_LIVE';
+    export type IncrementPlayerLifeAction = {
+      type: 'INCREMENT_PLAYER_LIFE';
+      playerName: PlayerName;
+    };
+
+    export type DecrementPlayerLifeAction = {
+      type: 'DECREMENT_PLAYER_LIFE';
       playerName: PlayerName;
     };
 
@@ -287,11 +292,6 @@ declare global {
       type: 'REMOVE_SCORE';
       scoreId: ScoreId;
     }
-
-    export type AddOneLifeAction = {
-      type: 'ADD_ONE_LIFE';
-      playerName: PlayerName;
-    };
 
     export type UpgradeTankAction = {
       type: 'UPGRADE_TANK';
