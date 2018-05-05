@@ -1,14 +1,6 @@
 import { delay } from 'redux-saga';
 import { put } from 'redux-saga/effects';
-import {
-  BLOCK_SIZE,
-  BULLET_SIZE,
-  FIELD_SIZE,
-  TANK_SIZE,
-  TANK_SPAWN_DELAY,
-  TANK_MOVE_SPEED_UNIT,
-  BULLET_MOVE_SPEED_UNIT
-} from 'utils/consts';
+import { BLOCK_SIZE, BULLET_SIZE, FIELD_SIZE, TANK_SIZE, TANK_SPAWN_DELAY } from 'utils/consts';
 import { BulletRecord, TankRecord, EagleRecord, PowerUpRecord } from 'types';
 
 // Calculte bullet start postion according to postion and
@@ -26,6 +18,8 @@ export function getBulletStartPosition({ x, y, direction }: { x: number; y: numb
       return { x: x + BLOCK_SIZE, y: y + 6 };
   }
 }
+
+export const frame = (x: number) => 1000 / 60 * x;
 
 export function between(min: number, value: number, max: number, threshhold = 0) {
   return min - threshhold <= value && value <= max + threshhold;
@@ -179,17 +173,15 @@ export function getTankBulletLimit(tank: TankRecord) {
 export function getTankBulletSpeed(tank: TankRecord) {
   if (tank.side === 'player') {
     if (tank.level === 'basic') {
-      return 2 * BULLET_MOVE_SPEED_UNIT;
+      return 0.12;
     } else {
-      return 3 * BULLET_MOVE_SPEED_UNIT;
+      return 0.24;
     }
   } else {
     if (tank.level === 'basic') {
-      return BULLET_MOVE_SPEED_UNIT;
-    } else if (tank.level === 'power') {
-      return 3 * BULLET_MOVE_SPEED_UNIT;
+      return 0.12;
     } else {
-      return 2 * BULLET_MOVE_SPEED_UNIT;
+      return 0.24;
     }
   }
 }
@@ -200,13 +192,15 @@ export function getTankBulletInterval(tank: TankRecord) {
 
 export function getTankMoveSpeed(tank: TankRecord) {
   if (tank.side === 'player') {
-    return 2 * TANK_MOVE_SPEED_UNIT;
-  } else if (tank.level === 'basic') {
-    return TANK_MOVE_SPEED_UNIT;
-  } else if (tank.level === 'fast') {
-    return 3 * TANK_MOVE_SPEED_UNIT;
+    return 0.045;
   } else {
-    return 2 * TANK_MOVE_SPEED_UNIT;
+    if (tank.level === 'basic') {
+      return 0.03;
+    } else if (tank.level === 'power') {
+      return 0.06;
+    } else {
+      return 0.045;
+    }
   }
 }
 

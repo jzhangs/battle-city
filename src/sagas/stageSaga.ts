@@ -4,7 +4,7 @@ import { delay } from 'redux-saga';
 import { fork, put, race, select, take } from 'redux-saga/effects';
 import { State } from 'reducers';
 import { PowerUpRecord } from 'types';
-import { getNextId } from 'utils/common';
+import { getNextId, frame as f } from 'utils/common';
 import * as selectors from 'utils/selectors';
 
 // const log = console.log;
@@ -61,7 +61,7 @@ function* powerUp(powerUp: PowerUpRecord) {
     let visible = true;
     for (let i = 0; i < 50; i++) {
       const result = yield race({
-        timeout: delay(200),
+        timeout: delay(f(8)),
         picked: take(pickThisPowerUp),
         stageChanged: take('LOAD_STAGE')
       });

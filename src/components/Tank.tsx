@@ -1,10 +1,12 @@
 import * as React from 'react';
+import { connect } from 'react-redux';
 import * as _ from 'lodash';
+
 import { Bitmap, Pixel } from 'components/Elements';
 import { BLOCK_SIZE, TANK_COLOR_SCHEMES } from 'utils/consts';
+import { frame as f } from 'utils/common';
 import { TankRecord } from 'types';
 import { State } from 'reducers';
-import { connect } from 'react-redux';
 
 interface TankComponent {
   (props: { transform: string; color: string; shape: number }): JSX.Element;
@@ -435,7 +437,7 @@ function resolveTankColorConfig(tank: TankRecord): TankColorConfig {
     return [[tank.color, Infinity]];
   }
   if (tank.withPowerUp) {
-    return [['red', 300], ['silver', 300]];
+    return [['red', f(8)], ['silver', f(8)]];
   }
   if (tank.level === 'basic') {
     return [['silver', Infinity]];
@@ -446,9 +448,9 @@ function resolveTankColorConfig(tank: TankRecord): TankColorConfig {
   } else {
     const map: { [key: number]: TankColorConfig } = {
       1: [['silver', Infinity]],
-      2: [['green', 100], ['yellow', 100]],
-      3: [['silver', 100], ['yellow', 100]],
-      4: [['green', 100], ['silver', 100]]
+      2: [['green', f(3)], ['yellow', f(1)], ['green', f(1)], ['yellow', f(1)]],
+      3: [['silver', f(3)], ['yellow', f(1)], ['silver', f(1)], ['yellow', f(1)]],
+      4: [['silver', f(3)], ['green', f(1)], ['silver', f(1)], ['green', f(1)]],
     };
     return map[tank.hp];
   }
