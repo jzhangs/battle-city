@@ -27,6 +27,7 @@ type Base = {
   transientKillInfo: Map<PlayerName, Map<TankLevel, KillCount>>;
   showTotalKillCount: boolean;
   AIFrozenTimeout: number;
+  paused: boolean;
 };
 
 export const GameRecord = Record(
@@ -37,7 +38,8 @@ export const GameRecord = Record(
     killInfo: Map<PlayerName, Map<TankLevel, KillCount>>(),
     transientKillInfo: emptyTransientKillInfo,
     showTotalKillCount: false,
-    AIFrozenTimeout: 0
+    AIFrozenTimeout: 0,
+    paused: false
   },
   'GameRecord'
 );
@@ -66,6 +68,10 @@ export default function game(state = GameRecord(), action: Action) {
     return state.set('showTotalKillCount', true);
   } else if (action.type === 'SET_AI_FROZEN_TIMEOUT') {
     return state.set('AIFrozenTimeout', action.AIFrozenTimeout);
+  } else if (action.type === 'GAMEPAUSE') {
+    return state.set('paused', true);
+  } else if (action.type === 'GAMERESUME') {
+    return state.set('paused', false);
   }
 
   return state;

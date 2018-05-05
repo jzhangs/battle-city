@@ -21,8 +21,10 @@ declare global {
       | UpdateMapAction
       | UpdateBulletsAction
       | LoadStageAction
-      | Simple<'GAMEOVER'>
       | Simple<'GAMESTART'>
+      | Simple<'GAMEPAUSE'>
+      | Simple<'GAMERESUME'>
+      | Simple<'GAMEOVER'>
       | LoadSceneAction
       | Simple<'REMOVE_FIRST_REMAINING_ENEMY'>
       | IncrementPlayerLifeAction
