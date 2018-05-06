@@ -1,6 +1,7 @@
 import { Map as IMap, Set as ISet } from 'immutable';
-import { fork, put, select, take, PutEffect } from 'redux-saga/effects';
+import { takeEvery, all, fork, put, select, take, PutEffect } from 'redux-saga/effects';
 import { BLOCK_SIZE, ITEM_SIZE_MAP, N_MAP, STEEL_POWER } from 'utils/consts';
+import { explosionFromBullet, explosionFromTank } from 'sagas/common';
 import { asBox, getDirectionInfo, getNextId, isInField, iterRowsAndCols, testCollide } from 'utils/common';
 
 import { BulletRecord, BulletsMap, State, TankRecord, ScoreRecord } from 'types';
@@ -35,16 +36,6 @@ function getOrDefault<K, V>(map: Map<K, V>, key: K, getValue: () => V) {
   return map.get(key);
 }
 
-function makeExplosionFromBullet(bullet: BulletRecord): PutEffect<Action> {
-  return put({
-    type: 'SPAWN_EXPLOSION',
-    x: bullet.x - 6,
-    y: bullet.y - 6,
-    explosionType: 'bullet',
-    explosionId: getNextId('explosion')
-  } as Action.SpawnExplosionAction);
-}
-
 function makeScoreFromTank(tank: TankRecord): PutEffect<Action> {
   const scoreMap = {
     basic: 100,
@@ -52,25 +43,15 @@ function makeScoreFromTank(tank: TankRecord): PutEffect<Action> {
     power: 300,
     armor: 400
   };
-  return put({
+  return put<Action.AddScoreAction>({
     type: 'ADD_SCORE',
     score: ScoreRecord({
       score: scoreMap[tank.level],
       scoreId: getNextId('score'),
-      x: tank.x + 12,
-      y: tank.y - 12
+      x: tank.x,
+      y: tank.y
     })
   } as Action.AddScoreAction);
-}
-
-function makeExplosionFromTank(tank: TankRecord): PutEffect<Action> {
-  return put({
-    type: 'SPAWN_EXPLOSION',
-    x: tank.x - 6,
-    y: tank.y - 6,
-    explosionType: 'tank',
-    explosionId: getNextId('explosion')
-  } as Action.SpawnExplosionAction);
 }
 
 function* handleTick() {
@@ -186,15 +167,14 @@ function* destroyBricks(collidedBullets: BulletsMap) {
   }
 }
 
-export function* destroyTanks(tankIdSet: ISet<TankId>) {
-  const { tanks }: State = yield select();
-  yield* tankIdSet.map(tankId =>
+export function* destroyTanks(destroyedTanks: ISet<TankRecord>) {
+  yield* destroyedTanks.map(tank =>
     put({
       type: 'REMOVE_TANK',
-      tankId
+      tankId: tank.tankId
     })
   );
-  yield* tankIdSet.map(tankId => tanks.get(tankId)).map(makeExplosionFromTank);
+  yield all(destroyedTanks.map(tank => fork(explosionFromTank, tank)).toArray());
 }
 
 function* filterBulletsCollidedWithEagle(bullets: BulletsMap) {
@@ -349,8 +329,9 @@ function* handleAfterTick() {
         yield put<Action>({ type: 'HURT', targetTank, hurt });
       }
     }
-    if (destroyedTankIdSet.size > 0) {
-      yield* destroyTanks(ISet(destroyedTankIdSet));
+    const destroyedTanks = ISet(destroyedTankIdSet).map(tankId => allTanks.get(tankId));
+    if (!destroyedTanks.isEmpty()) {
+      yield fork(destroyTanks, destroyedTanks);
 
       const destroyedAITanks = ISet(destroyedTankIdSet)
         .map(tankId => allTanks.get(tankId))
@@ -386,12 +367,12 @@ export default function* bulletsSaga() {
   yield fork(handleTick);
   yield fork(handleAfterTick);
 
-  yield fork(function* handleDestroyBullets() {
-    while (true) {
-      const { bullets, spawnExplosion }: Action.DestroyBulletsAction = yield take('DESTROY_BULLETS');
-      if (spawnExplosion) {
-        yield* bullets.map(makeExplosionFromBullet).values();
-      }
+  yield takeEvery('DESTROY_BULLETS' as Action['type'], function*({
+    bullets,
+    spawnExplosion
+  }: Action.DestroyBulletsAction) {
+    if (spawnExplosion) {
+      yield all(bullets.map(bullet => fork(explosionFromBullet, bullet)).toArray());
     }
   });
 }

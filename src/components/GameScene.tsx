@@ -53,9 +53,7 @@ class GameScene extends React.Component<State> {
             {powerUps.map(powerUp => <PowerUp key={powerUp.powerUpId} powerUp={powerUp} />).toArray()}
           </g>
           <g data-role="explosion-layer">
-            {explosions
-              .map(exp => <Explosion key={exp.explosionId} x={exp.x} y={exp.y} explosionType={exp.explosionType} />)
-              .toArray()}
+            {explosions.map(exp => <Explosion key={exp.explosionId} explosion={exp} />).toArray()}
           </g>
           <g data-role="flicker-layer">
             {flickers.map(flicker => <Flicker key={flicker.flickerId} flicker={flicker} />).toArray()}

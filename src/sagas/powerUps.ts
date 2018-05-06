@@ -118,11 +118,10 @@ function* timer() {
 }
 
 function* grenade(action: Action.PickPowerUpAction) {
-  const { tanks, players }: State = yield select();
-  const activeAITanks = tanks.filter(t => t.active && t.side === 'ai');
-  const aiTankIdSet = activeAITanks.map(t => t.tankId).toSet();
+  const { tanks: allTanks, players }: State = yield select();
+  const activeAITanks = allTanks.filter(t => t.active && t.side === 'ai');
 
-  yield* destroyTanks(aiTankIdSet);
+  yield* destroyTanks(activeAITanks.toSet());
 
   yield* activeAITanks
     .map(targetTank =>

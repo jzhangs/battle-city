@@ -3,8 +3,9 @@ import { fork, put, select, take, spawn, all } from 'redux-saga/effects';
 
 import directionController from 'sagas/directionController';
 import fireController from 'sagas/fireController';
+import { spawnTank } from 'sagas/common';
 import * as selectors from 'utils/selectors';
-import { getDirectionInfo, spawnTank, getNextId, getTankBulletLimit } from 'utils/common';
+import { getDirectionInfo, getNextId, getTankBulletLimit } from 'utils/common';
 import { State } from 'reducers';
 import { TankRecord, PlayerRecord } from 'types';
 import AIWorker = require('worker-loader!ai/worker');

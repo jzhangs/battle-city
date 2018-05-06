@@ -1,6 +1,7 @@
 export { default as TankRecord } from 'types/TankRecord';
 export { default as PowerUpRecord } from 'types/PowerUpRecord';
 export { default as ScoreRecord } from 'types/ScoreRecord';
+export { default as ExplosionRecord } from 'types/ExplosionRecord';
 export { default as FlickerRecord } from 'types/FlickerRecord';
 export { default as TextRecord } from 'types/TextRecord';
 export { default as BulletRecord } from 'types/BulletRecord';
@@ -13,6 +14,7 @@ export { BulletsMap } from 'reducers/bullets';
 export { TextsMap } from 'reducers/texts';
 export { TanksMap } from 'reducers/tanks';
 export { ScoresMap } from 'reducers/scores';
+export { ExplosionsMap } from 'reducers/explosions';
 
 export interface PlayerControllerConfig {
   fire: string;
@@ -44,6 +46,8 @@ declare global {
     enemies: string[];
   }
 
+  type Timing<T> = [T, number][];
+
   type PowerUpName = 'tank' | 'star' | 'grenade' | 'timer' | 'helmet' | 'shovel';
   type Scene = 'game-title' | 'game' | 'gameover' | 'statistics';
   type Direction = 'up' | 'down' | 'left' | 'right';
@@ -59,13 +63,15 @@ declare global {
   type PlayerName = string;
   type TextId = number;
   type FlickerId = number;
+  type ExplosionId = number;
+
+  type ExplosionShape = 's0' | 's1' | 's2' | 'b0' | 'b1';
+  type FlickerShape = 0 | 1 | 2 | 3;
 
   type SteelIndex = number;
   type BrickIndex = number;
   type RiverIndex = number;
 
-  type ExplosionType = 'bullet' | 'tank';
-  type ExplosionId = number;
   type Side = 'player' | 'ai';
 
   type AICommand = AICommand.AICommand;

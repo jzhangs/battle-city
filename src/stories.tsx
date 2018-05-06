@@ -22,7 +22,7 @@ import GameoverScene from 'components/GameoverScene';
 import StatisticsScene from 'components/StatisticsScene';
 import HUD from 'components/HUD';
 import Score from 'components/Score';
-import { _BulletExplosion, _TankExplosion } from 'components/Explosion';
+import Explosion from 'components/Explosion';
 import parseStageMap from 'utils/parseStageMap';
 import { BLOCK_SIZE as B, FIELD_BLOCK_SIZE as FBZ } from 'utils/consts';
 import tickEmitter from 'sagas/tickEmitter';
@@ -31,8 +31,8 @@ import registerTick from 'hocs/registerTick';
 import { PlayerRecord, TankRecord, PowerUpRecord, FlickerRecord } from 'types';
 import PowerUp from './components/PowerUp';
 
-const BulletExplosion = registerTick(1000, 1000, 1000)(_BulletExplosion);
-const TankExplosion = registerTick(1000, 1000)(_TankExplosion);
+const BulletExplosion = registerTick(1000, 1000, 1000)(Explosion);
+const TankExplosion = registerTick(1000, 1000)(Explosion);
 const PowerUpItem = ({ name, x, y }: { name: PowerUpName; x: number; y: number }) => (
   <PowerUp powerUp={PowerUpRecord({ powerUpName: name, x, y, visible: true })} />
 );
@@ -84,7 +84,7 @@ const FontLevel1 = ({ children }: any) => <span style={{ fontSize: 28, lineHeigh
 class FlickerStory extends React.PureComponent {
   private handle: any;
   state = {
-    shape: 0
+    shape: 0 as FlickerShape
   };
   componentDidMount() {
     this.handle = setInterval(() => this.setState({ shape: (this.state.shape + 1) % 4 }), 500);

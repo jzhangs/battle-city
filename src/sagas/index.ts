@@ -11,13 +11,6 @@ import { CONTROL_CONFIG } from 'utils/consts';
 import { frame as f } from 'utils/common';
 
 function* autoRemoveEffects() {
-  yield takeEvery('SPAWN_EXPLOSION', function* removeExplosion({
-    explosionId,
-    explosionType
-  }: Action.SpawnExplosionAction) {
-    yield delay(explosionType === 'tank' ? 500 : 200);
-    yield put<Action>({ type: 'REMOVE_EXPLOSION', explosionId });
-  });
   yield takeEvery('ADD_SCORE', function* removeScore({ score: { scoreId } }: Action.AddScoreAction) {
     yield delay(f(48));
     yield put<Action>({ type: 'REMOVE_SCORE', scoreId });

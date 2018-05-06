@@ -1,7 +1,5 @@
-import { delay } from 'redux-saga';
-import { put } from 'redux-saga/effects';
 import { BLOCK_SIZE, BULLET_SIZE, FIELD_SIZE, TANK_SIZE } from 'utils/consts';
-import { BulletRecord, TankRecord, EagleRecord, PowerUpRecord, FlickerRecord } from 'types';
+import { BulletRecord, TankRecord, EagleRecord, PowerUpRecord } from 'types';
 
 // Calculte bullet start postion according to postion and
 // direction of tank.
@@ -119,35 +117,6 @@ export function getDirectionInfo(direction: Direction, flipxy = false) {
     result.xy = result.xy === 'x' ? 'y' : 'x';
   }
   return result;
-}
-
-export function* spawnTank(tank: TankRecord, spawnSpeed = 1) {
-  const flickerShapeArray = [3, 2, 1, 0, 1, 2, 3, 2, 1, 0, 1, 2]
-    .map(x => [x, 3])
-    .concat([[3, 1]])
-
-  const flickerId = getNextId('flicker')
-
-  for (const [shape, t] of flickerShapeArray) {
-    yield put<Action.AddOrUpdateFlickerAction>({
-      type: 'ADD_OR_UPDATE_FLICKER',
-      flicker: FlickerRecord({
-        flickerId,
-        x: tank.x,
-        y: tank.y,
-        shape,
-      }),
-    })
-    yield delay(frame(t / spawnSpeed))
-  }
-  yield put<Action.RemoveFlickerAction>({ type: 'REMOVE_FLICKER', flickerId })
-
-  const tankId = getNextId('tank')
-  yield put({
-    type: 'ADD_TANK',
-    tank: tank.set('tankId', tankId),
-  })
-  return tankId
 }
 
 export function reverseDirection(direction: Direction): Direction {
