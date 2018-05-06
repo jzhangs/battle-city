@@ -1,9 +1,8 @@
 import { Record, Repeat } from 'immutable';
 import { N_MAP } from 'utils/consts';
-import { EagleRecord } from 'types';
 
 const MapRecord = Record({
-  eagle: EagleRecord(),
+  eagle: null,
   bricks: Repeat(false, N_MAP.BRICK ** 2).toList(),
   steels: Repeat(false, N_MAP.STEEL ** 2).toList(),
   rivers: Repeat(false, N_MAP.RIVER ** 2).toList(),

@@ -28,6 +28,8 @@ type Base = {
   showTotalKillCount: boolean;
   AIFrozenTimeout: number;
   paused: boolean;
+  showHUD: boolean;
+  stageEnterCurtainT: number;
 };
 
 export const GameRecord = Record(
@@ -39,7 +41,9 @@ export const GameRecord = Record(
     transientKillInfo: emptyTransientKillInfo,
     showTotalKillCount: false,
     AIFrozenTimeout: 0,
-    paused: false
+    paused: false,
+    showHUD: false,
+    stageEnterCurtainT: 0
   },
   'GameRecord'
 );
@@ -49,7 +53,7 @@ export type GameRecord = Record.Instance<Base> & Readonly<Base>;
 export default function game(state = GameRecord(), action: Action) {
   if (action.type === 'LOAD_SCENE') {
     return state.set('scene', action.scene);
-  } else if (action.type === 'LOAD_STAGE') {
+  } else if (action.type === 'START_STAGE') {
     return state.merge({
       currentStage: action.name,
       killInfo: Map(),
@@ -72,6 +76,12 @@ export default function game(state = GameRecord(), action: Action) {
     return state.set('paused', true);
   } else if (action.type === 'GAMERESUME') {
     return state.set('paused', false);
+  } else if (action.type === 'UPDATE_CURTAIN') {
+    return state.set('stageEnterCurtainT', action.t);
+  } else if (action.type === 'SHOW_HUD') {
+    return state.set('showHUD', true);
+  } else if (action.type === 'HIDE_HUD') {
+    return state.set('showHUD', false);
   }
 
   return state;

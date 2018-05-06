@@ -1,6 +1,6 @@
 import { Map } from 'immutable';
 import * as _ from 'lodash';
-import { delay } from 'redux-saga';
+import { delay, Effect } from 'redux-saga';
 import { fork, put, race, select, take } from 'redux-saga/effects';
 import { State } from 'reducers';
 import { PowerUpRecord } from 'types';
@@ -43,11 +43,11 @@ function* statistics() {
         yield delay(160);
       }
     }
-    yield delay(300);
+    yield delay(200);
   }
-  yield delay(1000);
+  yield delay(200);
   yield put<Action>({ type: 'SHOW_TOTAL_KILL_COUNT' });
-  yield delay(3000);
+  yield delay(1000);
 }
 
 function* powerUp(powerUp: PowerUpRecord) {
@@ -63,7 +63,7 @@ function* powerUp(powerUp: PowerUpRecord) {
       const result = yield race({
         timeout: delay(f(8)),
         picked: take(pickThisPowerUp),
-        stageChanged: take('LOAD_STAGE')
+        stageChanged: take('START_STAGE')
       });
       if (result.picked || result.stageChanged) {
         break;
@@ -82,9 +82,47 @@ function* powerUp(powerUp: PowerUpRecord) {
   }
 }
 
+function* tween(duration: number, effectFactory: (t: number) => Effect) {
+  let accumulation = 0;
+  while (accumulation < duration) {
+    const { delta }: Action.TickAction = yield take('TICK');
+    accumulation += delta;
+    yield effectFactory(_.clamp(accumulation / duration, 0, 1));
+  }
+}
+
 export default function* stageSaga(stageName: string) {
   yield put<Action>({ type: 'LOAD_SCENE', scene: 'game' });
-  yield put<Action>({ type: 'LOAD_STAGE', name: stageName });
+
+  yield put<Action>({
+    type: 'UPDATE_CURTAIN',
+    curtainName: 'stage-enter-curtain',
+    t: 0
+  });
+
+  yield* tween(f(50), t =>
+    put<Action>({
+      type: 'UPDATE_CURTAIN',
+      curtainName: 'stage-enter-curtain',
+      t
+    })
+  );
+  yield delay(f(20));
+  yield put<Action>({
+    type: 'LOAD_STAGE_MAP',
+    name: stageName
+  });
+  yield delay(f(30));
+  yield* tween(f(50), t =>
+    put<Action>({
+      type: 'UPDATE_CURTAIN',
+      curtainName: 'stage-enter-curtain',
+      t: 1 - t
+    })
+  );
+
+  yield put<Action>({ type: 'START_STAGE', name: stageName });
+  yield put<Action>({ type: 'SHOW_HUD' });
 
   while (true) {
     const { sourcePlayer, targetTank }: Action.KillAction = yield take('KILL');

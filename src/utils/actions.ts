@@ -20,12 +20,15 @@ declare global {
       | RemoveBricksAction
       | UpdateMapAction
       | UpdateBulletsAction
-      | LoadStageAction
+      | LoadStageMapAction
+      | StartStageAction
       | Simple<'GAMESTART'>
       | Simple<'GAMEPAUSE'>
       | Simple<'GAMERESUME'>
       | Simple<'GAMEOVER'>
       | LoadSceneAction
+      | Simple<'SHOW_HUD'>
+      | Simple<'HIDE_HUD'>
       | Simple<'REMOVE_FIRST_REMAINING_ENEMY'>
       | IncrementPlayerLifeAction
       | DecrementPlayerLifeAction
@@ -56,7 +59,8 @@ declare global {
       | PickPowerUpAction
       | AddScoreAction
       | RemoveScoreAction
-      | UpgradeTankAction;
+      | UpgradeTankAction
+      | UpdateCurtainAction;
 
     export type ActionType = Action['type'];
 
@@ -165,10 +169,15 @@ declare global {
       updatedBullets: Map<BulletId, BulletRecord>;
     };
 
-    export type LoadStageAction = {
-      type: 'LOAD_STAGE';
+    export interface LoadStageMapAction {
+      type: 'LOAD_STAGE_MAP';
       name: string;
-    };
+    }
+
+    export interface StartStageAction {
+      type: 'START_STAGE';
+      name: string;
+    }
 
     export type SpawnExplosionAction = {
       type: 'SPAWN_EXPLOSION';
@@ -293,6 +302,12 @@ declare global {
       type: 'UPGRADE_TANK';
       tankId: TankId;
     };
+
+    export interface UpdateCurtainAction {
+      type: 'UPDATE_CURTAIN';
+      curtainName: 'stage-enter-curtain';
+      t: number;
+    }
 
     export type Simple<T> = {
       type: T;

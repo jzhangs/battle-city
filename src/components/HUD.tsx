@@ -7,17 +7,11 @@ import { BLOCK_SIZE } from 'utils/consts';
 
 import { State, PlayersMap } from 'types';
 
-function mapStateToProps(state: State) {
-  return {
-    remainingEnemyCount: state.game.remainingEnemies.size,
-    players: state.players,
-  };
+interface P {
+  remainingEnemyCount: number;
+  players: PlayersMap;
+  show: boolean;
 }
-
-type P = {
-  remainingEnemyCount: number,
-  players: PlayersMap,
-};
 
 class HUD extends React.PureComponent<P> {
   renderPlayer1Info() {
@@ -31,12 +25,7 @@ class HUD extends React.PureComponent<P> {
       <g data-role="player-1-info" transform={transform}>
         <Text x={0} y={0} content={'\u2160P'} fill="#000" />
         <PlayerTankThumbnail x={0} y={0.5 * BLOCK_SIZE} />
-        <Text
-          x={0.5 * BLOCK_SIZE}
-          y={0.5 * BLOCK_SIZE}
-          content={String(player1.lives)}
-          fill="#000"
-        />
+        <Text x={0.5 * BLOCK_SIZE} y={0.5 * BLOCK_SIZE} content={String(player1.lives)} fill="#000" />
       </g>
     );
   }
@@ -58,15 +47,23 @@ class HUD extends React.PureComponent<P> {
   }
 
   render() {
-    const { remainingEnemyCount } = this.props;
+    const { remainingEnemyCount, show } = this.props;
 
     return (
-      <g data-role="HUD">
+      <g data-role="HUD" display={show ? 'inline' : 'none'}>
         <EnemyCountIndicator count={remainingEnemyCount} />
         {this.renderPlayer1Info()}
         {this.renderPlayer2Info()}
       </g>
     );
+  }
+}
+
+function mapStateToProps(state: State) {
+  return {
+    remainingEnemyCount: state.game.remainingEnemies.size,
+    players: state.players,
+    show: state.game.showHUD,
   }
 }
 

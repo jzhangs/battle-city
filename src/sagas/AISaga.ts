@@ -210,8 +210,8 @@ export default function* AIMasterSaga() {
   }
 
   while (true) {
-    const action: Action = yield take(['KILL', 'LOAD_STAGE', 'GAMEOVER']);
-    if (action.type === 'LOAD_STAGE') {
+    const action: Action = yield take(['KILL', 'START_STAGE', 'GAMEOVER']);
+    if (action.type === 'START_STAGE') {
       for (let i = 0; i < max; i++) {
         addAICommandChannel.put('add');
       }

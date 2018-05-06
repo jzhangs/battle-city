@@ -8,6 +8,7 @@ import playerSage from 'sagas/playerSaga';
 import powerUps from 'sagas/powerUps';
 import tickEmitter from 'sagas/tickEmitter';
 import { CONTROL_CONFIG, TANK_SPAWN_DELAY } from 'utils/consts';
+import { frame as f } from 'utils/common';
 
 function* autoRemoveEffects() {
   yield takeEvery('SPAWN_EXPLOSION', function* removeExplosion({
@@ -22,7 +23,7 @@ function* autoRemoveEffects() {
     yield put<Action>({ type: 'REMOVE_FLICKER', flickerId });
   });
   yield takeEvery('ADD_SCORE', function* removeScore({ score: { scoreId } }: Action.AddScoreAction) {
-    yield delay(2000);
+    yield delay(f(48));
     yield put<Action>({ type: 'REMOVE_SCORE', scoreId });
   });
 }

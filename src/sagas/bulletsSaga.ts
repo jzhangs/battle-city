@@ -199,10 +199,12 @@ export function* destroyTanks(tankIdSet: ISet<TankId>) {
 
 function* filterBulletsCollidedWithEagle(bullets: BulletsMap) {
   const {
-    map: {
-      eagle: { broken, x, y }
-    }
+    map: { eagle }
   }: State = yield select();
+  if (eagle == null) {
+    return bullets.clear();
+  }
+  const { broken, x, y } = eagle;
 
   if (broken) {
     return IMap();

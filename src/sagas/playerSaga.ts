@@ -42,12 +42,14 @@ export default function* playerSaga(playerName: string, tankColor: TankColor) {
   while (true) {
     const action: Action = yield take(
       (action: Action) =>
-        action.type === 'LOAD_STAGE' || (action.type === 'KILL' && action.targetPlayer.playerName === playerName)
+        action.type === 'START_STAGE' || (action.type === 'KILL' && action.targetPlayer.playerName === playerName)
     );
     const { players }: State = yield select();
     const player = players.get(playerName);
     if (player.lives > 0) {
-      yield delay(500);
+      if (action.type === 'KILL') {
+        yield delay(500);
+      }
       yield put<Action>({ type: 'DECREMENT_PLAYER_LIFE', playerName });
       const tankId = yield* spawnTank(
         TankRecord({
@@ -56,7 +58,7 @@ export default function* playerSaga(playerName: string, tankColor: TankColor) {
           side: 'player',
           color: tankColor,
           level: 'basic',
-          helmetDuration: action.type === 'LOAD_STAGE' ? f(135) : f(180)
+          helmetDuration: action.type === 'START_STAGE' ? f(135) : f(180)
         })
       );
       yield put({
