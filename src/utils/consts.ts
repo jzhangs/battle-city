@@ -33,6 +33,13 @@ export const TANK_COLOR_SCHEMES: Schema = {
   }
 };
 
+export const TANK_KILL_SCORE_MAP = {
+  basic: 100,
+  fast: 200,
+  power: 300,
+  armor: 400,
+}
+
 export const ITEM_SIZE_MAP = {
   BRICK: BLOCK_SIZE / 4,
   STEEL: BLOCK_SIZE / 2,

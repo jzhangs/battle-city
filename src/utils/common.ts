@@ -2,6 +2,21 @@ import { BLOCK_SIZE, BULLET_SIZE, FIELD_SIZE, TANK_SIZE } from 'utils/consts';
 import stageConfigs from 'stages';
 import { BulletRecord, TankRecord, EagleRecord, PowerUpRecord } from 'types';
 
+export function sum(iterable: Iterable<number>) {
+  let result = 0;
+  for (const item of iterable) {
+    result += item;
+  }
+  return result;
+}
+
+export function getOrDefault<K, V>(map: Map<K, V>, key: K, getValue: () => V) {
+  if (!map.has(key)) {
+    map.set(key, getValue());
+  }
+  return map.get(key);
+}
+
 // Calculte bullet start postion according to postion and
 // direction of tank.
 export function getBulletStartPosition({ x, y, direction }: { x: number; y: number; direction: Direction }) {

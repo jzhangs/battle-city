@@ -1,57 +1,19 @@
 import { Map as IMap, Set as ISet } from 'immutable';
-import { takeEvery, all, fork, put, select, take, PutEffect } from 'redux-saga/effects';
+import { fork, put, select, take } from 'redux-saga/effects';
 import { BLOCK_SIZE, ITEM_SIZE_MAP, N_MAP, STEEL_POWER } from 'utils/consts';
-import { explosionFromBullet, explosionFromTank } from 'sagas/common';
-import { asBox, getDirectionInfo, getNextId, isInField, iterRowsAndCols, testCollide } from 'utils/common';
-
-import { BulletRecord, BulletsMap, State, TankRecord, ScoreRecord } from 'types';
+import { destroyBullets, destroyTanks } from 'sagas/common';
+import { BulletRecord, BulletsMap, State } from 'types';
+import { asBox, getDirectionInfo, getOrDefault, isInField, iterRowsAndCols, sum, testCollide } from 'utils/common';
 
 type HurtCount = number;
 type TargetTankId = TankId;
 type SourceTankId = TankId;
 
-type Context = {
-  expBulletIdSet: Set<BulletId>;
-  noExpBulletIdSet: Set<BulletId>;
-  tankHurtMap: Map<TargetTankId, Map<SourceTankId, HurtCount>>;
-  frozenTankIdSet: Set<TankId>;
-};
-
-function isBulletInField(bullet: BulletRecord) {
-  return isInField(asBox(bullet));
-}
-
-function sum(iterable: Iterable<number>) {
-  let result = 0;
-  for (const item of iterable) {
-    result += item;
-  }
-  return result;
-}
-
-function getOrDefault<K, V>(map: Map<K, V>, key: K, getValue: () => V) {
-  if (!map.has(key)) {
-    map.set(key, getValue());
-  }
-  return map.get(key);
-}
-
-function makeScoreFromTank(tank: TankRecord): PutEffect<Action> {
-  const scoreMap = {
-    basic: 100,
-    fast: 200,
-    power: 300,
-    armor: 400
-  };
-  return put<Action.AddScoreAction>({
-    type: 'ADD_SCORE',
-    score: ScoreRecord({
-      score: scoreMap[tank.level],
-      scoreId: getNextId('score'),
-      x: tank.x,
-      y: tank.y
-    })
-  } as Action.AddScoreAction);
+interface Context {
+  readonly expBulletIdSet: Set<BulletId>;
+  readonly noExpBulletIdSet: Set<BulletId>;
+  readonly tankHurtMap: Map<TargetTankId, Map<SourceTankId, HurtCount>>;
+  readonly frozenTankIdSet: Set<TankId>;
 }
 
 function* handleTick() {
@@ -167,16 +129,6 @@ function* destroyBricks(collidedBullets: BulletsMap) {
   }
 }
 
-export function* destroyTanks(destroyedTanks: ISet<TankRecord>) {
-  yield* destroyedTanks.map(tank =>
-    put({
-      type: 'REMOVE_TANK',
-      tankId: tank.tankId
-    })
-  );
-  yield all(destroyedTanks.map(tank => fork(explosionFromTank, tank)).toArray());
-}
-
 function* filterBulletsCollidedWithEagle(bullets: BulletsMap) {
   const {
     map: { eagle }
@@ -260,19 +212,42 @@ function* handleBulletsCollidedWithBullets(context: Context) {
   }
 }
 
+function calculateHurtsAndKillsFromContext({ tanks, players }: State, context: Context) {
+  const kills: Action.KillAction[] = [];
+  const hurts: Action.HurtAction[] = [];
+
+  for (const [targetTankId, hurtMap] of context.tankHurtMap.entries()) {
+    const hurt = sum(hurtMap.values());
+    const targetTank = tanks.get(targetTankId);
+    if (hurt >= targetTank.hp) {
+      const sourceTankId = hurtMap.keys().next().value;
+      kills.push({
+        type: 'KILL',
+        targetTank,
+        sourceTank: tanks.get(sourceTankId),
+        targetPlayer: players.find(p => p.activeTankId === targetTankId),
+        sourcePlayer: players.find(p => p.activeTankId === sourceTankId)
+      });
+    } else {
+      hurts.push({
+        type: 'HURT',
+        targetTank,
+        hurt
+      });
+    }
+  }
+  return { kills, hurts };
+}
+
 function* handleAfterTick() {
   while (true) {
     yield take('AFTER_TICK');
-    const { bullets, players, tanks: allTanks }: State = yield select();
-    const activeTanks = allTanks.filter(t => t.active);
+    const state: State = yield select();
+    const { bullets } = state;
 
     const bulletsCollidedWithEagle = yield* filterBulletsCollidedWithEagle(bullets);
     if (!bulletsCollidedWithEagle.isEmpty()) {
-      yield put({
-        type: 'DESTROY_BULLETS',
-        bullets: bulletsCollidedWithEagle,
-        spawnExplosion: true
-      });
+      yield fork(destroyBullets, bulletsCollidedWithEagle, true);
       yield put({ type: 'DESTROY_EAGLE' });
     }
 
@@ -290,12 +265,7 @@ function* handleAfterTick() {
 
     const expBullets = bullets.filter(bullet => context.expBulletIdSet.has(bullet.bulletId));
     if (!expBullets.isEmpty()) {
-      yield put({
-        type: 'DESTROY_BULLETS',
-        bullets: expBullets,
-        spawnExplosion: true
-      });
-
+      yield fork(destroyBullets, expBullets, true);
       yield* destroyBricks(expBullets);
       yield* destroySteels(expBullets);
     }
@@ -308,71 +278,21 @@ function* handleAfterTick() {
       });
     }
 
-    const kills: PutEffect<Action.KillAction>[] = [];
-    const destroyedTankIdSet = new Set<TargetTankId>();
-    for (const [targetTankId, hurtMap] of context.tankHurtMap.entries()) {
-      const hurt = sum(hurtMap.values());
-      const targetTank = activeTanks.get(targetTankId);
-      if (hurt >= targetTank.hp) {
-        const sourceTankId = hurtMap.keys().next().value;
-        kills.push(
-          put<Action.KillAction>({
-            type: 'KILL',
-            targetTank,
-            sourceTank: allTanks.get(sourceTankId),
-            targetPlayer: players.find(p => p.activeTankId === targetTankId),
-            sourcePlayer: players.find(p => p.activeTankId === sourceTankId)
-          })
-        );
-        destroyedTankIdSet.add(targetTankId);
-      } else {
-        yield put<Action>({ type: 'HURT', targetTank, hurt });
-      }
-    }
-    const destroyedTanks = ISet(destroyedTankIdSet).map(tankId => allTanks.get(tankId));
-    if (!destroyedTanks.isEmpty()) {
-      yield fork(destroyTanks, destroyedTanks);
+    const { kills, hurts } = calculateHurtsAndKillsFromContext(state, context);
 
-      const destroyedAITanks = ISet(destroyedTankIdSet)
-        .map(tankId => allTanks.get(tankId))
-        .filter(tank => tank.side === 'ai');
-      if (destroyedAITanks.size > 0) {
-        yield* destroyedAITanks.map(makeScoreFromTank);
-      }
-    }
-
-    yield* kills;
+    yield* hurts.map(hurtAction => put(hurtAction));
+    yield* kills.map(killAction => put(killAction));
+    yield fork(destroyTanks, IMap(kills.map(kill => [kill.targetTank.tankId, kill.targetTank])));
 
     const noExpBullets = bullets.filter(bullet => context.noExpBulletIdSet.has(bullet.bulletId));
-    if (context.noExpBulletIdSet.size > 0) {
-      yield put({
-        type: 'DESTROY_BULLETS',
-        bullets: noExpBullets,
-        spawnExplosion: false
-      });
-    }
+    yield fork(destroyBullets, noExpBullets, false);
 
-    const outsideBullets = bullets.filterNot(isBulletInField);
-    if (!outsideBullets.isEmpty()) {
-      yield put({
-        type: 'DESTROY_BULLETS',
-        bullets: outsideBullets,
-        spawnExplosion: true
-      });
-    }
+    const outsideBullets = bullets.filterNot(bullet => isInField(asBox(bullet)))
+    yield fork(destroyBullets, outsideBullets, true);
   }
 }
 
 export default function* bulletsSaga() {
   yield fork(handleTick);
   yield fork(handleAfterTick);
-
-  yield takeEvery('DESTROY_BULLETS' as Action['type'], function*({
-    bullets,
-    spawnExplosion
-  }: Action.DestroyBulletsAction) {
-    if (spawnExplosion) {
-      yield all(bullets.map(bullet => fork(explosionFromBullet, bullet)).toArray());
-    }
-  });
 }
