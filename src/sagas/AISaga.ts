@@ -5,7 +5,7 @@ import directionController from 'sagas/directionController';
 import fireController from 'sagas/fireController';
 import { spawnTank } from 'sagas/common';
 import * as selectors from 'utils/selectors';
-import { getDirectionInfo, getNextId, getTankBulletLimit } from 'utils/common';
+import { getDirectionInfo, getNextId, getTankBulletLimit, getWithPowerUpProbability } from 'utils/common';
 import { State } from 'reducers';
 import { TankRecord, PlayerRecord } from 'types';
 import AIWorker = require('worker-loader!ai/worker');
@@ -174,7 +174,7 @@ export default function* AIMasterSaga() {
     while (true) {
       yield take(addAICommandChannel);
       const {
-        game: { remainingEnemies }
+        game: { remainingEnemies, currentStage }
       }: State = yield select();
       if (!remainingEnemies.isEmpty()) {
         const playerName = `AI-${getNextId('AI-player')}`;
@@ -196,7 +196,8 @@ export default function* AIMasterSaga() {
             y,
             side: 'ai',
             level,
-            hp
+            hp,
+            withPowerUp: Math.random() < getWithPowerUpProbability(currentStage)
           }),
           0.6
         );

@@ -139,8 +139,7 @@ export default function* stageSaga(stageName: string) {
         level: targetTank.level
       });
 
-      /* todo targetTank.withPowerUp */
-      if (true) {
+      if (targetTank.withPowerUp) {
         const powerUpName = _.sample(['tank', 'star', 'grenade', 'timer', 'helmet', 'shovel'] as PowerUpName[]);
         const position = _.sample(yield select(selectors.validPowerUpSpawnPositions));
         yield fork(

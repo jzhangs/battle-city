@@ -1,4 +1,5 @@
 import { BLOCK_SIZE, BULLET_SIZE, FIELD_SIZE, TANK_SIZE } from 'utils/consts';
+import stageConfigs from 'stages';
 import { BulletRecord, TankRecord, EagleRecord, PowerUpRecord } from 'types';
 
 // Calculte bullet start postion according to postion and
@@ -194,4 +195,8 @@ export function getTankBulletPower(tank: TankRecord) {
   } else {
     return 1;
   }
+}
+
+export function getWithPowerUpProbability(stageName: string) {
+  return 0.2 + stageConfigs[stageName].difficulty * 0.05;
 }

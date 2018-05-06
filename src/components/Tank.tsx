@@ -430,9 +430,7 @@ const TankAIArmor: TankComponent = ({ transform, color, shape }) => {
   );
 };
 
-type TankColorConfig = [TankColor, number][];
-
-function resolveTankColorConfig(tank: TankRecord): TankColorConfig {
+function resolveTankColorConfig(tank: TankRecord): Timing<TankColor> {
   if (tank.color !== 'auto') {
     return [[tank.color, Infinity]];
   }
@@ -446,7 +444,7 @@ function resolveTankColorConfig(tank: TankRecord): TankColorConfig {
   } else if (tank.level === 'power') {
     return [['silver', Infinity]];
   } else {
-    const map: { [key: number]: TankColorConfig } = {
+    const map: { [key: number]: Timing<TankColor> } = {
       1: [['silver', Infinity]],
       2: [['green', f(3)], ['yellow', f(1)], ['green', f(1)], ['yellow', f(1)]],
       3: [['silver', f(3)], ['yellow', f(1)], ['silver', f(1)], ['yellow', f(1)]],
@@ -485,7 +483,7 @@ function resolveTankComponent(side: Side, level: TankLevel): TankComponent {
 const tireShapeConfig: [number, number][] = [[0, 80], [1, 80]];
 const add = (x: number, y: number) => x + y;
 
-function calculate<T>(config: [T, number][], startTime: number, time: number): T {
+function calculate<T>(config: Timing<T>, startTime: number, time: number): T {
   const sum = config.map(item => item[1]).reduce(add);
   let t = (time - startTime) % sum;
   let index = 0;
