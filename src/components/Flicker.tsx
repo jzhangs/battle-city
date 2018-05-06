@@ -1,48 +1,45 @@
 import * as React from 'react';
-import registerTick from 'hocs/registerTick';
-import { TANK_SPAWN_DELAY } from 'utils/consts';
+import { FlickerRecord } from 'types';
 
-const interval = TANK_SPAWN_DELAY / 12;
+interface P {
+  flicker: FlickerRecord;
+}
 
-type P = {
-  x: number,
-  y: number,
-  tickIndex?: number,
-};
-
-class Flicker extends React.PureComponent<P, {}> {
+export default class Flicker extends React.PureComponent<P> {
   render() {
-    const { x, y, tickIndex } = this.props;
+    const {
+      flicker: { x, y, shape }
+    } = this.props;
     const transform = `translate(${x},${y})`;
-    if (tickIndex === 0) {
+    if (shape === 0) {
       return (
-        <g transform={transform} fill="#ffffff">
+        <g transform={transform} fill="#fff">
           <rect x={3} y={7} width={9} height={1} />
           <rect x={6} y={6} width={3} height={3} />
           <rect x={7} y={3} width={1} height={9} />
         </g>
       );
-    } else if (tickIndex === 1) {
+    } else if (shape === 1) {
       return (
-        <g transform={transform} fill="#ffffff">
+        <g transform={transform} fill="#fff">
           <rect x={2} y={7} width={11} height={1} />
           <rect x={5} y={6} width={5} height={3} />
           <rect x={6} y={5} width={3} height={5} />
           <rect x={7} y={2} width={1} height={11} />
         </g>
       );
-    } else if (tickIndex === 2) {
+    } else if (shape === 2) {
       return (
-        <g transform={transform} fill="#ffffff">
+        <g transform={transform} fill="#fff">
           <rect x={1} y={7} width={13} height={1} />
           <rect x={4} y={6} width={7} height={3} />
           <rect x={6} y={4} width={3} height={7} />
           <rect x={7} y={1} width={1} height={13} />
         </g>
       );
-    } else if (tickIndex === 3) {
+    } else if (shape === 3) {
       return (
-        <g transform={transform} fill="#ffffff">
+        <g transform={transform} fill="#fff">
           <rect x={0} y={7} width={15} height={1} />
           <rect x={3} y={6} width={9} height={3} />
           <rect x={5} y={5} width={5} height={5} />
@@ -50,9 +47,8 @@ class Flicker extends React.PureComponent<P, {}> {
           <rect x={7} y={0} width={1} height={15} />
         </g>
       );
+    } else {
+      throw new Error(`Invalid tickIndex: ${shape}`);
     }
-    throw new Error(`Invalid tickIndex: ${tickIndex}`);
   }
 }
-
-export default registerTick(interval, interval, interval, interval)(Flicker);

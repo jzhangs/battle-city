@@ -1,5 +1,5 @@
 import { Map, Set } from 'immutable';
-import { TankRecord, BulletRecord, PlayerRecord, PowerUpRecord, MapRecord, ScoreRecord } from 'types';
+import { FlickerRecord, TankRecord, BulletRecord, PlayerRecord, PowerUpRecord, MapRecord, ScoreRecord } from 'types';
 
 declare global {
   type Action = Action.Action;
@@ -41,13 +41,13 @@ declare global {
       | SetTextAction
       | UpdateTextPositionAction
       | Simple<'DESTROY_EAGLE'>
-      | SpawnTankAction
+      | AddTankAction
       | StartMoveAction
       | RemoveTankAction
       | StopMoveAction
       | RemoveTextAction
       | RemoveFlickerAction
-      | SpawnFlickerAction
+      | AddOrUpdateFlickerAction
       | HurtAction
       | KillAction
       | IncKillCout
@@ -192,22 +192,20 @@ declare global {
       explosionId: ExplosionId;
     };
 
-    export type SpawnFlickerAction = {
-      type: 'SPAWN_FLICKER';
-      flickerId: FlickerId;
-      x: number;
-      y: number;
-    };
+    export interface AddOrUpdateFlickerAction {
+      type: 'ADD_OR_UPDATE_FLICKER';
+      flicker: FlickerRecord;
+    }
 
-    export type RemoveFlickerAction = {
+    export interface RemoveFlickerAction {
       type: 'REMOVE_FLICKER';
       flickerId: FlickerId;
-    };
+    }
 
-    export type SpawnTankAction = {
-      type: 'SPAWN_TANK';
+    export interface AddTankAction {
+      type: 'ADD_TANK';
       tank: TankRecord;
-    };
+    }
 
     export type RemoveTankAction = {
       type: 'REMOVE_TANK';

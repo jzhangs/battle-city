@@ -196,7 +196,8 @@ export default function* AIMasterSaga() {
             side: 'ai',
             level,
             hp
-          })
+          }),
+          0.6
         );
         taskMap[playerName] = yield spawn(AIWorkerSaga, playerName, AIWorker);
 

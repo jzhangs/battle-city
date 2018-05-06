@@ -7,7 +7,7 @@ import AIMasterSaga from 'sagas/AISaga';
 import playerSage from 'sagas/playerSaga';
 import powerUps from 'sagas/powerUps';
 import tickEmitter from 'sagas/tickEmitter';
-import { CONTROL_CONFIG, TANK_SPAWN_DELAY } from 'utils/consts';
+import { CONTROL_CONFIG } from 'utils/consts';
 import { frame as f } from 'utils/common';
 
 function* autoRemoveEffects() {
@@ -17,10 +17,6 @@ function* autoRemoveEffects() {
   }: Action.SpawnExplosionAction) {
     yield delay(explosionType === 'tank' ? 500 : 200);
     yield put<Action>({ type: 'REMOVE_EXPLOSION', explosionId });
-  });
-  yield takeEvery('SPAWN_FLICKER', function* removeFlicker({ flickerId }: Action.SpawnFlickerAction) {
-    yield delay(TANK_SPAWN_DELAY);
-    yield put<Action>({ type: 'REMOVE_FLICKER', flickerId });
   });
   yield takeEvery('ADD_SCORE', function* removeScore({ score: { scoreId } }: Action.AddScoreAction) {
     yield delay(f(48));
